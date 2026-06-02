@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Track Start — Гид по релизу</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles-home.css" />
+<link rel="stylesheet" href="styles-app.css" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+</head>
+<body data-screen-label="Track Start — Release Guide">
+
+<header class="site-header">
+  <div class="container">
+    <nav class="nav">
+      <a href="index.html" class="brand">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
+          <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="brand-name">Track <em>Start</em></span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html" data-i18n="nav.home">Главная</a>
+        <a class="nav-link" href="generator.html" data-i18n="nav.generator">Генератор</a>
+        <a class="nav-link active" href="guide.html" data-i18n="nav.guide">Гид по релизу</a>
+      </div>
+      <div class="row" style="gap: 10px;">
+        <div class="lang-switch" data-lang-switch>
+          <button class="lang-switch-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span class="lang-switch-current">RU</span>
+            <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+          </button>
+          <div class="lang-switch-menu" role="listbox">
+            <button class="lang-opt active" data-lang="ru" role="option">
+              <span class="flag">RU</span>
+              <span class="name">Русский</span>
+              <span class="sub">RU</span>
+              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+            </button>
+            <button class="lang-opt" data-lang="en" role="option">
+              <span class="flag">EN</span>
+              <span class="name">English</span>
+              <span class="sub">EN</span>
+              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+            </button>
+          </div>
+        </div>
+        <a href="generator.html" class="btn btn-primary btn-sm" data-i18n="nav.start">Начать</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="guide-hero">
+    <div class="container">
+      <div class="eyebrow"><span class="dot"></span><span>release · v1</span></div>
+      <h1 style="margin-top: 18px;" data-i18n="guide.title">Гид по релизу: всё, что нужно знать</h1>
+      <p class="lede" style="margin-top: 18px;" data-i18n="guide.lede">Структурированная база знаний для тех, кто впервые выпускает трек. Без воды.</p>
+      <div class="guide-toc">
+        <a href="#legal" data-i18n="guide.toc_legal">Права</a>
+        <a href="#artwork" data-i18n="guide.toc_artwork">Обложка</a>
+        <a href="#meta" data-i18n="guide.toc_meta">Метаданные</a>
+        <a href="#compare" data-i18n="guide.toc_dist">Дистрибьюция</a>
+        <a href="#pitch" data-i18n="guide.toc_pitch">Питчинг</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ KB CARDS ============ -->
+  <section class="section" id="legal" style="padding-top: 32px;">
+    <div class="container">
+      <div class="kb-grid">
+        <div class="card kb-card reveal">
+          <div class="kb-head"><span class="kb-tag" data-i18n="kb.legal_tag">01 · Юр. часть</span><span class="chip">5</span></div>
+          <h3 data-i18n="kb.legal_title">Права и документы</h3>
+          <ul class="kb-list">
+            <li><span data-i18n="kb.legal_a">Авторские права на музыку</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.legal_b">Регистрация в РАО / ВОИС</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.legal_c">Договоры с дистрибьюторами</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.legal_d">Сэмплы и чужие лупы — что можно</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.legal_e">Соавторство и доли</span><span class="arrow">→</span></li>
+          </ul>
+        </div>
+        <div class="card kb-card reveal" id="artwork">
+          <div class="kb-head"><span class="kb-tag" data-i18n="kb.design_tag">02 · Оформление</span><span class="chip">5</span></div>
+          <h3 data-i18n="kb.design_title">Обложка и метаданные</h3>
+          <ul class="kb-list">
+            <li><span data-i18n="kb.design_a">Требования к обложке (3000×3000, sRGB)</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.design_b">Метаданные: ISRC, UPC, жанр</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.design_c">Оформление страницы артиста</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.design_d">Тексты и тайм-коды</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.design_e">Цензура и explicit-метки</span><span class="arrow">→</span></li>
+          </ul>
+        </div>
+        <div class="card kb-card reveal" id="meta">
+          <div class="kb-head"><span class="kb-tag" data-i18n="kb.dist_tag">03 · Дистрибьюция</span><span class="chip">5</span></div>
+          <h3 data-i18n="kb.dist_title">Площадки и выплаты</h3>
+          <ul class="kb-list">
+            <li><span data-i18n="kb.dist_a">Сравнение: DistroKid · TuneCore · Я.Музыка</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.dist_b">Пошаговая инструкция загрузки</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.dist_c">Сроки модерации и pre-save</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.dist_d">Выплаты, налоги, валюта</span><span class="arrow">→</span></li>
+            <li><span data-i18n="kb.dist_e">Питчинг в редакционные плейлисты</span><span class="arrow">→</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DISTRIBUTOR COMPARE ============ -->
+  <section class="section" id="compare" style="padding-top: 24px;">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot"></span><span>compare</span></div>
+        <h2 data-i18n="guide.dist_title">Сравнение площадок</h2>
+        <p class="lede" data-i18n="guide.dist_lede">Цены и условия — на май 2026. Фильтруй по тому, что важно тебе.</p>
+      </div>
+
+      <div class="dist-filters">
+        <button class="demo-chip active" data-filter="all" data-i18n="guide.f_all">Все</button>
+        <button class="demo-chip" data-filter="free" data-i18n="guide.f_free">Бесплатно</button>
+        <button class="demo-chip" data-filter="ru" data-i18n="guide.f_ru">Россия</button>
+        <button class="demo-chip" data-filter="fast" data-i18n="guide.f_fast">Быстрая модерация</button>
+        <button class="demo-chip" data-filter="ai" data-i18n="guide.f_ai">AI-music friendly</button>
+      </div>
+
+      <div class="dist-table-wrap reveal">
+        <table class="dist-table">
+          <thead>
+            <tr>
+              <th data-i18n="guide.col_name">Площадка</th>
+              <th data-i18n="guide.col_price">Цена / год</th>
+              <th data-i18n="guide.col_royalty">Роялти</th>
+              <th data-i18n="guide.col_speed">Модерация</th>
+              <th data-i18n="guide.col_notes">Особенности</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="dist-row" data-tags="fast">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#06c167;">DK</div>DistroKid</div></td>
+              <td>$22.99</td>
+              <td>100%</td>
+              <td>1–3 дня</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">unlimited</span><span class="dist-tag">no Russia bank</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="ai">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#000;">TC</div>TuneCore</div></td>
+              <td>$14.99 / single</td>
+              <td>100%</td>
+              <td>2–5 дней</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">per release</span><span class="dist-tag">AI ok</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="free ai">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#7c3aed;">AM</div>Amuse</div></td>
+              <td>$0 (free tier)</td>
+              <td>100%</td>
+              <td>3–7 дней</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">free</span><span class="dist-tag">slower</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="ru fast ai">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#ff3344;">ЯМ</div>Яндекс.Музыка</div></td>
+              <td>через дистрибьютора</td>
+              <td>90–100%</td>
+              <td>3–10 дней</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">Россия</span><span class="dist-tag">RUB выплаты</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="ru free">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#1d1d1f;">МВ</div>МойВклад</div></td>
+              <td>0 ₽</td>
+              <td>80%</td>
+              <td>5–14 дней</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">Россия</span><span class="dist-tag">free</span><span class="dist-tag">slow</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="fast ai">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#0ea5e9;">CD</div>CD Baby</div></td>
+              <td>$9.95 / single</td>
+              <td>91%</td>
+              <td>1–2 дня</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">YouTube ID</span><span class="dist-tag">sync ops</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="ai free">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#f59e0b;">RX</div>RouteNote</div></td>
+              <td>$0 / 15% cut</td>
+              <td>85%</td>
+              <td>5–10 дней</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">free</span><span class="dist-tag">AI ok</span></div></td>
+            </tr>
+            <tr class="dist-row" data-tags="ru ai">
+              <td><div class="dist-name"><div class="dist-logo" style="background:#6d28d9;">BD</div>Band Link / BD</div></td>
+              <td>1 990 ₽</td>
+              <td>92%</td>
+              <td>2–5 дней</td>
+              <td><div class="dist-tag-row"><span class="dist-tag">VK</span><span class="dist-tag">Я.Музыка</span></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA reusing the same component ============ -->
+  <section class="section" id="pitch">
+    <div class="container">
+      <div class="final-cta reveal">
+        <div class="eyebrow" style="margin: 0 auto 16px; color: rgba(255,255,255,0.6);"><span class="dot" style="background: var(--accent-2);"></span><span>start</span></div>
+        <h2 data-i18n="cta.title">Начни свой первый релиз правильно</h2>
+        <p data-i18n="cta.lede">Бесплатно. Без листа ожидания. Без кредитной карты.</p>
+        <div class="ctas">
+          <a href="generator.html" class="btn btn-primary btn-lg" data-i18n="cta.primary">Создать первую песню</a>
+          <a href="index.html" class="btn btn-secondary btn-lg" data-i18n="nav.home">Главная</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span data-i18n="footer.copy">© 2026 Track Start. Маршрут от идеи до релиза.</span>
+      <span>Made with care · Moscow / remote</span>
+    </div>
+  </div>
+</footer>
+
+<div id="tweaks-root"></div>
+
+<script src="i18n.js"></script>
+<script src="logos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

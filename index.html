@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Track Start — от идеи до релиза за 5 шагов</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles-home.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+</head>
+<body data-screen-label="Track Start — Home" data-hero="path">
+
+<!-- ============== HEADER ============== -->
+<header class="site-header">
+  <div class="container">
+    <nav class="nav">
+      <a href="index.html" class="brand">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
+          <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="brand-name">Track <em>Start</em></span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link active" href="index.html" data-i18n="nav.home">Главная</a>
+        <a class="nav-link" href="generator.html" data-i18n="nav.generator">Генератор</a>
+        <a class="nav-link" href="guide.html" data-i18n="nav.guide">Гид по релизу</a>
+        <a class="nav-link" href="#kb" data-i18n="nav.knowledge">База знаний</a>
+      </div>
+      <div class="row" style="gap: 10px;">
+        <div class="lang-switch" data-lang-switch>
+          <button class="lang-switch-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span class="lang-switch-current">RU</span>
+            <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+          </button>
+          <div class="lang-switch-menu" role="listbox">
+            <button class="lang-opt active" data-lang="ru" role="option">
+              <span class="flag">RU</span>
+              <span class="name">Русский</span>
+              <span class="sub">RU</span>
+              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+            </button>
+            <button class="lang-opt" data-lang="en" role="option">
+              <span class="flag">EN</span>
+              <span class="name">English</span>
+              <span class="sub">EN</span>
+              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
+            </button>
+          </div>
+        </div>
+        <a href="generator.html" class="btn btn-primary btn-sm" data-i18n="nav.start">Начать</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow hero-eyebrow"><span class="dot"></span><span data-i18n="hero.eyebrow">v 0.9 · бета · бесплатно</span></div>
+        <h1>
+          <span data-i18n="hero.title_a">От идеи до</span>
+          <span class="accent" data-i18n="hero.title_b">релиза</span>
+          <span data-i18n="hero.title_c">за 5 шагов</span>
+        </h1>
+        <p class="lede" data-i18n="hero.lede">Генерируй текст песни, получай готовые настройки для Suno и разбирайся в оформлении релиза — документы, права, обложки и дистрибьюция. Один маршрут, никакой каши.</p>
+        <div class="hero-ctas">
+          <a href="generator.html" class="btn btn-primary btn-lg" data-i18n="hero.cta_primary">Начать с песни</a>
+          <a href="guide.html" class="btn btn-secondary btn-lg" data-i18n="hero.cta_secondary">Узнать про релиз</a>
+        </div>
+        <div class="hero-meta">
+          <span class="dot-line" data-i18n="hero.meta_a">10 000+ треков сгенерировано</span>
+          <span class="dot-line" data-i18n="hero.meta_b">Бесплатно для авторов</span>
+          <span class="dot-line" data-i18n="hero.meta_c">Работает с Suno v4</span>
+        </div>
+      </div>
+
+      <div class="hero-stage">
+        <!-- VARIANT: path (default) -->
+        <div class="hero-variant is-path hero-path">
+          <div class="hero-path-title">
+            <span data-i18n="hero.stage_label">Твой маршрут</span>
+            <span data-i18n="hero.stage_step">ШАГ 1 ИЗ 5</span>
+          </div>
+          <div class="path-list">
+            <div class="path-step"><div class="num">01</div><div class="body"><strong data-i18n="hero.step1_t">Опиши идею</strong><span data-i18n="hero.step1_s">Жанр, настроение, тема</span></div></div>
+            <div class="path-step"><div class="num">02</div><div class="body"><strong data-i18n="hero.step2_t">Получи текст и промпт</strong><span data-i18n="hero.step2_s">С BPM, стилем и структурой</span></div></div>
+            <div class="path-step"><div class="num">03</div><div class="body"><strong data-i18n="hero.step3_t">Отредактируй</strong><span data-i18n="hero.step3_s">Прямо в редакторе</span></div></div>
+            <div class="path-step"><div class="num">04</div><div class="body"><strong data-i18n="hero.step4_t">Сгенерируй в Suno</strong><span data-i18n="hero.step4_s">По готовым настройкам</span></div></div>
+            <div class="path-step"><div class="num">05</div><div class="body"><strong data-i18n="hero.step5_t">Оформи релиз</strong><span data-i18n="hero.step5_s">Права, обложка, площадки</span></div></div>
+          </div>
+          <div class="demo" style="margin-top: 28px;">
+            <div class="hero-path-title" style="margin-bottom: 14px;">
+              <span data-i18n="hero.demo_label">Попробуй прямо здесь</span>
+              <span>↓</span>
+            </div>
+            <div class="demo-row demo-chip-row">
+              <button class="demo-chip active" data-i18n="hero.demo_g1">synth-pop</button>
+              <button class="demo-chip" data-i18n="hero.demo_g2">lo-fi</button>
+              <button class="demo-chip" data-i18n="hero.demo_g3">indie rock</button>
+            </div>
+            <div class="demo-input">
+              <span class="prompt" data-i18n="hero.demo_prompt">идея песни →</span>
+              <span class="typed typed-text" data-text="ночной троллейбус, фонари за окном" data-i18n="hero.demo_typed">ночной троллейбус, фонари за окном</span>
+              <span class="caret"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- VARIANT: player -->
+        <div class="hero-variant is-player">
+          <div class="player">
+            <div class="player-head">
+              <span data-i18n="hero.stage_label">Твой маршрут</span>
+              <span class="badge" data-i18n="hero.player_badge">demo</span>
+            </div>
+            <div class="player-title" data-i18n="hero.player_title">Полночный маршрут</div>
+            <div class="player-meta" data-i18n="hero.player_meta">synth-pop · 96 BPM · Am · 3:24</div>
+            <div class="waveform"></div>
+            <div class="player-controls">
+              <div class="play">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1 L12 7 L3 13 Z"/></svg>
+              </div>
+              <span class="timecode">1:14 / 3:24</span>
+            </div>
+          </div>
+          <div class="lyrics-preview">
+            <span class="verse-label" data-i18n="hero.lyric_v1_label">[verse 1]</span>
+            <span class="lyric-block" data-i18n="hero.lyric_v1">Фонари ложатся в окна
+Город спит, троллейбус едет
+Я держу твой номер в кармане
+Но звонить уже не буду</span>
+            <span class="verse-label" data-i18n="hero.lyric_chorus_label">[chorus]</span>
+            <span class="lyric-block" data-i18n="hero.lyric_chorus">Полночный маршрут, конечная — рассвет
+Я доеду до тебя или нет</span>
+          </div>
+        </div>
+
+        <!-- VARIANT: bigtype -->
+        <div class="hero-variant is-bigtype hero-bigtype">
+          <div>
+            <div class="hero-path-title"><span data-i18n="hero.stage_label">Твой маршрут</span><span>05/05</span></div>
+            <div class="megaword">
+              start<br/>
+              <span class="stroke">track</span>
+            </div>
+            <div class="megawave"></div>
+          </div>
+          <div class="hero-bigtype-meta">
+            <span>idea → release</span>
+            <span>5 steps · 1 evening</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== TWO SERVICES ============== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span><span>02 · services</span></div>
+      <h2 data-i18n="section.services">Два сервиса в одном</h2>
+      <p class="lede" data-i18n="section.services_lede">Один — пишет музыку. Второй — учит её выпускать. Они работают по отдельности или вместе.</p>
+    </div>
+    <div class="two-up">
+      <div class="svc-card reveal" data-flavor="music">
+        <div class="row" style="justify-content: space-between; align-items: flex-start;">
+          <div class="icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <span class="chip" data-i18n="svc.music_eyebrow">Музыкальный помощник</span>
+        </div>
+        <div>
+          <h3 data-i18n="svc.music_title">Сделай песню за вечер</h3>
+          <p style="margin-top:8px;" data-i18n="svc.music_desc">От текста и промпта до готового трека в Suno. Без переключения вкладок и сёрфинга по форумам.</p>
+        </div>
+        <div class="feat-list">
+          <div class="feat">
+            <div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+            <div><strong data-i18n="svc.music_f1_t">Генератор текста</strong><span data-i18n="svc.music_f1_s">Опиши идею — получи куплет, припев, мост и структуру</span></div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+            <div><strong data-i18n="svc.music_f2_t">Промпт для Suno</strong><span data-i18n="svc.music_f2_s">Готовая строка со стилем, BPM, инструментами и тегами</span></div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></div>
+            <div><strong data-i18n="svc.music_f3_t">Редактор</strong><span data-i18n="svc.music_f3_s">Правь рифмы, меняй настроение, перегенерируй блоки</span></div>
+          </div>
+        </div>
+        <div class="footer-cta">
+          <a href="generator.html" class="btn btn-primary" data-i18n="svc.music_cta">Создать песню</a>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" data-flavor="guide">
+        <div class="row" style="justify-content: space-between; align-items: flex-start;">
+          <div class="icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <span class="chip" data-i18n="svc.guide_eyebrow">Гид по релизу</span>
+        </div>
+        <div>
+          <h3 data-i18n="svc.guide_title">Разберись в выпуске трека</h3>
+          <p style="margin-top:8px;" data-i18n="svc.guide_desc">Никаких юридических лесов. Только то, что реально нужно, чтобы трек оказался на стримингах.</p>
+        </div>
+        <div class="feat-list">
+          <div class="feat">
+            <div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><strong data-i18n="svc.guide_f1_t">Документы и права</strong><span data-i18n="svc.guide_f1_s">Что оформить, где регистрировать, как не отдать своё</span></div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-7"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg></div>
+            <div><strong data-i18n="svc.guide_f2_t">Дистрибьюция</strong><span data-i18n="svc.guide_f2_s">Сравнение площадок и пошаговый чек-лист загрузки</span></div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+            <div><strong data-i18n="svc.guide_f3_t">Обложка и метаданные</strong><span data-i18n="svc.guide_f3_s">Требования, размеры, примеры — и где это сделать дёшево</span></div>
+          </div>
+        </div>
+        <div class="footer-cta">
+          <a href="guide.html" class="btn btn-secondary" data-i18n="svc.guide_cta">Изучить гид</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== HOW IT WORKS — 5 STEPS ============== -->
+<section class="section" id="how" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span><span>03 · workflow</span></div>
+      <h2 data-i18n="section.how">Как это работает</h2>
+      <p class="lede" data-i18n="section.how_lede">Пять шагов. Каждый занимает минуты, не часы.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="row" style="justify-content: space-between;"><div class="step-num">1</div>
+          <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <div><h4 data-i18n="how.s1_t">Идея</h4><p style="margin-top:6px;" data-i18n="how.s1_s">Опиши тему, настроение и жанр — пары предложений достаточно</p></div>
+      </div>
+      <div class="step-card reveal">
+        <div class="row" style="justify-content: space-between;"><div class="step-num">2</div>
+          <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div><h4 data-i18n="how.s2_t">Текст и настройки</h4><p style="margin-top:6px;" data-i18n="how.s2_s">Получи готовый текст и промпт для Suno с BPM и стилем</p></div>
+      </div>
+      <div class="step-card reveal">
+        <div class="row" style="justify-content: space-between;"><div class="step-num">3</div>
+          <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        </div>
+        <div><h4 data-i18n="how.s3_t">Редактирование</h4><p style="margin-top:6px;" data-i18n="how.s3_s">Поправь строки, поменяй ритм, попроси переписать припев</p></div>
+      </div>
+      <div class="step-card reveal">
+        <div class="row" style="justify-content: space-between;"><div class="step-num">4</div>
+          <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <div><h4 data-i18n="how.s4_t">Генерация в Suno</h4><p style="margin-top:6px;" data-i18n="how.s4_s">Скопируй промпт, вставь в Suno, получи трек</p></div>
+      </div>
+      <div class="step-card reveal">
+        <div class="row" style="justify-content: space-between;"><div class="step-num">5</div>
+          <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        </div>
+        <div><h4 data-i18n="how.s5_t">Релиз</h4><p style="margin-top:6px;" data-i18n="how.s5_s">Оформи обложку, права и залей на стриминги по чек-листу</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== KNOWLEDGE BASE ============== -->
+<section class="section" id="kb" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span><span>04 · knowledge</span></div>
+      <h2 data-i18n="section.kb">База знаний по релизу</h2>
+      <p class="lede" data-i18n="section.kb_lede">Структурированные ответы на вопросы, которые задают все начинающие.</p>
+    </div>
+    <div class="kb-grid">
+      <div class="card kb-card reveal">
+        <div class="kb-head">
+          <span class="kb-tag" data-i18n="kb.legal_tag">01 · Юр. часть</span>
+          <span class="chip">5</span>
+        </div>
+        <h3 data-i18n="kb.legal_title">Права и документы</h3>
+        <ul class="kb-list">
+          <li><span data-i18n="kb.legal_a">Авторские права на музыку</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.legal_b">Регистрация в РАО / ВОИС</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.legal_c">Договоры с дистрибьюторами</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.legal_d">Сэмплы и чужие лупы — что можно</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.legal_e">Соавторство и доли</span><span class="arrow">→</span></li>
+        </ul>
+      </div>
+      <div class="card kb-card reveal">
+        <div class="kb-head">
+          <span class="kb-tag" data-i18n="kb.design_tag">02 · Оформление</span>
+          <span class="chip">5</span>
+        </div>
+        <h3 data-i18n="kb.design_title">Обложка и метаданные</h3>
+        <ul class="kb-list">
+          <li><span data-i18n="kb.design_a">Требования к обложке (3000×3000, sRGB)</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.design_b">Метаданные: ISRC, UPC, жанр</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.design_c">Оформление страницы артиста</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.design_d">Тексты и тайм-коды</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.design_e">Цензура и explicit-метки</span><span class="arrow">→</span></li>
+        </ul>
+      </div>
+      <div class="card kb-card reveal">
+        <div class="kb-head">
+          <span class="kb-tag" data-i18n="kb.dist_tag">03 · Дистрибьюция</span>
+          <span class="chip">5</span>
+        </div>
+        <h3 data-i18n="kb.dist_title">Площадки и выплаты</h3>
+        <ul class="kb-list">
+          <li><span data-i18n="kb.dist_a">Сравнение: DistroKid · TuneCore · Я.Музыка</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.dist_b">Пошаговая инструкция загрузки</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.dist_c">Сроки модерации и pre-save</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.dist_d">Выплаты, налоги, валюта</span><span class="arrow">→</span></li>
+          <li><span data-i18n="kb.dist_e">Питчинг в редакционные плейлисты</span><span class="arrow">→</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== PERSONAS ============== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span><span>05 · who it's for</span></div>
+      <h2 data-i18n="section.who">Для кого это</h2>
+      <p class="lede" data-i18n="section.who_lede">Три типа авторов, которым Track Start снимает 80% боли.</p>
+    </div>
+    <div class="persona-grid">
+      <div class="persona reveal" data-tone="a">
+        <div class="avatar">A</div>
+        <h4 data-i18n="who.a_role">Начинающий артист</h4>
+        <p class="quote" data-i18n="who.a_quote">«Я написал текст, но не знаю, как правильно выпустить песню»</p>
+        <div class="tags">
+          <span class="tag" data-i18n="who.a_t1">первый релиз</span>
+          <span class="tag" data-i18n="who.a_t2">нет лейбла</span>
+          <span class="tag" data-i18n="who.a_t3">учит на ходу</span>
+        </div>
+      </div>
+      <div class="persona reveal" data-tone="b">
+        <div class="avatar">S</div>
+        <h4 data-i18n="who.b_role">Suno-энтузиаст</h4>
+        <p class="quote" data-i18n="who.b_quote">«Я генерирую музыку в Suno, но хочу структурировать процесс»</p>
+        <div class="tags">
+          <span class="tag" data-i18n="who.b_t1">AI music</span>
+          <span class="tag" data-i18n="who.b_t2">10+ треков в месяц</span>
+          <span class="tag" data-i18n="who.b_t3">ищет систему</span>
+        </div>
+      </div>
+      <div class="persona reveal" data-tone="c">
+        <div class="avatar">C</div>
+        <h4 data-i18n="who.c_role">Контент-мейкер</h4>
+        <p class="quote" data-i18n="who.c_quote">«Мне нужны песни для YouTube/TikTok и понимание прав»</p>
+        <div class="tags">
+          <span class="tag" data-i18n="who.c_t1">YouTube / TikTok</span>
+          <span class="tag" data-i18n="who.c_t2">soundtrack-ready</span>
+          <span class="tag" data-i18n="who.c_t3">монетизация</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== CASES ============== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span><span>06 · cases</span></div>
+      <h2 data-i18n="section.cases">Кейсы</h2>
+      <p class="lede" data-i18n="section.cases_lede">Реальные маршруты — от первой строчки до релиза.</p>
+    </div>
+    <div class="case-grid">
+      <article class="case reveal">
+        <div class="case-cover case-cover-1">
+          <svg width="220" height="220" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.6" stroke-opacity="0.6">
+            <circle cx="50" cy="50" r="44"/><circle cx="50" cy="50" r="32"/><circle cx="50" cy="50" r="20"/><circle cx="50" cy="50" r="8"/>
+          </svg>
+          <span>case · 01</span>
+        </div>
+        <div class="case-body">
+          <h4 data-i18n="case.a_t">Как я выпустил первый трек на Spotify за неделю</h4>
+          <div class="case-meta"><span data-i18n="case.a_m">Synth-pop · 7 дней · 0 ₽</span><span>→</span></div>
+        </div>
+      </article>
+      <article class="case reveal">
+        <div class="case-cover case-cover-2">
+          <svg width="220" height="220" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5" stroke-opacity="0.6">
+            <path d="M5 50 Q 27 5, 50 50 T 95 50" fill="none"/><path d="M5 60 Q 27 15, 50 60 T 95 60" fill="none"/><path d="M5 70 Q 27 25, 50 70 T 95 70" fill="none"/><path d="M5 40 Q 27 -5, 50 40 T 95 40" fill="none"/>
+          </svg>
+          <span>case · 02</span>
+        </div>
+        <div class="case-body">
+          <h4 data-i18n="case.b_t">От промпта в Suno до релиза: полный путь</h4>
+          <div class="case-meta"><span data-i18n="case.b_m">Lo-fi · 11 дней · 1 ремикс</span><span>→</span></div>
+        </div>
+      </article>
+      <article class="case reveal">
+        <div class="case-cover case-cover-3">
+          <svg width="220" height="220" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.6" stroke-opacity="0.6">
+            <rect x="20" y="20" width="60" height="60"/><rect x="30" y="30" width="40" height="40"/><rect x="10" y="10" width="80" height="80"/>
+          </svg>
+          <span>case · 03</span>
+        </div>
+        <div class="case-body">
+          <h4 data-i18n="case.c_t">Сколько стоит дистрибьюция в 2026</h4>
+          <div class="case-meta"><span data-i18n="case.c_m">Гайд · 8 площадок · честные цены</span><span>→</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FAQ ============== -->
+<section class="section" id="faq" style="background: var(--bg-2);">
+  <div class="container">
+    <div class="section-head reveal" style="text-align:center; margin: 0 auto 48px;">
+      <div class="eyebrow" style="margin: 0 auto;"><span class="dot"></span><span>07 · faq</span></div>
+      <h2 data-i18n="section.faq" style="margin: 0 auto;">Частые вопросы</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q1">Нужно ли платить за сервис?</span><span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a1">Сейчас всё бесплатно. Track Start в бете — мы открываем доступ автоматически, без листов ожидания.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q2">Можно ли редактировать сгенерированный текст?</span><span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a2">Да. В редакторе можно править построчно, менять рифмы, переписывать припев или просить переписать конкретный блок в другом настроении.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q3">Какие дистрибьюторы лучше для новичков?</span><span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a3">Зависит от того, где твоя аудитория. В гиде есть сравнение DistroKid, TuneCore, Amuse, Яндекс.Музыки — с ценами и сроками.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q4">Что делать с авторскими правами?</span><span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a4">Текст принадлежит тебе. С AI-музыкой из Suno сложнее — мы подробно разбираем нюансы пользовательских соглашений Suno в гиде.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q5">Работает ли сервис на русском языке?</span><span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a5">Да, генератор пишет на русском, английском и поддерживает смешанные тексты. Интерфейс — RU/EN с переключателем сверху.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FINAL CTA ============== -->
+<section class="section">
+  <div class="container">
+    <div class="final-cta reveal">
+      <div class="eyebrow" style="margin: 0 auto 16px; color: rgba(255,255,255,0.6);"><span class="dot" style="background: var(--accent-2);"></span><span>08 · start</span></div>
+      <h2 data-i18n="cta.title">Начни свой первый релиз правильно</h2>
+      <p data-i18n="cta.lede">Бесплатно. Без листа ожидания. Без кредитной карты.</p>
+      <div class="ctas">
+        <a href="generator.html" class="btn btn-primary btn-lg" data-i18n="cta.primary">Создать первую песню</a>
+        <a href="guide.html" class="btn btn-secondary btn-lg" data-i18n="cta.secondary">Открыть гид по релизу</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============== FOOTER ============== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <a href="index.html" class="brand" style="margin-bottom: 14px;">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+            <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
+            <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <span class="brand-name">Track <em>Start</em></span>
+        </a>
+        <p class="muted" style="font-size:14px;max-width:38ch;" data-i18n="footer.tagline">Track Start — помощник для авторов, которые делают музыку с AI и выпускают её на стриминги.</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.product">Продукт</h4>
+        <a href="generator.html" data-i18n="footer.f_gen">Генератор песен</a>
+        <a href="guide.html" data-i18n="footer.f_guide">Гид по релизу</a>
+        <a href="guide.html#compare" data-i18n="footer.f_compare">Сравнение площадок</a>
+        <a href="#" data-i18n="footer.f_changelog">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.learn">Обучение</h4>
+        <a href="#" data-i18n="footer.f_blog">Блог</a>
+        <a href="#" data-i18n="footer.f_yt">YouTube · @aimusiclab_studio</a>
+        <a href="#" data-i18n="footer.f_tg">Telegram-канал</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.legal">Юридическое</h4>
+        <a href="#" data-i18n="footer.f_privacy">Политика конфиденциальности</a>
+        <a href="#" data-i18n="footer.f_terms">Условия</a>
+        <a href="#" data-i18n="footer.f_contact">Связаться</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span data-i18n="footer.copy">© 2026 Track Start. Маршрут от идеи до релиза.</span>
+      <span>Made with care · Moscow / remote</span>
+    </div>
+  </div>
+</footer>
+
+<div id="tweaks-root"></div>
+
+<script src="i18n.js"></script>
+<script src="logos.js"></script>
+<script src="app.js"></script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="tweaks-app.jsx"></script>
+
+</body>
+</html>
