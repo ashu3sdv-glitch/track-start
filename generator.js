@@ -2,27 +2,35 @@
 
 (function () {
 
-  // ── CONSTANTS ──────────────────────────────────────────────────────────────
   const FREE_LIMIT = 3;
   const LS_KEY = 'ts_free_used';
 
-  // ── FREE REQUEST COUNTER ───────────────────────────────────────────────────
   function getUsed() { return parseInt(localStorage.getItem(LS_KEY) || '0', 10); }
   function incUsed() { localStorage.setItem(LS_KEY, getUsed() + 1); }
   function getFreeLeft() { return Math.max(0, FREE_LIMIT - getUsed()); }
 
-  // ── API KEY STORAGE ────────────────────────────────────────────────────────
   function getSavedKey() { return localStorage.getItem('ts_api_key') || ''; }
   function saveKey(k) { localStorage.setItem('ts_api_key', k.trim()); }
 
-  // ── INJECT API KEY UI ──────────────────────────────────────────────────────
+  // Получаем ключ с сервера (для бесплатных запросов)
+  async function fetchServerKey() {
+    try {
+      const res = await fetch('/api/key');
+      const data = await res.json();
+      return data.key || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // ── API KEY UI ─────────────────────────────────────────────────────────────
   function injectKeyUI() {
     const sidebar = document.querySelector('.form-stack');
     if (!sidebar) return;
 
     const wrap = document.createElement('div');
     wrap.id = 'api-key-section';
-    wrap.style.cssText = 'border-top: 1px solid var(--line); padding-top: 16px; margin-top: 4px;';
+    wrap.style.cssText = 'border-top:1px solid var(--line); padding-top:16px; margin-top:4px;';
 
     const counterEl = document.createElement('p');
     counterEl.id = 'free-counter';
@@ -30,7 +38,7 @@
 
     const label = document.createElement('label');
     label.className = 'field-label';
-    label.textContent = 'Claude API Key (необязательно)';
+    label.textContent = 'Claude API Key (для безлимитного доступа)';
 
     const row = document.createElement('div');
     row.style.cssText = 'display:flex; gap:8px;';
@@ -56,7 +64,7 @@
 
     const hint = document.createElement('p');
     hint.style.cssText = 'font-size:11.5px; color:var(--muted); font-family:var(--font-mono); margin-top:6px;';
-    hint.innerHTML = 'Ключ хранится только в браузере. <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent-ink)">Получить ключ →</a>';
+    hint.innerHTML = 'Ключ хранится только в твоём браузере. <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent-ink)">Получить ключ →</a>';
 
     row.appendChild(input);
     row.appendChild(saveBtn);
@@ -74,14 +82,14 @@
     if (!el) return;
     const key = getSavedKey();
     if (key) {
-      el.innerHTML = '✓ API ключ подключён — без лимитов';
-      el.style.color = 'var(--ok, #10b981)';
+      el.innerHTML = '✓ Твой API ключ подключён — без лимитов';
+      el.style.color = '#10b981';
     } else {
       const left = getFreeLeft();
-      el.style.color = left > 0 ? 'var(--muted)' : 'var(--err, #ef4444)';
+      el.style.color = left > 0 ? 'var(--muted)' : '#ef4444';
       el.textContent = left > 0
-        ? `Бесплатных запросов: ${left} из ${FREE_LIMIT}`
-        : 'Бесплатные запросы закончились — добавь API ключ';
+        ? `Бесплатных запросов осталось: ${left} из ${FREE_LIMIT}`
+        : '⚠ Бесплатные запросы закончились — добавь свой API ключ';
     }
   }
 
@@ -101,7 +109,7 @@
     });
   });
 
-  // ── BPM SLIDER ─────────────────────────────────────────────────────────────
+  // ── BPM ────────────────────────────────────────────────────────────────────
   const bpm = document.getElementById('bpm');
   const bpmVal = document.getElementById('bpm-val');
   const bpmMood = document.getElementById('bpm-mood');
@@ -116,7 +124,6 @@
     bpmMood.textContent = bpmLabel(+bpm.value);
   });
 
-  // ── READ BRIEF ─────────────────────────────────────────────────────────────
   function readBrief() {
     return {
       idea: document.getElementById('idea').value.trim(),
@@ -129,7 +136,7 @@
     };
   }
 
-  // ── CLAUDE API CALL ────────────────────────────────────────────────────────
+  // ── CLAUDE API ─────────────────────────────────────────────────────────────
   async function callClaude(prompt, apiKey) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -153,7 +160,6 @@
     return data.content?.[0]?.text || '';
   }
 
-  // ── BUILD PROMPT ───────────────────────────────────────────────────────────
   function buildPrompt(brief) {
     const langMap = { ru: 'русском', en: 'английском', mix: 'русском с английскими вставками' };
     const structMap = {
@@ -198,7 +204,7 @@
 
 ===SUNO===
 [Style] ${brief.genre}, ${brief.mood}, ${brief.bpm} BPM
-[Instruments] (конкретные инструменты для жанра)
+[Instruments] (конкретные инструменты для этого жанра)
 [Vocals] (язык, стиль, характер голоса)
 [Structure] ${structMap[brief.structure] || structMap.vcvcbc}
 [Mix] (характер звука)
@@ -207,30 +213,22 @@
 Текст должен быть живым, образным, с конкретными деталями. Не используй клише.`;
   }
 
-  // ── PARSE RESPONSE ─────────────────────────────────────────────────────────
   function parseResponse(text) {
     const lyricsMatch = text.match(/===LYRICS===([\s\S]*?)===END_LYRICS===/);
     const sunoMatch = text.match(/===SUNO===([\s\S]*?)===END_SUNO===/);
-
     const lyricsRaw = lyricsMatch ? lyricsMatch[1].trim() : text;
     const sunoRaw = sunoMatch ? sunoMatch[1].trim() : '';
-
-    // parse blocks
     const blocks = [];
     const blockRegex = /(\[[^\]]+\])\n([\s\S]*?)(?=\n\[|\n===|$)/g;
     let m;
     while ((m = blockRegex.exec(lyricsRaw)) !== null) {
       const label = m[1].trim();
       const textContent = m[2].trim();
-      if (textContent) {
-        blocks.push({ label, text: textContent });
-      }
+      if (textContent) blocks.push({ label, text: textContent });
     }
-
     return { blocks, suno: sunoRaw };
   }
 
-  // ── RENDER LYRICS ──────────────────────────────────────────────────────────
   function renderLyrics(blocks) {
     const doc = document.getElementById('lyric-doc');
     doc.innerHTML = '';
@@ -244,7 +242,6 @@
     });
   }
 
-  // ── RENDER SUNO PROMPT ─────────────────────────────────────────────────────
   function renderSuno(suno) {
     if (!suno) return;
     const html = suno
@@ -255,17 +252,16 @@
     document.getElementById('suno-panel').style.display = '';
   }
 
-  // ── SHOW ERROR ─────────────────────────────────────────────────────────────
   function showError(msg) {
     document.getElementById('gen-status').style.display = 'none';
-    const doc = document.getElementById('lyric-doc');
-    doc.innerHTML = `<div style="padding:20px; color:var(--err,#ef4444); font-family:var(--font-mono); font-size:13px; background:var(--bg-2); border-radius:var(--radius); border:1px solid var(--line);">
-      ⚠ ${msg}
-    </div>`;
     document.getElementById('empty-lyrics').style.display = 'none';
+    document.getElementById('lyric-doc').innerHTML = `
+      <div style="padding:20px; color:#ef4444; font-family:var(--font-mono); font-size:13px; background:var(--bg-2); border-radius:var(--radius); border:1px solid var(--line);">
+        ⚠ ${msg}
+      </div>`;
   }
 
-  // ── MAIN GENERATE ──────────────────────────────────────────────────────────
+  // ── MAIN ───────────────────────────────────────────────────────────────────
   async function runGenerate() {
     const brief = readBrief();
     if (!brief.idea) {
@@ -273,16 +269,16 @@
       return;
     }
 
-    const apiKey = getSavedKey();
+    const personalKey = getSavedKey();
     const freeLeft = getFreeLeft();
 
-    if (!apiKey && freeLeft <= 0) {
-      showError('Бесплатные запросы закончились. Добавь свой Claude API ключ — поле ниже.');
+    if (!personalKey && freeLeft <= 0) {
+      showError('Бесплатные запросы закончились. Добавь свой Claude API ключ в поле ниже.');
       updateCounter();
       return;
     }
 
-    // UI: loading state
+    // UI loading
     document.getElementById('empty-lyrics').style.display = 'none';
     document.getElementById('lyric-doc').innerHTML = '';
     document.getElementById('gen-status').style.display = 'flex';
@@ -291,24 +287,26 @@
     document.getElementById('generate').disabled = true;
 
     try {
-      // use env key for free tier (falls back to demo mode if not set)
-      const keyToUse = apiKey || (window.__TS_KEY__ || '');
+      let keyToUse = personalKey;
+
+      // если нет личного ключа — берём серверный (для бесплатных запросов)
+      if (!keyToUse) {
+        keyToUse = await fetchServerKey();
+      }
 
       if (!keyToUse) {
         throw new Error('Нет API ключа. Добавь свой ключ в поле ниже.');
       }
 
-      const prompt = buildPrompt(brief);
-      const raw = await callClaude(prompt, keyToUse);
-
+      const raw = await callClaude(buildPrompt(brief), keyToUse);
       const { blocks, suno } = parseResponse(raw);
 
       if (blocks.length === 0) {
         throw new Error('Не удалось разобрать ответ. Попробуй ещё раз.');
       }
 
-      // count free request only if no personal key
-      if (!apiKey) incUsed();
+      // считаем только если использовался серверный ключ
+      if (!personalKey) incUsed();
 
       renderLyrics(blocks);
       document.getElementById('gen-status').style.display = 'none';
@@ -324,7 +322,7 @@
     }
   }
 
-  // ── COPY BUTTONS ───────────────────────────────────────────────────────────
+  // ── COPY ───────────────────────────────────────────────────────────────────
   function copyText(text, btn) {
     const orig = btn.textContent;
     navigator.clipboard?.writeText(text).then(() => {
