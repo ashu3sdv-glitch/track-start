@@ -7,6 +7,220 @@
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="styles-app.css" />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+/* ── Generator v3 extra styles ── */
+.gen-form {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.gen-section-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.chip-btn {
+  padding: 8px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all .15s var(--ease);
+  line-height: 1;
+}
+.chip-btn:hover { border-color: var(--ink); color: var(--ink); }
+.chip-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.lang-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.lang-card {
+  padding: 10px 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all .15s var(--ease);
+  text-align: center;
+}
+.lang-card:hover { border-color: var(--ink); }
+.lang-card.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.lang-card .lang-sub { font-size: 10px; opacity: 0.6; display: block; margin-top: 2px; }
+
+.idea-wrap { position: relative; }
+.idea-wrap textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 14px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  resize: none;
+  min-height: 100px;
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+  line-height: 1.5;
+}
+.idea-wrap textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(139,92,246,0.12);
+}
+.idea-wrap textarea::placeholder { color: var(--muted-2); }
+
+.gen-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.gen-btn:hover { background: #000; transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.gen-btn.pro { background: var(--accent); }
+.gen-btn.pro:hover { background: var(--accent-ink); }
+
+/* Free counter badge */
+.free-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.free-badge.pro-active { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+.free-badge.limit { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+.free-dots { display: flex; gap: 4px; }
+.free-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+}
+.free-dot.used { background: var(--line-strong); }
+
+/* Settings gear */
+.settings-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  transition: color .15s;
+}
+.settings-trigger:hover { color: var(--ink); }
+.settings-trigger svg { width: 14px; height: 14px; }
+
+/* Settings modal */
+.settings-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.settings-modal.open { display: flex; }
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20,19,15,0.4);
+  backdrop-filter: blur(4px);
+}
+.settings-box {
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  box-shadow: var(--shadow-lg);
+}
+.settings-box h3 { font-size: 18px; margin-bottom: 6px; }
+.settings-box .settings-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+.settings-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.settings-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+}
+.settings-input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.12); }
+.settings-hint { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+.settings-hint a { color: var(--accent-ink); text-decoration: underline; }
+.settings-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg-2); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 16px;
+  transition: background .15s;
+}
+.settings-close:hover { background: var(--bg-3); color: var(--ink); }
+
+/* Output area */
+.output-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.output-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.output-head h3 { font-size: 16px; font-weight: 500; }
+</style>
 </head>
 <body data-screen-label="Track Start — Generator">
 
@@ -14,40 +228,29 @@
   <div class="container">
     <nav class="nav">
       <a href="index.html" class="brand">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
           <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
           <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </svg>
         <span class="brand-name">Track <em>Start</em></span>
       </a>
       <div class="nav-links">
-        <a class="nav-link" href="index.html" data-i18n="nav.home">Главная</a>
-        <a class="nav-link active" href="generator.html" data-i18n="nav.generator">Генератор</a>
-        <a class="nav-link" href="guide.html" data-i18n="nav.guide">Гид по релизу</a>
+        <a class="nav-link" href="index.html">Главная</a>
+        <a class="nav-link active" href="generator.html">Генератор</a>
+        <a class="nav-link" href="guide.html">Гид по релизу</a>
       </div>
-      <div class="row" style="gap: 10px;">
+      <div class="row" style="gap:10px;">
         <div class="lang-switch" data-lang-switch>
-          <button class="lang-switch-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <button class="lang-switch-btn" type="button">
             <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             <span class="lang-switch-current">RU</span>
             <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
           </button>
           <div class="lang-switch-menu" role="listbox">
-            <button class="lang-opt active" data-lang="ru" role="option">
-              <span class="flag">RU</span>
-              <span class="name">Русский</span>
-              <span class="sub">RU</span>
-              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
-            </button>
-            <button class="lang-opt" data-lang="en" role="option">
-              <span class="flag">EN</span>
-              <span class="name">English</span>
-              <span class="sub">EN</span>
-              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
-            </button>
+            <button class="lang-opt active" data-lang="ru" role="option"><span class="flag">RU</span><span class="name">Русский</span><span class="sub">RU</span><svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg></button>
+            <button class="lang-opt" data-lang="en" role="option"><span class="flag">EN</span><span class="name">English</span><span class="sub">EN</span><svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg></button>
           </div>
         </div>
-        <a href="guide.html" class="btn btn-secondary btn-sm" data-i18n="nav.guide">Гид по релизу</a>
       </div>
     </nav>
   </div>
@@ -56,99 +259,125 @@
 <main class="app-wrap">
   <div class="container">
 
-    <div class="app-title">
+    <div class="app-title" style="margin-bottom:28px;">
       <div>
-        <h1 data-i18n="gen.title">Генератор песни</h1>
-        <p style="margin-top:6px;" data-i18n="gen.lede">Опиши идею — получи текст, структуру и готовый промпт для Suno.</p>
+        <h1 style="font-size:32px;">Генератор песни</h1>
+        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Опиши идею — получи текст и готовый промпт для Suno</p>
       </div>
-      <span class="chip chip-accent">v 0.9 · beta</span>
+      <button class="settings-trigger" id="open-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        API ключ
+      </button>
     </div>
 
-    <div class="app-grid" style="margin-top: 28px;">
-      <!-- ============ SIDEBAR / BRIEF ============ -->
-      <aside class="app-side">
-        <div class="eyebrow"><span class="dot"></span><span data-i18n="gen.brief">Бриф трека</span></div>
+    <div class="app-grid">
 
-        <div class="form-stack">
+      <!-- ── FORM ── -->
+      <aside>
+        <div class="gen-form">
+
+          <!-- Free counter -->
+          <div class="free-badge" id="free-badge">
+            <span id="free-text">Бесплатных генераций сегодня: 3 из 3</span>
+            <div class="free-dots" id="free-dots">
+              <div class="free-dot"></div>
+              <div class="free-dot"></div>
+              <div class="free-dot"></div>
+            </div>
+          </div>
+
+          <!-- Idea -->
           <div>
-            <label class="field-label" data-i18n="gen.idea_label">О чём песня</label>
-            <textarea id="idea" class="textarea" rows="4" data-i18n-attr="placeholder:gen.idea_ph" placeholder="Например: ночной троллейбус, фонари за окном, девушка с другого конца города…">ночной троллейбус, фонари за окном, девушка с другого конца города</textarea>
+            <div class="gen-section-title">О чём песня</div>
+            <div class="idea-wrap">
+              <textarea id="idea" rows="4" placeholder="Опиши идею своими словами — тему, образ, историю, настроение…&#10;&#10;Например: ночной троллейбус, фонари, девушка с другого конца города"></textarea>
+            </div>
           </div>
 
+          <!-- Genre -->
           <div>
-            <label class="field-label" data-i18n="gen.genre">Жанр</label>
-            <div class="chip-row" data-field="genre">
-              <button class="chip-pick active" data-v="synth-pop">synth-pop</button>
-              <button class="chip-pick" data-v="lo-fi">lo-fi</button>
-              <button class="chip-pick" data-v="indie rock">indie rock</button>
-              <button class="chip-pick" data-v="r&amp;b">r&amp;b</button>
-              <button class="chip-pick" data-v="folk">folk</button>
-              <button class="chip-pick" data-v="hyperpop">hyperpop</button>
+            <div class="gen-section-title">Жанр</div>
+            <div class="chip-group" data-field="genre">
+              <button class="chip-btn active" data-v="synth-pop">Synth-pop</button>
+              <button class="chip-btn" data-v="lo-fi">Lo-fi</button>
+              <button class="chip-btn" data-v="indie rock">Инди-рок</button>
+              <button class="chip-btn" data-v="r&b">R&B</button>
+              <button class="chip-btn" data-v="folk">Фолк</button>
+              <button class="chip-btn" data-v="pop">Поп</button>
+              <button class="chip-btn" data-v="dark phonk">Dark phonk</button>
+              <button class="chip-btn" data-v="soul">Soul</button>
+              <button class="chip-btn" data-v="chanson russe">Шансон</button>
+              <button class="chip-btn" data-v="hyperpop">Hyperpop</button>
             </div>
           </div>
 
+          <!-- Mood -->
           <div>
-            <label class="field-label" data-i18n="gen.mood">Настроение</label>
-            <div class="chip-row" data-field="mood">
-              <button class="chip-pick active" data-v="nostalgic">nostalgic</button>
-              <button class="chip-pick" data-v="melancholic">melancholic</button>
-              <button class="chip-pick" data-v="hopeful">hopeful</button>
-              <button class="chip-pick" data-v="energetic">energetic</button>
-              <button class="chip-pick" data-v="angry">angry</button>
+            <div class="gen-section-title">Настроение</div>
+            <div class="chip-group" data-field="mood">
+              <button class="chip-btn active" data-v="nostalgic">Ностальгия</button>
+              <button class="chip-btn" data-v="melancholic">Меланхолия</button>
+              <button class="chip-btn" data-v="hopeful">Надежда</button>
+              <button class="chip-btn" data-v="energetic">Энергия</button>
+              <button class="chip-btn" data-v="romantic">Романтика</button>
+              <button class="chip-btn" data-v="dark and intense">Тьма</button>
+              <button class="chip-btn" data-v="dreamy">Мечта</button>
+              <button class="chip-btn" data-v="angry">Злость</button>
             </div>
           </div>
 
-          <div class="form-row">
-            <div>
-              <label class="field-label" data-i18n="gen.lang">Язык текста</label>
-              <select id="lang" class="select">
-                <option value="ru" data-i18n="gen.lang_ru">Русский</option>
-                <option value="en" data-i18n="gen.lang_en">English</option>
-                <option value="mix" data-i18n="gen.lang_mix">Mix</option>
-              </select>
-            </div>
-            <div>
-              <label class="field-label" data-i18n="gen.length">Длительность</label>
-              <select id="length" class="select">
-                <option value="short" data-i18n="gen.l_short">2:30</option>
-                <option value="med" selected data-i18n="gen.l_med">3:00</option>
-                <option value="long" data-i18n="gen.l_long">3:30+</option>
-              </select>
-            </div>
-          </div>
-
+          <!-- Vocal -->
           <div>
-            <label class="field-label" data-i18n="gen.structure">Структура</label>
-            <div class="chip-row" data-field="structure">
-              <button class="chip-pick active" data-v="vcvcbc" data-i18n="gen.struct_classic">V–C–V–C–B–C</button>
-              <button class="chip-pick" data-v="vcbc" data-i18n="gen.struct_short">V–C–B–C</button>
-              <button class="chip-pick" data-v="vcvcvbc" data-i18n="gen.struct_long">V–C–V–C–V–B–C</button>
+            <div class="gen-section-title">Вокал</div>
+            <div class="chip-group" data-field="vocal">
+              <button class="chip-btn active" data-v="male tenor">Мужской</button>
+              <button class="chip-btn" data-v="female soprano">Женский</button>
+              <button class="chip-btn" data-v="male and female duet">Дуэт</button>
+              <button class="chip-btn" data-v="no vocals instrumental">Без вокала</button>
             </div>
           </div>
 
+          <!-- Language -->
           <div>
-            <label class="field-label"><span data-i18n="gen.bpm">Темп (BPM)</span></label>
-            <div class="bpm-row">
-              <input type="range" id="bpm" min="60" max="180" value="96" />
-              <span class="bpm-val"><span id="bpm-val">96</span> bpm · <span id="bpm-mood">mid</span></span>
+            <div class="gen-section-title">Язык текста</div>
+            <div class="lang-row">
+              <button class="lang-card active" data-lang-pick="ru">
+                RU
+                <span class="lang-sub">Русский</span>
+              </button>
+              <button class="lang-card" data-lang-pick="en">
+                EN
+                <span class="lang-sub">English</span>
+              </button>
+              <button class="lang-card" data-lang-pick="mix">
+                MIX
+                <span class="lang-sub">RU + EN</span>
+              </button>
             </div>
           </div>
+
+          <!-- Generate button -->
+          <button class="gen-btn" id="generate">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Создать песню
+          </button>
+
         </div>
-
-        <button id="generate" class="btn btn-primary" style="height: 50px;" data-i18n="gen.go">Сгенерировать</button>
       </aside>
 
-      <!-- ============ OUTPUT ============ -->
+      <!-- ── OUTPUT ── -->
       <section class="app-main">
-        <div class="panel" id="lyrics-panel">
-          <div class="panel-head">
-            <div class="row" style="gap:12px;">
-              <h3 data-i18n="gen.lyrics_panel">Текст песни</h3>
+
+        <!-- Lyrics panel -->
+        <div class="output-panel" id="lyrics-panel">
+          <div class="output-head">
+            <div class="row" style="gap:10px;">
+              <h3>Текст песни</h3>
               <span class="chip mono" id="lyric-meta">— · — · —</span>
             </div>
-            <div class="tools">
-              <button class="tool-btn" id="copy-lyrics"><span data-i18n="gen.copy">Скопировать</span></button>
-              <button class="tool-btn primary" id="regen-lyrics" style="display:none;"><span data-i18n="gen.regenerate">Перегенерировать</span></button>
+            <div class="row" style="gap:6px;">
+              <button class="tool-btn" id="copy-lyrics">Скопировать</button>
+              <button class="tool-btn primary" id="regen-lyrics" style="display:none;">↻ Ещё раз</button>
             </div>
           </div>
 
@@ -157,42 +386,59 @@
               <div class="icon-bg">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
               </div>
-              <h4 data-i18n="gen.empty_t">Здесь появится текст</h4>
-              <p data-i18n="gen.empty_s">Заполни бриф слева и нажми «Сгенерировать»</p>
+              <h4>Здесь появится текст</h4>
+              <p>Заполни форму слева и нажми «Создать песню»</p>
             </div>
-
             <div class="gen-status" id="gen-status" style="display:none;">
-              <span class="gen-dot"></span><span data-i18n="gen.generating">Генерируем текст</span>
+              <span class="gen-dot"></span>Генерируем текст…
             </div>
-
             <div class="lyric-doc" id="lyric-doc"></div>
           </div>
 
-          <p class="muted" style="font-size:12.5px; margin-top:18px; font-family: var(--font-mono);" data-i18n="gen.tip">Подсказка: после генерации можешь править любую строку прямо здесь — кликни и пиши</p>
+          <p class="muted" style="font-size:12px; margin-top:18px; font-family:var(--font-mono);">
+            Подсказка: после генерации можешь редактировать любую строку прямо здесь
+          </p>
         </div>
 
-        <div class="panel" id="suno-panel" style="display:none;">
-          <div class="panel-head">
-            <div class="row" style="gap:12px;">
-              <h3 data-i18n="gen.suno_panel">Промпт для Suno v4</h3>
+        <!-- Suno prompt panel -->
+        <div class="output-panel" id="suno-panel" style="display:none;">
+          <div class="output-head">
+            <div class="row" style="gap:10px;">
+              <h3>Промпт для Suno v5</h3>
               <span class="chip chip-accent">copy → suno.com</span>
             </div>
-            <div class="tools">
-              <button class="tool-btn primary" id="copy-suno"><span data-i18n="gen.copy">Скопировать</span></button>
-            </div>
+            <button class="tool-btn primary" id="copy-suno">Скопировать</button>
           </div>
           <div class="suno-prompt" id="suno-prompt"></div>
         </div>
+
       </section>
-      <!-- /OUTPUT -->
     </div>
   </div>
 </main>
 
-<div id="tweaks-root"></div>
+<!-- ── SETTINGS MODAL ── -->
+<div class="settings-modal" id="settings-modal">
+  <div class="settings-backdrop" id="settings-backdrop"></div>
+  <div class="settings-box">
+    <button class="settings-close" id="close-settings">✕</button>
+    <h3>Безлимитный доступ</h3>
+    <p class="settings-desc">
+      Подключи свой Claude API ключ — и генерируй без ограничений. 
+      Ключ хранится только в твоём браузере, мы его не видим.
+    </p>
+    <div class="settings-input-row">
+      <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
+      <button class="btn btn-primary btn-sm" id="api-key-save">Сохранить</button>
+    </div>
+    <p class="settings-hint">
+      Нет ключа? <a href="https://console.anthropic.com" target="_blank">Получить на console.anthropic.com →</a>
+    </p>
+    <div id="key-status" style="margin-top:14px; font-family:var(--font-mono); font-size:12px; display:none;"></div>
+  </div>
+</div>
 
 <script src="i18n.js"></script>
-<script src="logos.js"></script>
 <script src="app.js"></script>
 <script src="generator.js"></script>
 </body>
