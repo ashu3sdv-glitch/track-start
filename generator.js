@@ -1,10 +1,8 @@
-// Track Start — Generator v4 (промпт из Suno Assistant)
+// Track Start — Generator v7 (по образцу Suno Assistant)
 
 (function () {
 
-  // ── DAILY FREE LIMIT ───────────────────────────────────────────────────────
   const FREE_DAILY = 3;
-
   function todayStr() { return new Date().toISOString().slice(0, 10); }
   function getUsedToday() {
     if (localStorage.getItem('ts_date') !== todayStr()) {
@@ -15,146 +13,129 @@
   }
   function incUsed() { localStorage.setItem('ts_used', getUsedToday() + 1); }
   function getFreeLeft() { return Math.max(0, FREE_DAILY - getUsedToday()); }
-
-  // ── API KEY ────────────────────────────────────────────────────────────────
   function getKey() { return localStorage.getItem('ts_key') || ''; }
   function saveKey(k) { localStorage.setItem('ts_key', k.trim()); }
   function isPro() { return !!getKey(); }
 
   async function fetchServerKey() {
-    try {
-      const r = await fetch('/api/key');
-      const d = await r.json();
-      return d.key || '';
-    } catch { return ''; }
+    try { const r = await fetch('/api/key'); const d = await r.json(); return d.key || ''; }
+    catch { return ''; }
   }
 
-  // ── COUNTER UI ─────────────────────────────────────────────────────────────
+  // ── BADGE ──────────────────────────────────────────────────────────────────
   function updateBadge() {
     const badge = document.getElementById('free-badge');
     const text  = document.getElementById('free-text');
     const dots  = document.getElementById('free-dots');
     const btn   = document.getElementById('generate');
     if (!badge) return;
-
     if (isPro()) {
       badge.className = 'free-badge pro-active';
       text.textContent = '✓ Pro — безлимитная генерация';
       dots.innerHTML = '';
       btn.className = 'gen-btn pro';
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Создать песню`;
     } else {
       const left = getFreeLeft();
       badge.className = left > 0 ? 'free-badge' : 'free-badge limit';
       text.textContent = left > 0
         ? `Бесплатных генераций сегодня: ${left} из ${FREE_DAILY}`
-        : 'Лимит исчерпан — возвращайся завтра или подключи ключ';
+        : 'Лимит исчерпан — возвращайся завтра или подключи ключ ⚙';
       dots.innerHTML = [0,1,2].map(i =>
-        `<div class="free-dot${i >= left ? ' used' : ''}"></div>`
-      ).join('');
+        `<div class="free-dot${i >= left ? ' used' : ''}"></div>`).join('');
       btn.className = 'gen-btn';
-      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Создать песню`;
     }
   }
 
-  // ── SETTINGS MODAL ─────────────────────────────────────────────────────────
+  // ── SETTINGS ───────────────────────────────────────────────────────────────
   function initSettings() {
-    const modal   = document.getElementById('settings-modal');
-    const input   = document.getElementById('api-key-input');
-    const saveBtn = document.getElementById('api-key-save');
-    const status  = document.getElementById('key-status');
-
+    const modal = document.getElementById('settings-modal');
+    const input = document.getElementById('api-key-input');
+    const status = document.getElementById('key-status');
     input.value = getKey();
-
-    document.getElementById('open-settings').addEventListener('click', () => {
-      modal.classList.add('open');
-      input.focus();
-    });
+    document.getElementById('open-settings').addEventListener('click', () => { modal.classList.add('open'); input.focus(); });
     document.getElementById('close-settings').addEventListener('click', () => modal.classList.remove('open'));
     document.getElementById('settings-backdrop').addEventListener('click', () => modal.classList.remove('open'));
-
-    saveBtn.addEventListener('click', () => {
-      const val = input.value.trim();
-      saveKey(val);
+    document.getElementById('api-key-save').addEventListener('click', () => {
+      saveKey(input.value);
       status.style.display = 'block';
-      if (val) {
-        status.style.color = '#15803d';
-        status.textContent = '✓ Ключ сохранён — Pro режим активен';
-      } else {
-        status.style.color = 'var(--muted)';
-        status.textContent = 'Ключ удалён';
-      }
+      status.style.color = input.value.trim() ? '#15803d' : 'var(--muted)';
+      status.textContent = input.value.trim() ? '✓ Ключ сохранён' : 'Ключ удалён';
       updateBadge();
-      setTimeout(() => modal.classList.remove('open'), 1200);
+      setTimeout(() => modal.classList.remove('open'), 1000);
     });
   }
 
-  // ── GENRE COMPATIBILITY ────────────────────────────────────────────────────
+  // ── GENRE COMPAT ───────────────────────────────────────────────────────────
   const COMPAT = {
-    "Synth-pop":  { good: ["Electronic","Indie","Pop","Lo-fi","Rock"],       conflict: ["Folk","Jazz","Classical","Шансон"] },
-    "Lo-fi":      { good: ["Jazz","Folk","Indie","Electronic","Pop","R&B"],  conflict: ["Rock","Dark phonk","Шансон"] },
-    "Инди-рок":   { good: ["Folk","Pop","Lo-fi","Rock","Jazz"],              conflict: ["Dark phonk","Шансон","Latin"] },
-    "R&B":        { good: ["Pop","Jazz","Electronic","Lo-fi"],               conflict: ["Rock","Classical","Folk","Шансон"] },
-    "Фолк":       { good: ["Инди-рок","Pop","Jazz","Lo-fi","Cinematic"],     conflict: ["Dark phonk","Electronic","Шансон"] },
-    "Pop":        { good: ["R&B","Инди-рок","Фолк","Electronic","Synth-pop","Lo-fi"], conflict: ["Dark phonk","Шансон"] },
-    "Dark phonk": { good: ["Electronic","Hip-hop","Trap"],                   conflict: ["Folk","Jazz","Classical","Шансон","Lo-fi"] },
-    "Soul":       { good: ["R&B","Jazz","Pop","Lo-fi"],                      conflict: ["Dark phonk","Rock","Шансон"] },
-    "Шансон":     { good: ["Фолк","Pop"],                                    conflict: ["Dark phonk","Electronic","R&B","Lo-fi","Synth-pop"] },
-    "Hyperpop":   { good: ["Electronic","Pop","Synth-pop"],                  conflict: ["Фолк","Jazz","Classical","Шансон","Lo-fi"] },
+    "Pop":        { good: ["R&B","Indie Rock","Folk","Synth-pop","Lo-fi","Soul","Cinematic"], conflict: ["Dark Phonk","Hip-Hop"] },
+    "Synth-pop":  { good: ["Electronic","Indie Rock","Pop","Lo-fi"],                         conflict: ["Folk","Chanson","Cinematic"] },
+    "Lo-fi":      { good: ["Jazz","Folk","Indie Rock","Electronic","Pop","R&B","Soul"],       conflict: ["Dark Phonk","Hip-Hop","Chanson"] },
+    "Indie Rock": { good: ["Folk","Pop","Lo-fi","Soul","Cinematic"],                         conflict: ["Dark Phonk","Chanson","Hip-Hop"] },
+    "R&B":        { good: ["Pop","Soul","Electronic","Lo-fi"],                               conflict: ["Dark Phonk","Folk","Chanson"] },
+    "Folk":       { good: ["Indie Rock","Pop","Lo-fi","Cinematic","Soul"],                   conflict: ["Dark Phonk","Electronic","Hip-Hop"] },
+    "Soul":       { good: ["R&B","Lo-fi","Pop","Folk","Cinematic"],                          conflict: ["Dark Phonk","Hip-Hop","Electronic"] },
+    "Dark Phonk": { good: ["Electronic","Hip-Hop"],                                          conflict: ["Folk","Chanson","Lo-fi","Cinematic","Soul","R&B","Pop","Synth-pop"] },
+    "Electronic": { good: ["Pop","Synth-pop","Hip-Hop","R&B","Lo-fi"],                       conflict: ["Folk","Chanson","Cinematic","Soul"] },
+    "Hip-Hop":    { good: ["R&B","Electronic","Lo-fi","Dark Phonk"],                         conflict: ["Folk","Chanson","Cinematic","Soul","Indie Rock"] },
+    "Chanson":    { good: ["Folk","Pop"],                                                     conflict: ["Dark Phonk","Electronic","R&B","Hip-Hop","Synth-pop"] },
+    "Cinematic":  { good: ["Folk","Indie Rock","Lo-fi","Soul","Pop"],                         conflict: ["Dark Phonk","Hip-Hop","Electronic","Synth-pop"] },
   };
 
-  function getGenreStatus(g, selected) {
-    if (selected.length === 0) return 'neutral';
-    if (selected.includes(g)) return 'selected';
-    const conflict = selected.some(s => COMPAT[s]?.conflict?.includes(g));
-    if (conflict) return 'conflict';
-    const good = selected.every(s => COMPAT[s]?.good?.includes(g));
-    if (good) return 'good';
-    return 'neutral';
-  }
-
-  // ── CHIP GROUPS ────────────────────────────────────────────────────────────
   let selectedGenres = [];
   let selectedMood   = '';
   let selectedVocal  = '';
   let selectedLang   = 'ru';
 
-  function initChips() {
-    // Genres — multiple select с совместимостью
-    const genreRow = document.querySelector('[data-field="genre"]');
-    if (genreRow) {
-      genreRow.querySelectorAll('.chip-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const v = btn.getAttribute('data-v');
-          if (selectedGenres.includes(v)) {
-            selectedGenres = selectedGenres.filter(g => g !== v);
-          } else if (selectedGenres.length < 2) {
-            selectedGenres.push(v);
-          }
-          updateGenreChips();
-        });
-      });
-    }
+  function getGenreStatus(g, selected) {
+    if (selected.length === 0) return 'neutral';
+    if (selected.includes(g)) return 'selected';
+    if (selected.some(s => COMPAT[s]?.conflict?.includes(g))) return 'conflict';
+    if (selected.every(s => COMPAT[s]?.good?.includes(g))) return 'good';
+    return 'neutral';
+  }
 
-    // Mood — single
+  function updateGenreChips() {
+    document.querySelectorAll('[data-field="genre"] .chip-btn').forEach(btn => {
+      const v = btn.getAttribute('data-v');
+      const status = getGenreStatus(v, selectedGenres);
+      btn.className = 'chip-btn';
+      if (status === 'selected') btn.classList.add('active');
+      else if (status === 'good') btn.classList.add('good');
+      else if (status === 'conflict') btn.classList.add('conflict');
+    });
+  }
+
+  function initChips() {
+    // Genre — multiple (max 2)
+    document.querySelector('[data-field="genre"]')?.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.getAttribute('data-v');
+        if (selectedGenres.includes(v)) {
+          selectedGenres = selectedGenres.filter(g => g !== v);
+        } else if (selectedGenres.length < 2) {
+          selectedGenres.push(v);
+        }
+        updateGenreChips();
+      });
+    });
+    // Mood — single toggle
     document.querySelector('[data-field="mood"]')?.querySelectorAll('.chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-field="mood"] .chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedMood = btn.getAttribute('data-v');
+        const v = btn.getAttribute('data-v');
+        selectedMood = selectedMood === v ? '' : v;
+        document.querySelectorAll('[data-field="mood"] .chip-btn').forEach(b =>
+          b.classList.toggle('active', b.getAttribute('data-v') === selectedMood));
       });
     });
-
-    // Vocal — single
+    // Vocal — single toggle
     document.querySelector('[data-field="vocal"]')?.querySelectorAll('.chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-field="vocal"] .chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedVocal = btn.getAttribute('data-v');
-        updateVocalRange();
+        const v = btn.getAttribute('data-v');
+        selectedVocal = selectedVocal === v ? '' : v;
+        document.querySelectorAll('[data-field="vocal"] .chip-btn').forEach(b =>
+          b.classList.toggle('active', b.getAttribute('data-v') === selectedVocal));
       });
     });
-
     // Lang
     document.querySelectorAll('[data-lang-pick]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -165,223 +146,142 @@
     });
   }
 
-  function updateGenreChips() {
-    document.querySelectorAll('[data-field="genre"] .chip-btn').forEach(btn => {
-      const v = btn.getAttribute('data-v');
-      const status = getGenreStatus(v, selectedGenres);
-      btn.className = 'chip-btn';
-      if (status === 'selected') btn.classList.add('active');
-      else if (status === 'good')     btn.classList.add('good');
-      else if (status === 'conflict') btn.classList.add('conflict');
-    });
-  }
-
-  // Диапазоны вокала
-  const VOICE_RANGES = {
-    'male-bass':     { label: 'Бас',      range: 'E2–E4', desc: 'resonant chest depth, loses body above D3, powerful low-mid' },
-    'male-baritone': { label: 'Баритон',  range: 'G2–G4', desc: 'rich velvet tone in chest, slightly thinning above G3, warm dark centre' },
-    'male-tenor':    { label: 'Тенор',    range: 'C3–B4', desc: 'bright chest below A3, ringing passaggio C3–E3, soaring head above' },
-    'female-alto':   { label: 'Альт',     range: 'G3–E5', desc: 'deep smoky chest, full-bodied through F3, silky upper register' },
-    'female-mezzo':  { label: 'Меццо',    range: 'A3–F5', desc: 'rich chest voice in lower octave, soft and thin above E4, warm mid-range power' },
-    'female-soprano':{ label: 'Сопрано',  range: 'C4–A5', desc: 'light crystalline tone, full bloom above A4, effortless top register' },
-  };
-
-  function updateVocalRange() {
-    const wrap = document.getElementById('vocal-range-wrap');
-    if (!wrap) return;
+  // ── VOCAL SETTINGS ─────────────────────────────────────────────────────────
+  function buildVocalSettings() {
     const v = selectedVocal;
-    if (!v || v === 'duet' || v === 'no-vocals') {
-      wrap.style.display = 'none';
-      return;
-    }
-    const isMale   = v === 'male';
-    const isFemale = v === 'female';
-    if (!isMale && !isFemale) { wrap.style.display = 'none'; return; }
-
-    const keys = isMale
-      ? ['male-bass','male-baritone','male-tenor']
-      : ['female-alto','female-mezzo','female-soprano'];
-
-    wrap.style.display = '';
-    wrap.innerHTML = `
-      <div class="gen-section-title">Диапазон голоса</div>
-      <div class="chip-group" data-field="range">
-        ${keys.map(k => `<button class="chip-btn" data-v="${k}">${VOICE_RANGES[k].label}<span style="font-size:10px;opacity:0.6;margin-left:4px;">${VOICE_RANGES[k].range}</span></button>`).join('')}
-        <button class="chip-btn active" data-v="auto">Авто</button>
-      </div>`;
-
-    wrap.querySelectorAll('[data-field="range"] .chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        wrap.querySelectorAll('[data-field="range"] .chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
+    if (!v || v === 'No vocals') return '[Instrumental] [No Vocals]';
+    if (v === 'Choir') return '[Choir] [SATB] [Vocal Style: full choral arrangement, epic, layered harmonies]';
+    if (v === 'Duet M+F') return '[Duet] [Male Baritone G2–G4 | Female Mezzo A3–F5] [warm dark baritone | rich mezzo chest] [Vocal Style: solo intimate verse, unison pre-chorus tension, harmony chorus swell, call-response bridge, fading duet outro]';
+    if (v === 'Male vocal') return '[Male Vocal] [Baritone G2–G4] [rich velvet tone in chest, slightly thinning above G3, warm dark centre] [Vocal Style: breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]';
+    if (v === 'Female vocal') return '[Female Vocal] [Mezzo A3–F5] [rich chest voice in lower octave, soft and thin above E4, warm mid-range power] [Vocal Style: breathy intimate verse, vocal cry pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]';
+    return '[Male Vocal] [Baritone G2–G4] [Vocal Style: breathy intimate verse, crescendo chorus, falsetto bridge]';
   }
 
-  function getSelectedRange() {
-    const active = document.querySelector('[data-field="range"] .chip-btn.active');
-    if (!active) return null;
-    const v = active.getAttribute('data-v');
-    return v === 'auto' ? null : VOICE_RANGES[v] || null;
-  }
-
-  // ── READ BRIEF ─────────────────────────────────────────────────────────────
-  function readBrief() {
-    return {
-      idea:   document.getElementById('idea').value.trim(),
-      genres: selectedGenres,
-      mood:   selectedMood,
-      vocal:  selectedVocal,
-      range:  getSelectedRange(),
-      lang:   selectedLang
-    };
-  }
-
-  // ── BUILD VOCAL SETTINGS LINE ──────────────────────────────────────────────
-  function buildVocalSettings(b) {
-    if (!b.vocal || b.vocal === 'no-vocals') return '[Instrumental] [No Vocals]';
-
-    if (b.vocal === 'duet') {
-      return `[Duet] [Male Baritone G2–G4 | Female Mezzo A3–F5] [warm dark baritone | rich mezzo chest] [Vocal Style: solo intimate verse, unison pre-chorus tension, harmony chorus swell, call-response bridge, fading duet outro]`;
-    }
-
-    const isMale = b.vocal === 'male';
-    const type   = isMale ? 'Male Vocal' : 'Female Vocal';
-
-    let rangeStr, descStr;
-    if (b.range) {
-      rangeStr = b.range.range;
-      descStr  = b.range.desc;
-    } else {
-      if (isMale) { rangeStr = 'G2–G4'; descStr = 'rich velvet tone in chest, slightly thinning above G3, warm dark centre'; }
-      else        { rangeStr = 'A3–F5'; descStr = 'rich chest voice in lower octave, soft and thin above E4, warm mid-range power'; }
-    }
-
-    return `[${type}] [${rangeStr}] [${descStr}] [Vocal Style: breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]`;
-  }
-
-  // ── MAIN PROMPT ────────────────────────────────────────────────────────────
-  function buildPrompt(b) {
+  // ── PROMPTS ────────────────────────────────────────────────────────────────
+  function buildLyricsPrompt(brief) {
     const langMap = { ru: 'Russian', en: 'English', mix: 'Russian with some English phrases' };
-    const genreStr = b.genres.length > 0 ? b.genres.join(' + ') : 'choose best genre for this idea';
-    const moodStr  = b.mood  || 'choose best mood for this idea';
-    const vocalSettings = buildVocalSettings(b);
+    const genreStr = brief.genres.length > 0 ? brief.genres.join(' + ') : 'choose best genre for this idea';
+    const moodStr  = brief.mood  || 'choose best mood for this idea';
+    const vocalSettings = buildVocalSettings();
+    const instrLine = brief.instruments ? `Key instruments: ${brief.instruments}` : '';
 
-    return `You are a professional hitmaker lyricist with deep knowledge of song craft. Your lyrics must be publication-ready, emotionally powerful, and rhythmically precise.
+    return `You are a professional hitmaker lyricist. Your lyrics must be publication-ready, emotionally powerful, rhythmically precise.
 
 SONG BRIEF:
-- Idea: ${b.idea}
+- Idea: ${brief.idea}
 - Genre: ${genreStr}
 - Mood: ${moodStr}
-- Language: ${langMap[b.lang] || 'Russian'}
-- Duration: 3:00–3:30
-- Structure: [Intro] [Verse 1] [Pre-Chorus] [Chorus] [Verse 2] [Pre-Chorus] [Chorus] [Bridge] [Final Chorus] [Outro]
+- Language: ${langMap[brief.lang] || 'Russian'} — write ALL lyrics STRICTLY in this language only
+${instrLine}
 
 ABSOLUTE RULES:
-1. Do NOT mention musical instruments in lyrics text
-2. Section tags ALWAYS in English only — Suno will SING non-English tags as lyrics
-3. VOCAL SETTINGS block must be the very first line before any section tag
-4. The vocal settings line for this song: ${vocalSettings}
-
-VOCAL SETTINGS — copy this line verbatim as the first line:
-${vocalSettings}
+1. Do NOT mention musical instruments in lyrics text (unless provided in Key instruments)
+2. Section tags ALWAYS in English only — Suno will SING non-English tags
+3. VOCAL SETTINGS must be the very first line before any section tag
+4. Copy this vocal settings line verbatim as line 1: ${vocalSettings}
 
 RHYME RULES:
-FORBIDDEN Russian rhymes: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт
-FORBIDDEN English rhymes: love–above | heart–start | home–alone
-Use quality rhymes — night/light/sight | fire/higher/desire | dream/stream/gleam
+- FORBIDDEN Russian: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт
+- FORBIDDEN English: love–above | heart–start | home–alone
+- Use quality rhymes: ночь/дочь → замени на: сезон/телефон/поклон | свет/ответ/портрет
 
 IMAGE RULES:
-- Each line must carry ONE clear image — not two half-ideas joined by "но/и/а"
-- BAD: "Я кричу, но ты не помнишь" — two weak ideas
-- GOOD: "Я кричу — волна уносит" — one action, one consequence
-- Images must be CONCRETE: not "грусть" but "мёртвый омут" / not "боль" but "соль на губах"
-- FORBIDDEN clichés: звёзды светят / сердце бьётся / слёзы льются / душа поёт / мечта зовёт
+- Each line = ONE clear image, not two half-ideas joined by "но/и/а"
+- BAD: "Я кричу, но ты не помнишь" | GOOD: "Я кричу — волна уносит"
+- CONCRETE: не "грусть" а "мёртвый омут" / не "боль" а "соль на губах"
+- FORBIDDEN clichés: звёзды светят / сердце бьётся / слёзы льются / душа поёт
 
-RHYTHM RULES:
-- Lines in same section must match syllable count ±1
-- Never end a line on a weak syllable (-ишь, -ешь, -же, -бы, -ли)
-- Stress must fall on strong beats
+RHYTHM: Lines in same section match syllable count ±1. Never end on weak syllable (-ишь,-ешь,-же,-бы,-ли)
 
-PRE-OUTPUT CHECKLIST:
-- Vocal settings block is the very first line ✓
-- All section tags in English ✓  
-- No forbidden rhymes ✓
-- No clichéd images ✓
-- Verse 2 has NEW angle/meaning ✓
-- Bridge contrasts in rhythm or perspective ✓
+STRUCTURE (3:00–3:30):
+[Intro] 1-2 lines
+[Verse 1] 4 lines
+[Pre-Chorus] 2 lines
+[Chorus] 4 lines — HOOK, must be singable, ≤8 syllables first line
+[Verse 2] 4 lines — NEW angle
+[Pre-Chorus] 2 lines
+[Chorus] 4 lines
+[Bridge] 3 lines — contrast in rhythm or perspective
+[Final Chorus] 4 lines
+[Outro] 1-2 lines
 
-OUTPUT FORMAT — exactly this structure:
-
-===LYRICS===
+OUTPUT — return ONLY the lyrics, no JSON, no explanation:
 ${vocalSettings}
 
 [Intro]
-(1-2 lines)
+...
 
 [Verse 1]
-(4 lines)
+...
 
 [Pre-Chorus]
-(2 lines)
+...
 
 [Chorus]
-(4 lines — HOOK)
+...
 
 [Verse 2]
-(4 lines — NEW angle)
+...
 
 [Pre-Chorus]
-(2 lines)
+...
 
 [Chorus]
-(4 lines)
+...
 
 [Bridge]
-(3 lines — contrast)
+...
 
 [Final Chorus]
-(4 lines)
+...
 
 [Outro]
-(1-2 lines)
-===END_LYRICS===
-
-===SUNO===
-(style string: genre BPM vocal-descriptor sound-descriptors | finish-tags)
-===END_SUNO===`;
+...`;
   }
 
-  // ── STYLE PROMPT ───────────────────────────────────────────────────────────
-  function buildStylePrompt(b, lyrics) {
-    const genreStr = b.genres.length > 0 ? b.genres.join(' + ') : 'pop';
+  function buildStylePrompt(lyrics, brief) {
+    const genreStr = brief.genres.length > 0 ? brief.genres.join(' + ') : 'pop';
     return `You are a professional Suno AI music producer.
 
 Generate a Suno v5 style string for this song.
 
 Genre: ${genreStr}
-Mood: ${b.mood || 'emotional'}
-Vocal: ${b.vocal || 'male vocal'}
+Mood: ${brief.mood || 'emotional'}
+Vocal: ${brief.vocal || 'male vocal'}
+Lyrics (for reference):
+${lyrics.slice(0, 300)}
 
 Style string format:
-<genre> <BPM> BPM <vocal-descriptor> <2-3 sound descriptors> <hook words from chorus> <finish tags>
-Target length: 180-220 characters
+<genre> <BPM> BPM <vocal-descriptor> <2-3 sound descriptors> | <finish tags>
+Target: 180-220 characters
 
-BPM by genre: Pop/R&B/Indie 96-115 | Rock/Synthwave 110-132 | Electronic 120-138 | Folk/Lo-fi 72-96
+BPM: Pop/R&B/Indie 96-115 | Rock/Synth-pop 110-132 | Electronic 120-138 | Folk/Lo-fi 72-96 | Dark Phonk 138-150
 
 Finish tags — pick one:
-EMOTIONAL: | deep emotional warmth | close-mic intimacy | analog texture | no generic AI polish
+EMOTIONAL: | deep emotional warmth | close-mic intimacy | analog texture | no generic AI polish | human breath imperfection
 ENERGETIC: | raw energy | organic punch | wide stereo depth | no safe AI sound
-ATMOSPHERIC: | cinematic space | subtle tape noise | no clean digital polish
-RETRO: | analog tape saturation | vinyl crackle | warm tube mastering
+ATMOSPHERIC: | cinematic space | subtle tape noise | no clean digital polish | air and silence matter
 
-Negative tags:
-- Folk/acoustic → no-808
-- Clean Pop/Indie/Lo-fi → no-808 no-clap
+Negative tags: Folk/acoustic → no-808 | Clean Pop/Indie/Lo-fi → no-808 no-clap
 
 NEVER include language names like "Russian" or "English".
+Return ONLY the style string, nothing else.`;
+  }
 
-Return ONLY the style string, nothing else, no JSON, no explanation.`;
+  function buildFixPrompt(lyrics, request) {
+    return `You are a lyric editor. Fix the lyrics based on the user's request.
+
+CURRENT LYRICS:
+${lyrics}
+
+FIX REQUEST: ${request}
+
+RULES:
+- Fix ONLY what was requested — keep everything else identical
+- Preserve rhyme scheme and syllable count
+- Keep all section tags exactly as they are (in English)
+- Keep the Vocal Settings line (first line) unchanged
+- Return the COMPLETE corrected lyrics, nothing else, no explanation`;
   }
 
   // ── CLAUDE CALL ────────────────────────────────────────────────────────────
@@ -407,106 +307,83 @@ Return ONLY the style string, nothing else, no JSON, no explanation.`;
     return (await res.json()).content?.[0]?.text || '';
   }
 
-  // ── PARSE ──────────────────────────────────────────────────────────────────
-  function parse(text) {
-    const lm = text.match(/===LYRICS===([\s\S]*?)===END_LYRICS===/);
-    const sm = text.match(/===SUNO===([\s\S]*?)===END_SUNO===/);
-    const raw = lm ? lm[1].trim() : text;
-    const blocks = [];
-    const re = /(\[[^\]]+\])\n([\s\S]*?)(?=\n\[|\n===|$)/g;
-    let m;
-    while ((m = re.exec(raw)) !== null) {
-      const t = m[2].trim();
-      if (t) blocks.push({ label: m[1].trim(), text: t });
-    }
-    return { blocks, suno: sm ? sm[1].trim() : '' };
-  }
-
-  // ── RENDER ─────────────────────────────────────────────────────────────────
-  function renderLyrics(blocks) {
-    const doc = document.getElementById('lyric-doc');
-    doc.innerHTML = '';
-    blocks.forEach(b => {
-      const card = document.createElement('div');
-      card.className = 'lyric-block-card';
-      card.innerHTML = `
-        <div class="lb-label">${b.label}</div>
-        <div class="lb-text" contenteditable="true" spellcheck="false">${b.text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`;
-      doc.appendChild(card);
-    });
-  }
-
-  function renderSuno(suno) {
-    if (!suno) return;
-    document.getElementById('suno-prompt').innerHTML = suno
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/(\[[^\]]+\])/g,'<span class="tag">$1</span>')
-      .replace(/(\d{2,3})( BPM)/g,'<span class="num">$1</span>$2')
-      .replace(/\|/g,'<span style="color:#6b6862">|</span>');
-    document.getElementById('suno-panel').style.display = '';
-  }
-
+  // ── SHOW ERROR ─────────────────────────────────────────────────────────────
   function showError(msg) {
     document.getElementById('gen-status').style.display = 'none';
-    document.getElementById('empty-lyrics').style.display = 'none';
-    document.getElementById('lyric-doc').innerHTML = `
-      <div style="padding:20px;color:#c2410c;font-family:var(--font-mono);font-size:13px;background:#fff7ed;border-radius:var(--radius);border:1px solid #fed7aa;">
+    document.getElementById('empty-lyrics').style.display = '';
+    document.getElementById('empty-lyrics').innerHTML = `
+      <div style="padding:20px;color:#c2410c;font-family:var(--font-mono);font-size:13px;background:#fff7ed;border-radius:var(--radius);border:1px solid #fed7aa;text-align:left;">
         ⚠ ${msg}
       </div>`;
   }
 
   // ── GENERATE ───────────────────────────────────────────────────────────────
   async function runGenerate() {
-    const brief = readBrief();
-    if (!brief.idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
+    const idea = document.getElementById('idea').value.trim();
+    const instruments = document.getElementById('instruments').value.trim();
+    if (!idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
 
     const personalKey = getKey();
     const freeLeft = getFreeLeft();
-
     if (!personalKey && freeLeft <= 0) {
-      showError('Лимит на сегодня исчерпан. Возвращайся завтра или подключи свой API ключ (⚙ вверху).');
+      showError('Лимит на сегодня исчерпан. Возвращайся завтра или нажми ⚙ и добавь свой API ключ.');
       return;
     }
 
-    // loading
+    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, lang: selectedLang, instruments };
+
+    // UI — loading
     document.getElementById('empty-lyrics').style.display = 'none';
-    document.getElementById('lyric-doc').innerHTML = '';
+    document.getElementById('lyrics-ready').style.display = 'none';
     document.getElementById('gen-status').style.display = 'flex';
-    document.getElementById('gen-status').innerHTML = '<span class="gen-dot"></span>Генерируем текст песни…';
-    document.getElementById('suno-panel').style.display = 'none';
-    document.getElementById('regen-lyrics').style.display = 'none';
+    document.getElementById('suno-panel').style.opacity = '0.4';
+    document.getElementById('suno-ready').style.display = 'none';
+    document.getElementById('suno-empty').style.display = '';
+    document.getElementById('suno-status').style.display = 'none';
+    document.getElementById('step1-num').className = 'step-num';
+    document.getElementById('step2-num').className = 'step-num dim';
     document.getElementById('generate').disabled = true;
 
     try {
       const key = personalKey || await fetchServerKey();
-      if (!key) throw new Error('Нет API ключа. Нажми ⚙ «API ключ» вверху и добавь свой ключ.');
+      if (!key) throw new Error('Нет API ключа. Нажми ⚙ вверху и добавь свой ключ.');
 
       // Шаг 1 — текст
-      const raw = await callClaude(buildPrompt(brief), key, 2000);
-      const { blocks, suno } = parse(raw);
-      if (!blocks.length) throw new Error('Не удалось разобрать ответ. Попробуй ещё раз.');
+      const lyrics = await callClaude(buildLyricsPrompt(brief), key, 2000);
+      if (!lyrics.trim()) throw new Error('Пустой ответ от API. Попробуй ещё раз.');
 
       if (!personalKey) incUsed();
 
-      renderLyrics(blocks);
+      // Показываем текст
       document.getElementById('gen-status').style.display = 'none';
-      document.getElementById('regen-lyrics').style.display = '';
+      document.getElementById('lyrics-text').value = lyrics;
+      document.getElementById('lyrics-ready').style.display = '';
+      document.getElementById('step1-num').className = 'step-num done';
       document.getElementById('lyric-meta').textContent =
-        `${brief.genres.join('+') || 'auto'} · ${brief.mood || 'auto'} · ${brief.lang.toUpperCase()}`;
-
-      // Шаг 2 — стайл стринг
-      if (suno) {
-        renderSuno(suno);
-      } else {
-        document.getElementById('suno-panel').style.display = '';
-        document.getElementById('suno-prompt').innerHTML = '<span style="color:var(--muted);font-family:var(--font-mono);font-size:12px;">Генерируем стиль…</span>';
-        try {
-          const styleRaw = await callClaude(buildStylePrompt(brief, raw), key, 400);
-          renderSuno(styleRaw.trim());
-        } catch { /* молча игнорируем если стиль не сгенерировался */ }
-      }
-
+        `${selectedGenres.join('+') || 'auto'} · ${selectedMood || 'auto'} · ${selectedLang.toUpperCase()}`;
       updateBadge();
+
+      // Шаг 2 — стиль
+      document.getElementById('suno-panel').style.opacity = '1';
+      document.getElementById('suno-empty').style.display = 'none';
+      document.getElementById('suno-status').style.display = 'flex';
+
+      try {
+        const style = await callClaude(buildStylePrompt(lyrics, brief), key, 400);
+        const styleClean = style.trim().replace(/^["']|["']$/g, '');
+        const html = styleClean
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/\|/g,'<span style="color:var(--muted)">|</span>')
+          .replace(/(\d{2,3})( BPM)/g,'<span style="color:#f59e0b">$1</span>$2');
+        document.getElementById('suno-prompt').innerHTML = html;
+        document.getElementById('suno-status').style.display = 'none';
+        document.getElementById('suno-ready').style.display = '';
+        document.getElementById('step2-num').className = 'step-num done';
+      } catch {
+        document.getElementById('suno-status').style.display = 'none';
+        document.getElementById('suno-empty').style.display = '';
+        document.getElementById('suno-empty').textContent = 'Не удалось сгенерировать стиль. Попробуй ещё раз.';
+      }
 
     } catch (err) {
       showError(err.message || 'Что-то пошло не так. Попробуй ещё раз.');
@@ -515,20 +392,45 @@ Return ONLY the style string, nothing else, no JSON, no explanation.`;
     }
   }
 
+  // ── FIX ────────────────────────────────────────────────────────────────────
+  async function runFix() {
+    const request = document.getElementById('fix-request').value.trim();
+    const lyrics  = document.getElementById('lyrics-text').value.trim();
+    if (!request) { alert('Опиши что нужно исправить'); return; }
+    if (!lyrics)  { alert('Сначала сгенерируй текст'); return; }
+
+    const key = getKey() || await fetchServerKey();
+    if (!key) { alert('Нет API ключа'); return; }
+
+    const btn = document.getElementById('fix-btn');
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    try {
+      const fixed = await callClaude(buildFixPrompt(lyrics, request), key, 1500);
+      if (fixed.trim()) {
+        document.getElementById('lyrics-text').value = fixed.trim();
+        document.getElementById('fix-request').value = '';
+      }
+    } catch (err) {
+      alert('Ошибка: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✦ Исправить';
+    }
+  }
+
   // ── COPY ───────────────────────────────────────────────────────────────────
   function copyText(text, btn) {
-    const orig = btn.textContent;
     navigator.clipboard?.writeText(text).then(() => {
-      btn.textContent = '✓ скопировано';
+      const orig = btn.textContent;
+      btn.textContent = '✓ Скопировано';
       setTimeout(() => { btn.textContent = orig; }, 1400);
     });
   }
 
   document.getElementById('copy-lyrics').addEventListener('click', e => {
-    const text = [...document.querySelectorAll('.lyric-block-card')]
-      .map(b => `${b.querySelector('.lb-label').textContent}\n${b.querySelector('.lb-text').innerText}`)
-      .join('\n\n');
-    if (text) copyText(text, e.currentTarget);
+    copyText(document.getElementById('lyrics-text').value, e.currentTarget);
   });
 
   document.getElementById('copy-suno').addEventListener('click', e => {
@@ -537,7 +439,8 @@ Return ONLY the style string, nothing else, no JSON, no explanation.`;
 
   // ── INIT ───────────────────────────────────────────────────────────────────
   document.getElementById('generate').addEventListener('click', runGenerate);
-  document.getElementById('regen-lyrics')?.addEventListener('click', runGenerate);
+  document.getElementById('regen-btn').addEventListener('click', runGenerate);
+  document.getElementById('fix-btn').addEventListener('click', runFix);
 
   initChips();
   initSettings();
