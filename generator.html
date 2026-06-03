@@ -268,8 +268,8 @@
 
     <div class="app-title" style="margin-bottom:28px;">
       <div>
-        <h1 style="font-size:32px;">Генератор песни</h1>
-        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Опиши идею — получи текст и готовый промпт для Suno</p>
+        <h1 style="font-size:32px;" data-i18n="gen.title">Генератор песни</h1>
+        <p style="margin-top:6px; color:var(--muted); font-size:14px;" data-i18n="gen.lede">Опиши идею — получи текст и готовый промпт для Suno</p>
       </div>
       <button class="settings-trigger" id="open-settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -295,25 +295,25 @@
 
           <!-- Idea -->
           <div>
-            <div class="gen-section-title">О чём песня</div>
+            <div class="gen-section-title" data-i18n="gen.idea_label">О чём песня</div>
             <div class="idea-wrap">
-              <textarea id="idea" rows="4" placeholder="Опиши идею своими словами — тему, образ, историю, настроение…&#10;&#10;Например: ночной троллейбус, фонари, девушка с другого конца города"></textarea>
+              <textarea id="idea" rows="4" data-i18n-attr="placeholder:gen.idea_ph" placeholder="Опиши идею своими словами — тему, образ, историю, настроение…"></textarea>
             </div>
           </div>
 
           <!-- Genre -->
           <div>
-            <div class="gen-section-title">Жанр</div>
+            <div class="gen-section-title" data-i18n="gen.genre">Жанр</div>
             <div class="chip-group" data-field="genre">
               <button class="chip-btn" data-v="synth-pop">Synth-pop</button>
               <button class="chip-btn" data-v="lo-fi">Lo-fi</button>
-              <button class="chip-btn" data-v="indie rock">Инди-рок</button>
+              <button class="chip-btn" data-v="indie rock">Indie Rock</button>
               <button class="chip-btn" data-v="r&b">R&B</button>
               <button class="chip-btn" data-v="folk">Фолк</button>
-              <button class="chip-btn" data-v="pop">Поп</button>
+              <button class="chip-btn" data-v="pop">Pop</button>
               <button class="chip-btn" data-v="dark phonk">Dark phonk</button>
               <button class="chip-btn" data-v="soul">Soul</button>
-              <button class="chip-btn" data-v="chanson russe">Шансон</button>
+              <button class="chip-btn" data-v="chanson russe">Chanson</button>
               <button class="chip-btn" data-v="hyperpop">Hyperpop</button>
             </div>
           </div>
@@ -322,27 +322,27 @@
             <p class="genre-hint"><span class="dot-good">●</span> хорошо сочетается &nbsp; <span class="dot-bad">●</span> конфликт (макс. 2 жанра)</p>
           <!-- Mood -->
           <div>
-            <div class="gen-section-title">Настроение</div>
+            <div class="gen-section-title" data-i18n="gen.mood">Настроение</div>
             <div class="chip-group" data-field="mood">
               <button class="chip-btn" data-v="nostalgic">Ностальгия</button>
-              <button class="chip-btn" data-v="melancholic">Меланхолия</button>
-              <button class="chip-btn" data-v="hopeful">Надежда</button>
-              <button class="chip-btn" data-v="energetic">Энергия</button>
-              <button class="chip-btn" data-v="romantic">Романтика</button>
-              <button class="chip-btn" data-v="dark and intense">Тьма</button>
-              <button class="chip-btn" data-v="dreamy">Мечта</button>
-              <button class="chip-btn" data-v="angry">Злость</button>
+              <button class="chip-btn" data-v="melancholic">Melancholic</button>
+              <button class="chip-btn" data-v="hopeful">Hopeful</button>
+              <button class="chip-btn" data-v="energetic">Energetic</button>
+              <button class="chip-btn" data-v="romantic">Romantic</button>
+              <button class="chip-btn" data-v="dark and intense">Dark</button>
+              <button class="chip-btn" data-v="dreamy">Dreamy</button>
+              <button class="chip-btn" data-v="angry">Angry</button>
             </div>
           </div>
 
           <!-- Vocal -->
           <div>
-            <div class="gen-section-title">Вокал</div>
+            <div class="gen-section-title" data-i18n="gen.vocal">Вокал</div>
             <div class="chip-group" data-field="vocal">
               <button class="chip-btn" data-v="male tenor">Мужской</button>
-              <button class="chip-btn" data-v="female soprano">Женский</button>
-              <button class="chip-btn" data-v="male and female duet">Дуэт</button>
-              <button class="chip-btn" data-v="no vocals instrumental">Без вокала</button>
+              <button class="chip-btn" data-v="female soprano">Female vocal</button>
+              <button class="chip-btn" data-v="male and female duet">Duet M+F</button>
+              <button class="chip-btn" data-v="no vocals instrumental">No vocals</button>
             </div>
           </div>
 
@@ -351,7 +351,7 @@
           <div id="vocal-range-wrap" style="display:none;"></div>
           <!-- Language -->
           <div>
-            <div class="gen-section-title">Язык текста</div>
+            <div class="gen-section-title" data-i18n="gen.lang">Язык текста</div>
             <div class="lang-row">
               <button class="lang-card active" data-lang-pick="ru">
                 RU
@@ -387,7 +387,7 @@
               <h3>Текст песни</h3>
               <span class="chip mono" id="lyric-meta">— · — · —</span>
             </div>
-            <button class="tool-btn primary" id="regen-lyrics" style="display:none;">↻ Ещё раз</button>
+            <button class="tool-btn primary" id="regen-lyrics" style="display:none;"><span data-i18n="gen.regenerate">↻ Ещё раз</span></button>
           </div>
 
           <div id="lyrics-area">
@@ -395,8 +395,8 @@
               <div class="icon-bg">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
               </div>
-              <h4>Здесь появится текст</h4>
-              <p>Заполни форму слева и нажми «Создать песню»</p>
+              <h4 data-i18n="gen.empty_t">Здесь появится текст</h4>
+              <p data-i18n="gen.empty_s">Заполни форму слева и нажми «Создать песню»</p>
             </div>
             <div class="gen-status" id="gen-status" style="display:none;">
               <span class="gen-dot"></span>Генерируем текст…
@@ -405,10 +405,26 @@
           </div>
 
           <p class="muted" style="font-size:12px; margin-top:18px; font-family:var(--font-mono);">
-            Подсказка: после генерации можешь редактировать любую строку прямо здесь
+            <span data-i18n="gen.tip">Подсказка: после генерации можешь редактировать любую строку прямо здесь</span>
           </p>
-          <div style="margin-top:14px;">
-            <button class="btn btn-secondary" id="copy-lyrics" style="width:100%; height:44px; font-size:14px;">
+          <!-- Fix block — появляется после генерации -->
+          <div id="fix-block" style="display:none; margin-top:20px; border-top:1px solid var(--line); padding-top:18px;">
+            <div class="gen-section-title" style="margin-bottom:8px;" data-i18n="gen.fix_label">Что исправить?</div>
+            <textarea id="fix-request" class="idea-wrap" rows="3" 
+              style="width:100%; background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--radius); padding:12px 14px; font:inherit; font-size:14px; color:var(--ink); outline:none; resize:none; line-height:1.5; transition:border-color .15s;"
+              data-i18n-attr="placeholder:gen.fix_ph" placeholder="Например: во втором куплете третья строка слабая, замени на что-то про дождь и пустые улицы…"></textarea>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+              <button class="btn btn-primary" id="fix-btn" style="height:44px; font-size:14px;">
+                <span data-i18n="gen.fix_btn">✦ Исправить</span>
+              </button>
+              <button class="btn btn-secondary" id="copy-lyrics" style="height:44px; font-size:14px;">
+                Скопировать текст
+              </button>
+            </div>
+          </div>
+          <!-- Кнопка копирования до первой генерации — скрыта -->
+          <div id="copy-only-block" style="display:none; margin-top:14px;">
+            <button class="btn btn-secondary" id="copy-lyrics-2" style="width:100%; height:44px; font-size:14px;">
               Скопировать текст
             </button>
           </div>
@@ -425,7 +441,7 @@
           <div class="suno-prompt" id="suno-prompt"></div>
           <div style="margin-top:14px;">
             <button class="btn btn-secondary" id="copy-suno" style="width:100%; height:44px; font-size:14px;">
-              Скопировать стиль для Suno
+              <span data-i18n="gen.copy_suno">Скопировать стиль для Suno</span>
             </button>
           </div>
         </div>
@@ -440,7 +456,7 @@
   <div class="settings-backdrop" id="settings-backdrop"></div>
   <div class="settings-box">
     <button class="settings-close" id="close-settings">✕</button>
-    <h3>Безлимитный доступ</h3>
+    <h3 data-i18n="gen.modal_title">Безлимитный доступ</h3>
     <p class="settings-desc">
       Подключи свой Claude API ключ — и генерируй без ограничений. 
       Ключ хранится только в твоём браузере, мы его не видим.
