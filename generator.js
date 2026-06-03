@@ -177,41 +177,68 @@ ${instrLine}
 
 ABSOLUTE RULES:
 1. Do NOT mention musical instruments in lyrics text (unless provided in Key instruments)
-2. Section tags ALWAYS in English only — Suno will SING non-English tags
-3. VOCAL SETTINGS must be the very first line before any section tag
-4. ${vocalSettings.startsWith('AUTO') 
-    ? 'Choose the best voice type for this idea and write a complete vocal settings line as line 1. Format: [Voice Type] [Range e.g. G2–G4] [range description] [Vocal Style: breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]'
-    : 'Copy this vocal settings line verbatim as line 1: ' + vocalSettings}
+2. Section tags ALWAYS in English only — Suno will SING non-English tags as lyrics
+3. VOCAL SETTINGS block must be the very FIRST line before any section tag
+4. ${vocalSettings.startsWith('AUTO')
+    ? 'Choose the best voice type for this song and write a complete vocal settings line as line 1. Format: [Voice Type] [Range e.g. G2–G4] [range description] [Vocal Style: per-section delivery e.g. breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]'
+    : 'Copy this vocal settings line VERBATIM as line 1: ' + vocalSettings}
+
+VOCAL SETTINGS FORMAT (if choosing automatically):
+[Voice Type] [Range] [range character description] [Vocal Style: technique per section]
+Example: [Male Vocal] [Baritone G2–G4] [rich velvet tone, slightly thinning above G3] [Vocal Style: breathy intimate verse, chest push pre-chorus, crescendo belting chorus, falsetto bridge, hummed outro]
+FORBIDDEN Vocal Style formats: [Vocal Style: warm, emotional] — must name SECTIONS not just adjectives
+
+SECTION TAGS — every tag must include delivery:
+[Intro — description] / [Verse 1 — delivery] / [Pre-Chorus — delivery]
+[Chorus — delivery] / [Verse 2 — delivery] / [Bridge — delivery]
+[Final Chorus — delivery] / [Outro — delivery]
+Optional: [Spoken Word — character] / [Instrumental Break — description]
 
 RHYME RULES:
-- FORBIDDEN Russian: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт
-- FORBIDDEN English: love–above | heart–start | home–alone
-- Use quality rhymes: ночь/дочь → замени на: сезон/телефон/поклон | свет/ответ/портрет
+FORBIDDEN Russian: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт
+FORBIDDEN English: love–above | heart–start | home–alone
+Quality Russian rhymes: огонь→сезон/телефон/поклон | свет→ответ/портрет/расцвет | сон→закон/балкон/вагон | тень→день/сирень | звезда→всегда/тишина/страна
+Quality English rhymes: night→light/bright/flight | fire→higher/desire/inspire | dream→stream/gleam/esteem
+Max 1 verb-verb rhyme per verse. Rhyme density ≥ 0.42.
 
 IMAGE RULES:
-- Each line = ONE clear image, not two half-ideas joined by "но/и/а"
+- Each line = ONE clear image — not two half-ideas joined by "но/и/а"
 - BAD: "Я кричу, но ты не помнишь" | GOOD: "Я кричу — волна уносит"
-- CONCRETE: не "грусть" а "мёртвый омут" / не "боль" а "соль на губах"
-- FORBIDDEN clichés: звёзды светят / сердце бьётся / слёзы льются / душа поёт
+- CONCRETE details: не "грусть" а "мёртвый омут" / не "боль" а "соль на губах"
+- FORBIDDEN clichés: звёзды светят / сердце бьётся / слёзы льются / душа поёт / мечта зовёт
 
-RHYTHM: Lines in same section match syllable count ±1. Never end on weak syllable (-ишь,-ешь,-же,-бы,-ли)
+RHYTHM: Syllables RU 9–11 per line, EN 8–10. Lines in same section ±1. First Chorus line ≤8 syllables. Never end on weak syllable (-ишь,-ешь,-же,-бы,-ли). Stress on strong beats.
+
+HIT FORMULA:
+- Hook phrase repeated ≥3 times
+- Verse 2 carries NEW meaning — not a repeat of Verse 1
+- Bridge contrasts in rhythm or perspective
+- Chorus appears before 0:50 mark
+
+PRE-OUTPUT CHECK:
+✓ Vocal settings is line 1
+✓ All section tags in English with delivery hint
+✓ No forbidden rhymes
+✓ No cliché images
+✓ Verse 2 has new angle
+✓ Hook repeated ≥3 times
 
 STRUCTURE (3:00–3:30):
-[Intro] 1-2 lines
-[Verse 1] 4 lines
-[Pre-Chorus] 2 lines
-[Chorus] 4 lines — HOOK, must be singable, ≤8 syllables first line
-[Verse 2] 4 lines — NEW angle
-[Pre-Chorus] 2 lines
-[Chorus] 4 lines
-[Bridge] 3 lines — contrast in rhythm or perspective
-[Final Chorus] 4 lines
-[Outro] 1-2 lines
+[Intro — ...] 1-2 lines
+[Verse 1 — ...] 4 lines
+[Pre-Chorus — ...] 2 lines
+[Chorus — ...] 4 lines — HOOK, first line ≤8 syllables
+[Verse 2 — ...] 4 lines — NEW angle
+[Pre-Chorus — ...] 2 lines
+[Chorus — ...] 4 lines
+[Bridge — ...] 3 lines — contrast
+[Final Chorus — ...] 4 lines
+[Outro — ...] 1-2 lines
 
 OUTPUT — return ONLY the lyrics, no JSON, no explanation:
 [Vocal Settings line here]
 
-[Intro]
+[Intro — ...]
 ...
 
 [Verse 1]
@@ -243,31 +270,45 @@ OUTPUT — return ONLY the lyrics, no JSON, no explanation:
   }
 
   function buildStylePrompt(lyrics, brief) {
-    const genreStr = brief.genres.length > 0 ? brief.genres.join(' + ') : 'pop';
-    return `You are a professional Suno AI music producer.
+    const genreStr = brief.genres.length > 0 ? brief.genres.join(' x ') : 'pop';
+    const hookLine = lyrics.split('\n').find(l => l && !l.startsWith('[')) || '';
+    return `You are a professional Suno AI music producer. Generate a precise Suno v5 style string.
 
-Generate a Suno v5 style string for this song.
-
-Genre: ${genreStr}
+Genre mix: ${genreStr}
 Mood: ${brief.mood || 'emotional'}
 Vocal: ${brief.vocal || 'male vocal'}
-Lyrics (for reference):
-${lyrics.slice(0, 300)}
+Hook reference: ${hookLine}
 
-Style string format:
-<genre> <BPM> BPM <vocal-descriptor> <2-3 sound descriptors> | <finish tags>
+FORMAT: <genre-mix> <BPM> BPM <timbral preset> <2-3 sound descriptors> <2-3 hook words> <AI Music Lab finish>
 Target: 180-220 characters
 
-BPM: Pop/R&B/Indie 96-115 | Rock/Synth-pop 110-132 | Electronic 120-138 | Folk/Lo-fi 72-96 | Dark Phonk 138-150
+GENRE MIX — always hybrid:
+sad pop → cinematic indie-folk x lo-fi x dream-pop
+rock ballad → post-grunge x cinematic strings x alt-rock
+dance pop → disco-funk x synth-pop x future bass
+chill → organic house x lo-fi jazz x ambient pop
+russian pop → 70s soft rock x modern indie-folk x chamber pop warmth
+dark phonk → Memphis phonk x cold wave x dark industrial
 
-Finish tags — pick one:
+BPM GRID: 60 64 68 72 76 80 84 88 92 96 100 105 110 115 120 126 132 138 144 150
+Folk/Lo-fi 72-96 | Pop/R&B 96-115 | Rock/Synth-pop 110-132 | Electronic 120-138 | Phonk 138-150
+
+TIMBRAL PRESETS:
+Male deep: worn velvet baritone / smoky tenement tenor / gravelled storyteller voice
+Male young: raw street tenor / close-mic bedroom voice / cracked-edge earnest vocal
+Female gentle: crystalline mezzo / breath-first folk soprano / intimate whisper alto
+Female powerful: arena-stage alto belt / emotional floodgate mezzo / gospel-tinged contralto
+Duet: worn velvet baritone x crystalline mezzo
+
+AI MUSIC LAB FINISH — pick one:
 EMOTIONAL: | deep emotional warmth | close-mic intimacy | analog texture | no generic AI polish | human breath imperfection
-ENERGETIC: | raw energy | organic punch | wide stereo depth | no safe AI sound
-ATMOSPHERIC: | cinematic space | subtle tape noise | no clean digital polish | air and silence matter
+ENERGETIC: | raw energy no overproduce | organic punch | wide stereo depth | no safe AI sound | unexpected texture
+ATMOSPHERIC: | cinematic space | subtle tape noise | unhurried tempo feel | no clean digital polish | air and silence matter
 
-Negative tags: Folk/acoustic → no-808 | Clean Pop/Indie/Lo-fi → no-808 no-clap
+NEGATIVE TAGS: Ballad/acoustic → no-808 | Folk → no-drums | Clean Pop/Indie/Lo-fi → no-808 no-clap
+FORBIDDEN WORDS: catchy | viral | radio 2025 | tiktok | sidechain kick | radio-ready master
+NEVER include "Russian" or "English"
 
-NEVER include language names like "Russian" or "English".
 Return ONLY the style string, nothing else.`;
   }
 
