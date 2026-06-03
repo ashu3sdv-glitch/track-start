@@ -220,6 +220,13 @@
   border-bottom: 1px solid var(--line);
 }
 .output-head h3 { font-size: 16px; font-weight: 500; }
+
+.chip-btn.good { border-color: #10b981; color: #10b981; }
+.chip-btn.conflict { border-color: #fca5a5; color: #dc2626; opacity: 0.45; cursor: not-allowed; }
+.genre-hint { font-size: 11px; font-family: var(--font-mono); color: var(--muted); margin-top: 4px; }
+.genre-hint .dot-good { color: #10b981; } 
+.genre-hint .dot-bad { color: #dc2626; }
+#vocal-range-wrap { transition: all .2s; }
 </style>
 </head>
 <body data-screen-label="Track Start — Generator">
@@ -298,7 +305,7 @@
           <div>
             <div class="gen-section-title">Жанр</div>
             <div class="chip-group" data-field="genre">
-              <button class="chip-btn active" data-v="synth-pop">Synth-pop</button>
+              <button class="chip-btn" data-v="synth-pop">Synth-pop</button>
               <button class="chip-btn" data-v="lo-fi">Lo-fi</button>
               <button class="chip-btn" data-v="indie rock">Инди-рок</button>
               <button class="chip-btn" data-v="r&b">R&B</button>
@@ -311,11 +318,13 @@
             </div>
           </div>
 
+
+            <p class="genre-hint"><span class="dot-good">●</span> хорошо сочетается &nbsp; <span class="dot-bad">●</span> конфликт (макс. 2 жанра)</p>
           <!-- Mood -->
           <div>
             <div class="gen-section-title">Настроение</div>
             <div class="chip-group" data-field="mood">
-              <button class="chip-btn active" data-v="nostalgic">Ностальгия</button>
+              <button class="chip-btn" data-v="nostalgic">Ностальгия</button>
               <button class="chip-btn" data-v="melancholic">Меланхолия</button>
               <button class="chip-btn" data-v="hopeful">Надежда</button>
               <button class="chip-btn" data-v="energetic">Энергия</button>
@@ -330,13 +339,16 @@
           <div>
             <div class="gen-section-title">Вокал</div>
             <div class="chip-group" data-field="vocal">
-              <button class="chip-btn active" data-v="male tenor">Мужской</button>
+              <button class="chip-btn" data-v="male tenor">Мужской</button>
               <button class="chip-btn" data-v="female soprano">Женский</button>
               <button class="chip-btn" data-v="male and female duet">Дуэт</button>
               <button class="chip-btn" data-v="no vocals instrumental">Без вокала</button>
             </div>
           </div>
 
+
+          <!-- Vocal range (показывается динамически) -->
+          <div id="vocal-range-wrap" style="display:none;"></div>
           <!-- Language -->
           <div>
             <div class="gen-section-title">Язык текста</div>
@@ -375,10 +387,7 @@
               <h3>Текст песни</h3>
               <span class="chip mono" id="lyric-meta">— · — · —</span>
             </div>
-            <div class="row" style="gap:6px;">
-              <button class="tool-btn" id="copy-lyrics">Скопировать</button>
-              <button class="tool-btn primary" id="regen-lyrics" style="display:none;">↻ Ещё раз</button>
-            </div>
+            <button class="tool-btn primary" id="regen-lyrics" style="display:none;">↻ Ещё раз</button>
           </div>
 
           <div id="lyrics-area">
@@ -398,6 +407,11 @@
           <p class="muted" style="font-size:12px; margin-top:18px; font-family:var(--font-mono);">
             Подсказка: после генерации можешь редактировать любую строку прямо здесь
           </p>
+          <div style="margin-top:14px;">
+            <button class="btn btn-secondary" id="copy-lyrics" style="width:100%; height:44px; font-size:14px;">
+              Скопировать текст
+            </button>
+          </div>
         </div>
 
         <!-- Suno prompt panel -->
@@ -407,9 +421,13 @@
               <h3>Промпт для Suno v5</h3>
               <span class="chip chip-accent">copy → suno.com</span>
             </div>
-            <button class="tool-btn primary" id="copy-suno">Скопировать</button>
           </div>
           <div class="suno-prompt" id="suno-prompt"></div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-secondary" id="copy-suno" style="width:100%; height:44px; font-size:14px;">
+              Скопировать стиль для Suno
+            </button>
+          </div>
         </div>
 
       </section>
