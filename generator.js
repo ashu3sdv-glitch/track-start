@@ -149,7 +149,8 @@
   // ── VOCAL SETTINGS ─────────────────────────────────────────────────────────
   function buildVocalSettings() {
     const v = selectedVocal;
-    if (!v || v === 'No vocals') return '[Instrumental] [No Vocals]';
+    if (!v) return 'AUTO — choose the best vocal type for this song idea and write the full vocal settings line';
+    if (v === 'No vocals') return '[Instrumental] [No Vocals]';
     if (v === 'Choir') return '[Choir] [SATB] [Vocal Style: full choral arrangement, epic, layered harmonies]';
     if (v === 'Duet M+F') return '[Duet] [Male Baritone G2–G4 | Female Mezzo A3–F5] [warm dark baritone | rich mezzo chest] [Vocal Style: solo intimate verse, unison pre-chorus tension, harmony chorus swell, call-response bridge, fading duet outro]';
     if (v === 'Male vocal') return '[Male Vocal] [Baritone G2–G4] [rich velvet tone in chest, slightly thinning above G3, warm dark centre] [Vocal Style: breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]';
@@ -178,7 +179,9 @@ ABSOLUTE RULES:
 1. Do NOT mention musical instruments in lyrics text (unless provided in Key instruments)
 2. Section tags ALWAYS in English only — Suno will SING non-English tags
 3. VOCAL SETTINGS must be the very first line before any section tag
-4. Copy this vocal settings line verbatim as line 1: ${vocalSettings}
+4. ${vocalSettings.startsWith('AUTO') 
+    ? 'Choose the best voice type for this idea and write a complete vocal settings line as line 1. Format: [Voice Type] [Range e.g. G2–G4] [range description] [Vocal Style: breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]'
+    : 'Copy this vocal settings line verbatim as line 1: ' + vocalSettings}
 
 RHYME RULES:
 - FORBIDDEN Russian: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт
@@ -206,7 +209,7 @@ STRUCTURE (3:00–3:30):
 [Outro] 1-2 lines
 
 OUTPUT — return ONLY the lyrics, no JSON, no explanation:
-${vocalSettings}
+[Vocal Settings line here]
 
 [Intro]
 ...
