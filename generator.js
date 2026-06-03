@@ -2,7 +2,7 @@
 
 (function () {
 
-  const FREE_DAILY = 100;
+  const FREE_DAILY = 3;
   function todayStr() { return new Date().toISOString().slice(0, 10); }
   function getUsedToday() {
     if (localStorage.getItem('ts_date') !== todayStr()) {
