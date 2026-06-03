@@ -8,247 +8,82 @@
 <link rel="stylesheet" href="styles-app.css" />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 <style>
-/* ── Generator v3 extra styles ── */
-.gen-form {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.gen-section-title {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.chip-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-.chip-btn {
-  padding: 8px 14px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 13px;
-  font-family: var(--font-mono);
-  color: var(--ink-2);
-  cursor: pointer;
-  transition: all .15s var(--ease);
-  line-height: 1;
-}
-.chip-btn:hover { border-color: var(--ink); color: var(--ink); }
-.chip-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-
-.lang-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-}
-.lang-card {
-  padding: 10px 8px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-family: var(--font-mono);
-  color: var(--ink-2);
-  cursor: pointer;
-  transition: all .15s var(--ease);
-  text-align: center;
-}
-.lang-card:hover { border-color: var(--ink); }
-.lang-card.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-.lang-card .lang-sub { font-size: 10px; opacity: 0.6; display: block; margin-top: 2px; }
-
-.idea-wrap { position: relative; }
-.idea-wrap textarea {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
-  padding: 14px;
-  font: inherit;
-  font-size: 15px;
-  color: var(--ink);
-  outline: none;
-  resize: none;
-  min-height: 100px;
-  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
-  line-height: 1.5;
-}
-.idea-wrap textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(139,92,246,0.12);
-}
-.idea-wrap textarea::placeholder { color: var(--muted-2); }
-
-.gen-btn {
-  width: 100%;
-  height: 52px;
-  background: var(--ink);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-pill);
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition: all .2s var(--ease);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.gen-btn:hover { background: #000; transform: translateY(-1px); box-shadow: var(--shadow-lg); }
-.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.gen-btn.pro { background: var(--accent); }
-.gen-btn.pro:hover { background: var(--accent-ink); }
-
-/* Free counter badge */
-.free-badge {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--muted);
-}
-.free-badge.pro-active { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
-.free-badge.limit { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
-.free-dots { display: flex; gap: 4px; }
-.free-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent);
-}
-.free-dot.used { background: var(--line-strong); }
-
-/* Settings gear */
-.settings-trigger {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 6px 0;
-  border: none;
-  background: none;
-  transition: color .15s;
-}
-.settings-trigger:hover { color: var(--ink); }
-.settings-trigger svg { width: 14px; height: 14px; }
-
-/* Settings modal */
-.settings-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-}
-.settings-modal.open { display: flex; }
-.settings-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(20,19,15,0.4);
-  backdrop-filter: blur(4px);
-}
-.settings-box {
-  position: relative;
-  z-index: 1;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  width: 420px;
-  max-width: calc(100vw - 40px);
-  box-shadow: var(--shadow-lg);
-}
-.settings-box h3 { font-size: 18px; margin-bottom: 6px; }
-.settings-box .settings-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
-.settings-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.settings-input-row input {
-  flex: 1;
-  padding: 10px 12px;
-  background: var(--bg-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--ink);
-  outline: none;
-}
-.settings-input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.12); }
-.settings-hint { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
-.settings-hint a { color: var(--accent-ink); text-decoration: underline; }
-.settings-close {
-  position: absolute; top: 16px; right: 16px;
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--bg-2); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--muted); font-size: 16px;
-  transition: background .15s;
-}
-.settings-close:hover { background: var(--bg-3); color: var(--ink); }
-
-/* Output area */
-.output-panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-}
-.output-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-.output-head h3 { font-size: 16px; font-weight: 500; }
-
-.chip-btn.good { border-color: #10b981; color: #10b981; }
-.chip-btn.conflict { border-color: #fca5a5; color: #dc2626; opacity: 0.45; cursor: not-allowed; }
-.genre-hint { font-size: 11px; font-family: var(--font-mono); color: var(--muted); margin-top: 4px; }
-.genre-hint .dot-good { color: #10b981; } 
-.genre-hint .dot-bad { color: #dc2626; }
-#vocal-range-wrap { transition: all .2s; }
+.gen-form { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:28px; display:flex; flex-direction:column; gap:18px; }
+.gen-label { font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; display:block; }
+.gen-hint  { font-family:var(--font-mono); font-size:11px; color:var(--muted-2); margin-top:4px; }
+.chip-group { display:flex; flex-wrap:wrap; gap:6px; }
+.chip-btn { padding:7px 13px; background:var(--bg-2); border:1px solid var(--line); border-radius:999px; font-size:12.5px; font-family:var(--font-mono); color:var(--ink-2); cursor:pointer; transition:all .15s var(--ease); }
+.chip-btn:hover { border-color:var(--ink); color:var(--ink); }
+.chip-btn.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+.chip-btn.good { border-color:#10b981; color:#10b981; }
+.chip-btn.conflict { opacity:.4; cursor:not-allowed; }
+.lang-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.lang-card { padding:10px 8px; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); font-size:13px; font-family:var(--font-mono); color:var(--ink-2); cursor:pointer; transition:all .15s var(--ease); text-align:center; }
+.lang-card:hover { border-color:var(--ink); }
+.lang-card.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+.lang-card .sub { font-size:10px; opacity:.6; display:block; margin-top:2px; }
+.idea-field { width:100%; background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--radius); padding:13px 14px; font:inherit; font-size:15px; color:var(--ink); outline:none; resize:none; line-height:1.55; transition:border-color .15s var(--ease),box-shadow .15s var(--ease); }
+.idea-field:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(139,92,246,.12); }
+.idea-field::placeholder { color:var(--muted-2); }
+.gen-btn { width:100%; height:52px; background:var(--ink); color:#fff; border:none; border-radius:var(--radius-pill); font-size:15px; font-weight:500; letter-spacing:-.01em; cursor:pointer; transition:all .2s var(--ease); display:flex; align-items:center; justify-content:center; gap:8px; }
+.gen-btn:hover { background:#000; transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+.gen-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+.gen-btn.pro { background:var(--accent); }
+.gen-btn.pro:hover { background:var(--accent-ink); }
+.free-badge { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); font-family:var(--font-mono); font-size:12px; color:var(--muted); }
+.free-badge.pro-active { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
+.free-badge.limit { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
+.free-dots { display:flex; gap:4px; }
+.free-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+.free-dot.used { background:var(--line-strong); }
+.settings-trigger { display:flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:12px; color:var(--muted); cursor:pointer; padding:6px 0; border:none; background:none; transition:color .15s; }
+.settings-trigger:hover { color:var(--ink); }
+.settings-trigger svg { width:14px; height:14px; }
+.settings-modal { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; }
+.settings-modal.open { display:flex; }
+.settings-backdrop { position:absolute; inset:0; background:rgba(20,19,15,.4); backdrop-filter:blur(4px); }
+.settings-box { position:relative; z-index:1; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:32px; width:420px; max-width:calc(100vw - 40px); box-shadow:var(--shadow-lg); }
+.settings-box h3 { font-size:18px; margin-bottom:6px; }
+.settings-desc { font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+.settings-input-row { display:flex; gap:8px; margin-bottom:10px; }
+.settings-input-row input { flex:1; padding:10px 12px; background:var(--bg-2); border:1px solid var(--line-strong); border-radius:var(--radius); font-family:var(--font-mono); font-size:13px; color:var(--ink); outline:none; }
+.settings-input-row input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(139,92,246,.12); }
+.settings-hint { font-size:12px; color:var(--muted); font-family:var(--font-mono); }
+.settings-hint a { color:var(--accent-ink); text-decoration:underline; }
+.settings-close { position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:var(--bg-2); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:16px; transition:background .15s; }
+.settings-close:hover { background:var(--bg-3); color:var(--ink); }
+.output-panel { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:28px; }
+.output-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+.output-head h3 { font-size:16px; font-weight:500; }
+.step-head { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+.step-num { width:26px; height:26px; border-radius:50%; background:var(--ink); color:#fff; font-family:var(--font-mono); font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.step-num.done { background:var(--ok,#10b981); }
+.step-num.dim { background:var(--bg-3); color:var(--muted); }
+.step-title { font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.lyrics-textarea { width:100%; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px; font-family:var(--font-mono); font-size:13px; color:var(--ink); outline:none; resize:vertical; line-height:1.8; min-height:200px; transition:border-color .15s var(--ease); }
+.lyrics-textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(139,92,246,.1); }
+.fix-row { display:flex; gap:8px; align-items:flex-start; }
+.fix-row textarea { flex:1; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px; font:inherit; font-size:13px; color:var(--ink); outline:none; resize:none; line-height:1.5; transition:border-color .15s; }
+.fix-row textarea:focus { border-color:var(--accent); }
 </style>
 </head>
-<body data-screen-label="Track Start — Generator">
+<body>
 
 <header class="site-header">
   <div class="container">
     <nav class="nav">
       <a href="index.html" class="brand">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
-          <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/><path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
         <span class="brand-name">Track <em>Start</em></span>
       </a>
       <div class="nav-links">
-        <a class="nav-link" href="index.html">Главная</a>
-        <a class="nav-link active" href="generator.html">Генератор</a>
-        <a class="nav-link" href="guide.html">Гид по релизу</a>
+        <a class="nav-link" href="index.html" data-i18n="nav.home">Главная</a>
+        <a class="nav-link active" href="generator.html" data-i18n="nav.generator">Генератор</a>
+        <a class="nav-link" href="guide.html" data-i18n="nav.guide">Гид по релизу</a>
       </div>
       <div class="row" style="gap:10px;">
         <div class="lang-switch" data-lang-switch>
-          <button class="lang-switch-btn" type="button">
+          <button class="lang-switch-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
             <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             <span class="lang-switch-current">RU</span>
             <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
@@ -258,6 +93,10 @@
             <button class="lang-opt" data-lang="en" role="option"><span class="flag">EN</span><span class="name">English</span><span class="sub">EN</span><svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg></button>
           </div>
         </div>
+        <button class="settings-trigger" id="open-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="gen.api_key">API ключ</span>
+        </button>
       </div>
     </nav>
   </div>
@@ -271,178 +110,178 @@
         <h1 style="font-size:32px;" data-i18n="gen.title">Генератор песни</h1>
         <p style="margin-top:6px; color:var(--muted); font-size:14px;" data-i18n="gen.lede">Опиши идею — получи текст и готовый промпт для Suno</p>
       </div>
-      <button class="settings-trigger" id="open-settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        API ключ
-      </button>
     </div>
 
     <div class="app-grid">
 
-      <!-- ── FORM ── -->
+      <!-- ── ФОРМА ── -->
       <aside>
         <div class="gen-form">
 
-          <!-- Free counter -->
+          <!-- Счётчик -->
           <div class="free-badge" id="free-badge">
             <span id="free-text">Бесплатных генераций сегодня: 3 из 3</span>
             <div class="free-dots" id="free-dots">
-              <div class="free-dot"></div>
-              <div class="free-dot"></div>
-              <div class="free-dot"></div>
+              <div class="free-dot"></div><div class="free-dot"></div><div class="free-dot"></div>
             </div>
           </div>
 
-          <!-- Idea -->
+          <!-- Идея -->
           <div>
-            <div class="gen-section-title" data-i18n="gen.idea_label">О чём песня</div>
-            <div class="idea-wrap">
-              <textarea id="idea" rows="4" data-i18n-attr="placeholder:gen.idea_ph" placeholder="Опиши идею своими словами — тему, образ, историю, настроение…"></textarea>
+            <label class="gen-label" data-i18n="gen.idea_label">О чём песня</label>
+            <textarea id="idea" class="idea-field" rows="4"
+              data-i18n-attr="placeholder:gen.idea_ph"
+              placeholder="Опиши идею своими словами…"></textarea>
+          </div>
+
+          <!-- Жанр -->
+          <div>
+            <label class="gen-label" data-i18n="gen.genre">Жанр <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional">(необязательно, макс. 2)</span></label>
+            <p class="gen-hint" data-i18n="gen.genre_hint">Не знаешь? Оставь пустым — AI выберет сам</p>
+            <div class="chip-group" style="margin-top:8px;" data-field="genre">
+              <button class="chip-btn" data-v="Pop">Pop</button>
+              <button class="chip-btn" data-v="Synth-pop">Synth-pop</button>
+              <button class="chip-btn" data-v="Lo-fi">Lo-fi</button>
+              <button class="chip-btn" data-v="Indie Rock">Indie Rock</button>
+              <button class="chip-btn" data-v="R&B">R&amp;B</button>
+              <button class="chip-btn" data-v="Folk">Folk</button>
+              <button class="chip-btn" data-v="Soul">Soul</button>
+              <button class="chip-btn" data-v="Dark Phonk">Dark Phonk</button>
+              <button class="chip-btn" data-v="Electronic">Electronic</button>
+              <button class="chip-btn" data-v="Hip-Hop">Hip-Hop</button>
+              <button class="chip-btn" data-v="Chanson">Chanson</button>
+              <button class="chip-btn" data-v="Cinematic">Cinematic</button>
             </div>
           </div>
 
-          <!-- Genre -->
+          <!-- Настроение -->
           <div>
-            <div class="gen-section-title" data-i18n="gen.genre">Жанр</div>
-            <div class="chip-group" data-field="genre">
-              <button class="chip-btn" data-v="synth-pop">Synth-pop</button>
-              <button class="chip-btn" data-v="lo-fi">Lo-fi</button>
-              <button class="chip-btn" data-v="indie rock">Indie Rock</button>
-              <button class="chip-btn" data-v="r&b">R&B</button>
-              <button class="chip-btn" data-v="folk">Фолк</button>
-              <button class="chip-btn" data-v="pop">Pop</button>
-              <button class="chip-btn" data-v="dark phonk">Dark phonk</button>
-              <button class="chip-btn" data-v="soul">Soul</button>
-              <button class="chip-btn" data-v="chanson russe">Chanson</button>
-              <button class="chip-btn" data-v="hyperpop">Hyperpop</button>
-            </div>
-          </div>
-
-
-            <p class="genre-hint"><span class="dot-good">●</span> хорошо сочетается &nbsp; <span class="dot-bad">●</span> конфликт (макс. 2 жанра)</p>
-          <!-- Mood -->
-          <div>
-            <div class="gen-section-title" data-i18n="gen.mood">Настроение</div>
+            <label class="gen-label" data-i18n="gen.mood">Mood <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <div class="chip-group" data-field="mood">
-              <button class="chip-btn" data-v="nostalgic">Ностальгия</button>
-              <button class="chip-btn" data-v="melancholic">Melancholic</button>
-              <button class="chip-btn" data-v="hopeful">Hopeful</button>
-              <button class="chip-btn" data-v="energetic">Energetic</button>
-              <button class="chip-btn" data-v="romantic">Romantic</button>
-              <button class="chip-btn" data-v="dark and intense">Dark</button>
-              <button class="chip-btn" data-v="dreamy">Dreamy</button>
-              <button class="chip-btn" data-v="angry">Angry</button>
+              <button class="chip-btn" data-v="Nostalgic">Nostalgic</button>
+              <button class="chip-btn" data-v="Melancholic">Melancholic</button>
+              <button class="chip-btn" data-v="Romantic">Romantic</button>
+              <button class="chip-btn" data-v="Energetic">Energetic</button>
+              <button class="chip-btn" data-v="Hopeful">Hopeful</button>
+              <button class="chip-btn" data-v="Dark">Dark</button>
+              <button class="chip-btn" data-v="Dreamy">Dreamy</button>
+              <button class="chip-btn" data-v="Angry">Angry</button>
+              <button class="chip-btn" data-v="Peaceful">Peaceful</button>
+              <button class="chip-btn" data-v="Euphoric">Euphoric</button>
             </div>
           </div>
 
-          <!-- Vocal -->
+          <!-- Голос -->
           <div>
-            <div class="gen-section-title" data-i18n="gen.vocal">Вокал</div>
+            <label class="gen-label" data-i18n="gen.vocal">Voice <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <div class="chip-group" data-field="vocal">
-              <button class="chip-btn" data-v="male tenor">Мужской</button>
-              <button class="chip-btn" data-v="female soprano">Female vocal</button>
-              <button class="chip-btn" data-v="male and female duet">Duet M+F</button>
-              <button class="chip-btn" data-v="no vocals instrumental">No vocals</button>
+              <button class="chip-btn" data-v="Male vocal">Male vocal</button>
+              <button class="chip-btn" data-v="Female vocal">Female vocal</button>
+              <button class="chip-btn" data-v="Duet M+F">Duet M+F</button>
+              <button class="chip-btn" data-v="Choir">Choir</button>
+              <button class="chip-btn" data-v="No vocals">No vocals</button>
             </div>
           </div>
 
-
-          <!-- Vocal range (показывается динамически) -->
-          <div id="vocal-range-wrap" style="display:none;"></div>
-          <!-- Language -->
+          <!-- Инструменты -->
           <div>
-            <div class="gen-section-title" data-i18n="gen.lang">Язык текста</div>
+            <label class="gen-label" data-i18n="gen.instruments">Instruments <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
+            <input type="text" id="instruments" class="idea-field" style="height:44px; min-height:unset; resize:none;"
+              data-i18n-attr="placeholder:gen.instruments_ph"
+              placeholder="accordion, duduk, piano, guitar…" />
+            <p class="gen-hint" data-i18n="gen.instruments_hint">1–2 инструмента — оптимально</p>
+          </div>
+
+          <!-- Язык -->
+          <div>
+            <label class="gen-label" data-i18n="gen.lang">Язык текста</label>
             <div class="lang-row">
-              <button class="lang-card active" data-lang-pick="ru">
-                RU
-                <span class="lang-sub">Русский</span>
-              </button>
-              <button class="lang-card" data-lang-pick="en">
-                EN
-                <span class="lang-sub">English</span>
-              </button>
-              <button class="lang-card" data-lang-pick="mix">
-                MIX
-                <span class="lang-sub">RU + EN</span>
-              </button>
+              <button class="lang-card active" data-lang-pick="ru">RU<span class="sub">Русский</span></button>
+              <button class="lang-card" data-lang-pick="en">EN<span class="sub">English</span></button>
+              <button class="lang-card" data-lang-pick="mix">MIX<span class="sub">RU + EN</span></button>
             </div>
           </div>
 
-          <!-- Generate button -->
+          <!-- Кнопка -->
           <button class="gen-btn" id="generate">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Создать песню
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span data-i18n="gen.go">Создать песню</span>
           </button>
 
         </div>
       </aside>
 
-      <!-- ── OUTPUT ── -->
+      <!-- ── РЕЗУЛЬТАТ ── -->
       <section class="app-main">
 
-        <!-- Lyrics panel -->
-        <div class="output-panel" id="lyrics-panel">
-          <div class="output-head">
-            <div class="row" style="gap:10px;">
-              <h3>Текст песни</h3>
-              <span class="chip mono" id="lyric-meta">— · — · —</span>
-            </div>
-            <button class="tool-btn primary" id="regen-lyrics" style="display:none;"><span data-i18n="gen.regenerate">↻ Ещё раз</span></button>
+        <!-- Шаг 1 — Текст -->
+        <div class="output-panel">
+
+          <div class="step-head">
+            <div class="step-num" id="step1-num">1</div>
+            <div class="step-title" data-i18n="gen.step1">Текст песни</div>
           </div>
 
-          <div id="lyrics-area">
-            <div class="empty-state" id="empty-lyrics">
-              <div class="icon-bg">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          <!-- Пустое состояние -->
+          <div class="empty-state" id="empty-lyrics">
+            <div class="icon-bg">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </div>
+            <h4 data-i18n="gen.empty_t">Здесь появится текст</h4>
+            <p data-i18n="gen.empty_s">Заполни форму слева и нажми «Создать песню»</p>
+          </div>
+
+          <!-- Лоадер -->
+          <div class="gen-status" id="gen-status" style="display:none;">
+            <span class="gen-dot"></span><span data-i18n="gen.generating">Генерируем текст…</span>
+          </div>
+
+          <!-- Текст — редактируемое поле -->
+          <div id="lyrics-ready" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="chip mono" id="lyric-meta">— · —</span>
+              <button class="tool-btn" id="regen-btn" data-i18n="gen.regenerate">↻ Заново</button>
+            </div>
+            <textarea id="lyrics-text" class="lyrics-textarea" rows="18" spellcheck="false"></textarea>
+
+            <!-- Fix row -->
+            <div style="margin-top:14px;">
+              <label class="gen-label" data-i18n="gen.fix_label">Что исправить?</label>
+              <div class="fix-row">
+                <textarea id="fix-request" rows="2"
+                  data-i18n-attr="placeholder:gen.fix_ph"
+                  placeholder="Например: во втором куплете третья строка слабая…"></textarea>
+                <button class="btn btn-primary btn-sm" id="fix-btn" style="flex-shrink:0; height:auto; padding:10px 16px;" data-i18n="gen.fix_btn">✦ Исправить</button>
               </div>
-              <h4 data-i18n="gen.empty_t">Здесь появится текст</h4>
-              <p data-i18n="gen.empty_s">Заполни форму слева и нажми «Создать песню»</p>
             </div>
-            <div class="gen-status" id="gen-status" style="display:none;">
-              <span class="gen-dot"></span>Генерируем текст…
-            </div>
-            <div class="lyric-doc" id="lyric-doc"></div>
-          </div>
 
-          <p class="muted" style="font-size:12px; margin-top:18px; font-family:var(--font-mono);">
-            <span data-i18n="gen.tip">Подсказка: после генерации можешь редактировать любую строку прямо здесь</span>
-          </p>
-          <!-- Fix block — появляется после генерации -->
-          <div id="fix-block" style="display:none; margin-top:20px; border-top:1px solid var(--line); padding-top:18px;">
-            <div class="gen-section-title" style="margin-bottom:8px;" data-i18n="gen.fix_label">Что исправить?</div>
-            <textarea id="fix-request" class="idea-wrap" rows="3" 
-              style="width:100%; background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--radius); padding:12px 14px; font:inherit; font-size:14px; color:var(--ink); outline:none; resize:none; line-height:1.5; transition:border-color .15s;"
-              data-i18n-attr="placeholder:gen.fix_ph" placeholder="Например: во втором куплете третья строка слабая, замени на что-то про дождь и пустые улицы…"></textarea>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
-              <button class="btn btn-primary" id="fix-btn" style="height:44px; font-size:14px;">
-                <span data-i18n="gen.fix_btn">✦ Исправить</span>
-              </button>
-              <button class="btn btn-secondary" id="copy-lyrics" style="height:44px; font-size:14px;">
-                Скопировать текст
-              </button>
-            </div>
-          </div>
-          <!-- Кнопка копирования до первой генерации — скрыта -->
-          <div id="copy-only-block" style="display:none; margin-top:14px;">
-            <button class="btn btn-secondary" id="copy-lyrics-2" style="width:100%; height:44px; font-size:14px;">
-              Скопировать текст
-            </button>
+            <!-- Кнопка копирования -->
+            <button class="btn btn-secondary" id="copy-lyrics" style="width:100%; height:44px; margin-top:12px; font-size:14px;" data-i18n="gen.copy_lyrics">Скопировать текст</button>
           </div>
         </div>
 
-        <!-- Suno prompt panel -->
-        <div class="output-panel" id="suno-panel" style="display:none;">
-          <div class="output-head">
-            <div class="row" style="gap:10px;">
-              <h3>Промпт для Suno v5</h3>
-              <span class="chip chip-accent">copy → suno.com</span>
-            </div>
+        <!-- Шаг 2 — Suno Style String -->
+        <div class="output-panel" id="suno-panel" style="opacity:.4; transition:opacity .3s;">
+
+          <div class="step-head">
+            <div class="step-num dim" id="step2-num">2</div>
+            <div class="step-title" data-i18n="gen.step2">Строка стиля для Suno</div>
           </div>
-          <div class="suno-prompt" id="suno-prompt"></div>
-          <div style="margin-top:14px;">
-            <button class="btn btn-secondary" id="copy-suno" style="width:100%; height:44px; font-size:14px;">
-              <span data-i18n="gen.copy_suno">Скопировать стиль для Suno</span>
-            </button>
+
+          <!-- Лоадер стиля -->
+          <div class="gen-status" id="suno-status" style="display:none;">
+            <span class="gen-dot"></span><span data-i18n="gen.gen_style">Генерируем стиль…</span>
+          </div>
+
+          <!-- Пустое состояние шага 2 -->
+          <div id="suno-empty" style="font-family:var(--font-mono); font-size:12px; color:var(--muted-2); padding:8px 0;">
+            <span data-i18n="gen.suno_hint">Появится автоматически после генерации текста</span>
+          </div>
+
+          <!-- Промпт -->
+          <div id="suno-ready" style="display:none;">
+            <div class="suno-prompt" id="suno-prompt"></div>
+            <button class="btn btn-secondary" id="copy-suno" style="width:100%; height:44px; margin-top:14px; font-size:14px;" data-i18n="gen.copy_suno">Скопировать стиль для Suno</button>
           </div>
         </div>
 
@@ -451,23 +290,18 @@
   </div>
 </main>
 
-<!-- ── SETTINGS MODAL ── -->
+<!-- Settings Modal -->
 <div class="settings-modal" id="settings-modal">
   <div class="settings-backdrop" id="settings-backdrop"></div>
   <div class="settings-box">
     <button class="settings-close" id="close-settings">✕</button>
     <h3 data-i18n="gen.modal_title">Безлимитный доступ</h3>
-    <p class="settings-desc">
-      Подключи свой Claude API ключ — и генерируй без ограничений. 
-      Ключ хранится только в твоём браузере, мы его не видим.
-    </p>
+    <p class="settings-desc" data-i18n="gen.modal_desc">Подключи свой Claude API ключ — и генерируй без ограничений. Ключ хранится только в твоём браузере.</p>
     <div class="settings-input-row">
       <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
-      <button class="btn btn-primary btn-sm" id="api-key-save">Сохранить</button>
+      <button class="btn btn-primary btn-sm" id="api-key-save" data-i18n="gen.save">Сохранить</button>
     </div>
-    <p class="settings-hint">
-      Нет ключа? <a href="https://console.anthropic.com" target="_blank">Получить на console.anthropic.com →</a>
-    </p>
+    <p class="settings-hint"><span data-i18n="gen.key_hint">Нет ключа?</span> <a href="https://console.anthropic.com" target="_blank">console.anthropic.com →</a></p>
     <div id="key-status" style="margin-top:14px; font-family:var(--font-mono); font-size:12px; display:none;"></div>
   </div>
 </div>
