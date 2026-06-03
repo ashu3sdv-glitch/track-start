@@ -6,8 +6,41 @@
 <title>Track Start — Гид по релизу</title>
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="styles-home.css" />
-<!-- styles-app.css не нужен на guide — только generator использует app-grid/output-panel -->
+<link rel="stylesheet" href="styles-app.css" />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+<style>
+/* ── Distributor table ─────────────────────────────────────── */
+.dist-filters { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 18px; }
+
+.dist-table-wrap { overflow-x:auto; border-radius:var(--radius-lg); border:1px solid var(--line); }
+.dist-table { width:100%; border-collapse:collapse; font-size:14px; }
+.dist-table thead tr { background:var(--bg-2); border-bottom:1px solid var(--line); }
+.dist-table th { padding:12px 16px; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:500; text-align:left; white-space:nowrap; }
+.dist-table td { padding:14px 16px; border-bottom:1px solid var(--line); vertical-align:middle; }
+.dist-row:last-child td { border-bottom:none; }
+.dist-row:hover td { background:var(--bg-2); }
+
+.dist-name { display:flex; align-items:center; gap:10px; font-weight:500; white-space:nowrap; }
+.dist-logo { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
+
+.dist-tag-row { display:flex; flex-wrap:wrap; gap:4px; }
+.dist-tag { padding:3px 8px; background:var(--bg-2); border:1px solid var(--line); border-radius:999px; font-family:var(--font-mono); font-size:11px; color:var(--muted); white-space:nowrap; }
+
+/* ── KB cards ──────────────────────────────────────────────── */
+.kb-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:2px; margin-top:auto; }
+.kb-list li { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:14px; color:var(--ink-2); }
+.kb-list li:last-child { border-bottom:none; }
+.kb-list .arrow { color:var(--muted-2); font-size:12px; }
+
+/* ── Reveal fix — показываем сразу если JS не сработал ─────── */
+.reveal { opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity:1; transform:translateY(0); }
+
+@media(max-width:768px) {
+  .dist-table th:nth-child(4), .dist-table td:nth-child(4) { display:none; }
+}
+</style>
 </head>
 <body data-screen-label="Track Start — Release Guide">
 
@@ -232,5 +265,16 @@
 <script src="i18n.js"></script>
 <script src="logos.js"></script>
 <script src="app.js"></script>
+
+<script>
+// Fallback: если IntersectionObserver не отработал — показываем всё
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.querySelectorAll('.reveal').forEach(function(el) {
+      el.classList.add('in');
+    });
+  }, 100);
+});
+</script>
 </body>
 </html>
