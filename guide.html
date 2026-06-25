@@ -33,12 +33,70 @@
 .kb-list li:last-child { border-bottom:none; }
 .kb-list .arrow { color:var(--muted-2); font-size:12px; }
 
+/* ── Practical guide blocks ───────────────────────────────── */
+.guide-band { padding: 24px 0; }
+.guide-block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.guide-block + .guide-block { margin-top: 18px; }
+.guide-block h2 { font-size: 28px; margin-bottom: 10px; }
+.guide-block h3 { font-size: 17px; margin-bottom: 8px; }
+.guide-block p { color: var(--ink-2); line-height: 1.65; }
+.guide-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+.guide-mini {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--bg-2);
+}
+.guide-mini .num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.guide-checklist { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
+.guide-checklist li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+.guide-checklist li::before {
+  content: "✓";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.guide-note {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #fff7ed;
+  color: #92400e;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 /* ── Reveal fix — показываем сразу если JS не сработал ─────── */
 .reveal { opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease; }
 .reveal.in { opacity:1; transform:translateY(0); }
 
 @media(max-width:768px) {
   .dist-table th:nth-child(4), .dist-table td:nth-child(4) { display:none; }
+  .guide-columns { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -104,7 +162,7 @@
   </section>
 
   <!-- ============ KB CARDS ============ -->
-  <section class="section" id="legal" style="padding-top: 32px;">
+  <section class="section" id="overview" style="padding-top: 32px;">
     <div class="container">
       <div class="kb-grid">
         <div class="card kb-card reveal">
@@ -118,7 +176,7 @@
             <li><span data-i18n="kb.legal_e">Соавторство и доли</span><span class="arrow">→</span></li>
           </ul>
         </div>
-        <div class="card kb-card reveal" id="artwork">
+        <div class="card kb-card reveal">
           <div class="kb-head"><span class="kb-tag" data-i18n="kb.design_tag">02 · Оформление</span><span class="chip">5</span></div>
           <h3 data-i18n="kb.design_title">Обложка и метаданные</h3>
           <ul class="kb-list">
@@ -129,7 +187,7 @@
             <li><span data-i18n="kb.design_e">Цензура и explicit-метки</span><span class="arrow">→</span></li>
           </ul>
         </div>
-        <div class="card kb-card reveal" id="meta">
+        <div class="card kb-card reveal">
           <div class="kb-head"><span class="kb-tag" data-i18n="kb.dist_tag">03 · Дистрибьюция</span><span class="chip">5</span></div>
           <h3 data-i18n="kb.dist_title">Площадки и выплаты</h3>
           <ul class="kb-list">
@@ -144,13 +202,101 @@
     </div>
   </section>
 
+  <!-- ============ PRACTICAL RELEASE GUIDE ============ -->
+  <section class="guide-band">
+    <div class="container">
+      <div class="guide-block reveal">
+        <div class="eyebrow"><span class="dot"></span><span>route</span></div>
+        <h2>Маршрут релиза без паники</h2>
+        <p>Перед загрузкой трека проверь не только сам аудиофайл. Для стримингов важны права, название, обложка, метаданные, дата релиза и понимание, куда пойдут выплаты.</p>
+        <div class="guide-columns">
+          <div class="guide-mini">
+            <div class="num">01</div>
+            <h3>Подготовь трек</h3>
+            <p>Финальный WAV/FLAC, без клиппинга, с понятным названием файла и версией мастеринга.</p>
+          </div>
+          <div class="guide-mini">
+            <div class="num">02</div>
+            <h3>Собери данные</h3>
+            <p>Артист, название, авторы, explicit-метка, жанр, язык, текст песни и дата релиза.</p>
+          </div>
+          <div class="guide-mini">
+            <div class="num">03</div>
+            <h3>Загрузи заранее</h3>
+            <p>Лучше отправлять релиз за 2-4 недели: останется время на модерацию и исправления.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-block reveal" id="legal">
+        <div class="eyebrow"><span class="dot"></span><span>rights</span></div>
+        <h2>Права и документы</h2>
+        <p>Минимальная задача перед релизом — понимать, кто написал текст, кто сделал музыку, кто владеет мастер-записью и можно ли легально использовать все элементы трека.</p>
+        <ul class="guide-checklist">
+          <li>Если есть соавторы, зафиксируй доли письменно: хотя бы простым соглашением в переписке или документе.</li>
+          <li>Не используй чужие сэмплы, лупы и минусы без лицензии. Даже короткий узнаваемый фрагмент может заблокировать релиз.</li>
+          <li>Если музыка создана с AI-сервисом, проверь условия конкретного сервиса и тарифа на момент релиза.</li>
+          <li>Сохрани исходники: текст, промпт, проект, аудиофайлы, обложку и переписку с участниками.</li>
+        </ul>
+        <div class="guide-note">Это не юридическая консультация. Для спорных прав, сэмплов, каверов и коммерческих договоров лучше обратиться к профильному юристу.</div>
+      </div>
+
+      <div class="guide-block reveal" id="artwork">
+        <div class="eyebrow"><span class="dot"></span><span>artwork</span></div>
+        <h2>Обложка</h2>
+        <p>Обложка должна выглядеть как самостоятельный релиз, а не случайная картинка. Площадки часто отклоняют изображения с лишними логотипами, QR-кодами, контактами, водяными знаками и обещаниями вроде “new hit”.</p>
+        <ul class="guide-checklist">
+          <li>Используй квадратный формат, лучше 3000×3000 px, RGB/sRGB, JPG или PNG.</li>
+          <li>Не ставь чужие бренды, фото людей без разрешения, логотипы стримингов и социальные иконки.</li>
+          <li>Название и артист на обложке должны совпадать с метаданными, если ты их пишешь на изображении.</li>
+          <li>Проверь, читается ли обложка в маленьком размере: 100×100 px часто важнее большого превью.</li>
+        </ul>
+      </div>
+
+      <div class="guide-block reveal" id="meta">
+        <div class="eyebrow"><span class="dot"></span><span>metadata</span></div>
+        <h2>Метаданные</h2>
+        <p>Метаданные — это то, как релиз попадёт в каталоги. Ошибки в имени артиста, версии трека или explicit-метке сложнее исправлять после публикации.</p>
+        <div class="guide-columns">
+          <div class="guide-mini">
+            <div class="num">artist</div>
+            <h3>Имя артиста</h3>
+            <p>Пиши одинаково на всех релизах. Не меняй регистр, пробелы и символы без причины.</p>
+          </div>
+          <div class="guide-mini">
+            <div class="num">track</div>
+            <h3>Название</h3>
+            <p>Не добавляй жанры, рекламу и лишние скобки. Версии вроде Remix или Acoustic указывай аккуратно.</p>
+          </div>
+          <div class="guide-mini">
+            <div class="num">flags</div>
+            <h3>Explicit</h3>
+            <p>Если есть мат или взрослые темы, ставь explicit. Неверная отметка может привести к снятию релиза.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-block reveal" id="pitch">
+        <div class="eyebrow"><span class="dot"></span><span>pitch</span></div>
+        <h2>Питчинг и запуск</h2>
+        <p>Релиз не заканчивается загрузкой файла. Нужны короткое описание, дата, ссылки, визуалы и понятный план первых дней после публикации.</p>
+        <ul class="guide-checklist">
+          <li>Выбери дату релиза с запасом: редакционный питчинг и pre-save требуют времени.</li>
+          <li>Подготовь 2-3 предложения о треке: история, настроение, жанр, для какой аудитории он подходит.</li>
+          <li>Собери короткие видео/обложки для Reels, Shorts, TikTok и постов до даты релиза.</li>
+          <li>После выхода проверь ссылки на площадках, карточку артиста, текст песни и правильность имени.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ DISTRIBUTOR COMPARE ============ -->
   <section class="section" id="compare" style="padding-top: 24px;">
     <div class="container">
       <div class="section-head reveal">
         <div class="eyebrow"><span class="dot"></span><span>compare</span></div>
         <h2 data-i18n="guide.dist_title">Сравнение площадок</h2>
-        <p class="lede" data-i18n="guide.dist_lede">Цены и условия — на май 2026. Фильтруй по тому, что важно тебе.</p>
+        <p class="lede" data-i18n="guide.dist_lede">Ориентиры по условиям дистрибьюторов. Перед оплатой проверь актуальные цены и правила на сайте площадки.</p>
       </div>
 
       <div class="dist-filters">
@@ -236,7 +382,7 @@
   </section>
 
   <!-- ============ FINAL CTA reusing the same component ============ -->
-  <section class="section" id="pitch">
+  <section class="section" id="start">
     <div class="container">
       <div class="final-cta reveal">
         <div class="eyebrow" style="margin: 0 auto 16px; color: rgba(255,255,255,0.6);"><span class="dot" style="background: var(--accent-2);"></span><span>start</span></div>
