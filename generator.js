@@ -2,7 +2,7 @@
 
 (function () {
 
-  const FREE_DAILY = 10;
+  const FREE_DAILY = 5;
   function todayStr() { return new Date().toISOString().slice(0, 10); }
   function getUsedToday() {
     if (localStorage.getItem('ts_date') !== todayStr()) {
@@ -38,9 +38,9 @@
       const left = getFreeLeft();
       badge.className = left > 0 ? 'free-badge' : 'free-badge limit';
       text.textContent = left > 0
-        ? `Бесплатных генераций сегодня: ${left} из ${FREE_DAILY}`
+        ? `Бесплатных генераций: ${left} из ${FREE_DAILY}`
         : 'Лимит исчерпан — возвращайся завтра или подключи ключ ⚙';
-      dots.innerHTML = [0,1,2].map(i =>
+      dots.innerHTML = Array.from({ length: FREE_DAILY }, (_, i) =>
         `<div class="free-dot${i >= left ? ' used' : ''}"></div>`).join('');
       btn.className = 'gen-btn';
     }
@@ -272,7 +272,7 @@ OUTPUT — return ONLY the lyrics, no JSON, no explanation:
   function buildStylePrompt(lyrics, brief) {
     const genreStr = brief.genres.length > 0 ? brief.genres.join(' x ') : 'pop';
     const hookLine = lyrics.split('\n').find(l => l && !l.startsWith('[')) || '';
-    return `You are a professional Suno AI music producer. Generate a precise Suno v5 style string.
+    return `You are a professional Suno AI music producer. Generate a precise Suno style string.
 
 Genre mix: ${genreStr}
 Mood: ${brief.mood || 'emotional'}
