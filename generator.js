@@ -329,6 +329,8 @@ RULES:
   }
 
   // ── CLAUDE CALL ────────────────────────────────────────────────────────────
+  const CLAUDE_MODEL = 'claude-sonnet-4-5-20250929';
+
   async function callClaude(prompt, key, maxTokens = 2000) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -339,7 +341,7 @@ RULES:
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: maxTokens,
         messages: [{ role: 'user', content: prompt }]
       })
