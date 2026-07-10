@@ -2,25 +2,18 @@
 
 (function () {
 
-  const FREE_DAILY = 5;
-  function todayStr() { return new Date().toISOString().slice(0, 10); }
-  function getUsedToday() {
-    if (localStorage.getItem('ts_date') !== todayStr()) {
-      localStorage.setItem('ts_date', todayStr());
-      localStorage.setItem('ts_used', '0');
-    }
-    return parseInt(localStorage.getItem('ts_used') || '0', 10);
+  const FREE_TOTAL = 5; // всего на пробу, без ежедневного сброса
+  function getUsed() {
+    // миграция со старого суточного счётчика
+    const legacy = parseInt(localStorage.getItem('ts_used') || '0', 10);
+    const total = parseInt(localStorage.getItem('ts_free_used') || '0', 10);
+    return Math.max(total, legacy);
   }
-  function incUsed() { localStorage.setItem('ts_used', getUsedToday() + 1); }
-  function getFreeLeft() { return Math.max(0, FREE_DAILY - getUsedToday()); }
+  function incUsed() { localStorage.setItem('ts_free_used', getUsed() + 1); }
+  function getFreeLeft() { return Math.max(0, FREE_TOTAL - getUsed()); }
   function getKey() { return localStorage.getItem('ts_key') || ''; }
   function saveKey(k) { localStorage.setItem('ts_key', k.trim()); }
   function isPro() { return !!getKey(); }
-
-  async function fetchServerKey() {
-    try { const r = await fetch('/api/key'); const d = await r.json(); return d.key || ''; }
-    catch { return ''; }
-  }
 
   // ── BADGE ──────────────────────────────────────────────────────────────────
   function updateBadge() {
@@ -38,9 +31,9 @@
       const left = getFreeLeft();
       badge.className = left > 0 ? 'free-badge' : 'free-badge limit';
       text.textContent = left > 0
-        ? `Бесплатных генераций: ${left} из ${FREE_DAILY}`
-        : 'Лимит исчерпан — возвращайся завтра или подключи ключ ⚙';
-      dots.innerHTML = Array.from({ length: FREE_DAILY }, (_, i) =>
+        ? `Бесплатных генераций: ${left} из ${FREE_TOTAL}`
+        : 'Бесплатные генерации закончились — подключи тариф или добавь свой ключ ⚙';
+      dots.innerHTML = Array.from({ length: FREE_TOTAL }, (_, i) =>
         `<div class="free-dot${i >= left ? ' used' : ''}"></div>`).join('');
       btn.className = 'gen-btn';
     }
@@ -353,6 +346,26 @@ RULES:
     return (await res.json()).content?.[0]?.text || '';
   }
 
+  // Серверная генерация — ключ хранится только на сервере
+  async function callServer(prompt, maxTokens = 2000) {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, maxTokens })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Ошибка сервера: ${res.status}`);
+    return data.text || '';
+  }
+
+  // Единая точка: свой ключ → напрямую в API, иначе — через сервер
+  function ask(prompt, maxTokens) {
+    const personalKey = getKey();
+    return personalKey
+      ? callClaude(prompt, personalKey, maxTokens)
+      : callServer(prompt, maxTokens);
+  }
+
   // ── SHOW ERROR ─────────────────────────────────────────────────────────────
   function showError(msg) {
     document.getElementById('gen-status').style.display = 'none';
@@ -372,7 +385,7 @@ RULES:
     const personalKey = getKey();
     const freeLeft = getFreeLeft();
     if (!personalKey && freeLeft <= 0) {
-      showError('Лимит на сегодня исчерпан. Возвращайся завтра или нажми ⚙ и добавь свой API ключ.');
+      showError('Бесплатные генерации закончились. Подключи тариф на главной странице или нажми ⚙ и добавь свой API ключ.');
       return;
     }
 
@@ -391,11 +404,8 @@ RULES:
     document.getElementById('generate').disabled = true;
 
     try {
-      const key = personalKey || await fetchServerKey();
-      if (!key) throw new Error('Нет API ключа. Нажми ⚙ вверху и добавь свой ключ.');
-
       // Шаг 1 — текст
-      const lyrics = await callClaude(buildLyricsPrompt(brief), key, 2000);
+      const lyrics = await ask(buildLyricsPrompt(brief), 2000);
       if (!lyrics.trim()) throw new Error('Пустой ответ от API. Попробуй ещё раз.');
 
       if (!personalKey) incUsed();
@@ -415,7 +425,7 @@ RULES:
       document.getElementById('suno-status').style.display = 'flex';
 
       try {
-        const style = await callClaude(buildStylePrompt(lyrics, brief), key, 400);
+        const style = await ask(buildStylePrompt(lyrics, brief), 400);
         const styleClean = style.trim().replace(/^["']|["']$/g, '');
         const html = styleClean
           .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -445,15 +455,12 @@ RULES:
     if (!request) { alert('Опиши что нужно исправить'); return; }
     if (!lyrics)  { alert('Сначала сгенерируй текст'); return; }
 
-    const key = getKey() || await fetchServerKey();
-    if (!key) { alert('Нет API ключа'); return; }
-
     const btn = document.getElementById('fix-btn');
     btn.disabled = true;
     btn.textContent = '…';
 
     try {
-      const fixed = await callClaude(buildFixPrompt(lyrics, request), key, 1500);
+      const fixed = await ask(buildFixPrompt(lyrics, request), 1500);
       if (fixed.trim()) {
         document.getElementById('lyrics-text').value = fixed.trim();
         document.getElementById('fix-request').value = '';
