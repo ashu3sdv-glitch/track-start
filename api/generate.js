@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const key = process.env.VITE_CLAUDE_KEY || process.env.CLAUDE_API_KEY;
+  const key = process.env.ANTHROPIC_API_KEY || process.env.VITE_CLAUDE_KEY || process.env.CLAUDE_API_KEY;
   if (!key) {
     res.status(500).json({ error: 'Сервер не настроен: нет API ключа' });
     return;
