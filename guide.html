@@ -32,6 +32,9 @@
 .kb-list li { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:14px; color:var(--ink-2); }
 .kb-list li:last-child { border-bottom:none; }
 .kb-list .arrow { color:var(--muted-2); font-size:12px; }
+.kb-list a { display:flex; justify-content:space-between; align-items:center; width:100%; color:inherit; text-decoration:none; }
+.kb-list a:hover { color:var(--ink); }
+.kb-list a:hover .arrow { color:var(--ink); }
 
 /* ── Practical guide blocks ───────────────────────────────── */
 .guide-band { padding: 24px 0; }
@@ -169,7 +172,7 @@
           <div class="kb-head"><span class="kb-tag" data-i18n="kb.legal_tag">01 · Юр. часть</span><span class="chip">5</span></div>
           <h3 data-i18n="kb.legal_title">Права и документы</h3>
           <ul class="kb-list">
-            <li><span data-i18n="kb.legal_a">Авторские права на музыку</span><span class="arrow">→</span></li>
+            <li><a href="/articles/prava-na-ai-muzyku.html"><span data-i18n="kb.legal_a">Авторские права на музыку</span><span class="arrow">→</span></a></li>
             <li><span data-i18n="kb.legal_b">Регистрация в РАО / ВОИС</span><span class="arrow">→</span></li>
             <li><span data-i18n="kb.legal_c">Договоры с дистрибьюторами</span><span class="arrow">→</span></li>
             <li><span data-i18n="kb.legal_d">Сэмплы и чужие лупы — что можно</span><span class="arrow">→</span></li>
