@@ -100,6 +100,7 @@
   let selectedGenres = [];
   let selectedMood   = '';
   let selectedVocal  = '';
+  let selectedEra    = '';
   let selectedLang   = 'ru';
 
   function getGenreStatus(g, selected) {
@@ -152,6 +153,15 @@
           b.classList.toggle('active', b.getAttribute('data-v') === selectedVocal));
       });
     });
+    // Era — single toggle
+    document.querySelector('[data-field="era"]')?.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.getAttribute('data-v');
+        selectedEra = selectedEra === v ? '' : v;
+        document.querySelectorAll('[data-field="era"] .chip-btn').forEach(b =>
+          b.classList.toggle('active', b.getAttribute('data-v') === selectedEra));
+      });
+    });
     // Lang
     document.querySelectorAll('[data-lang-pick]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -167,7 +177,9 @@
     const v = selectedVocal;
     if (!v) return 'AUTO — choose the best vocal type for this song idea and write the full vocal settings line';
     if (v === 'No vocals') return '[Instrumental] [No Vocals]';
-    if (v === 'Choir') return '[Choir] [SATB] [Vocal Style: full choral arrangement, epic, layered harmonies]';
+    if (v === 'Choir') return '[Choir] [SATB] [cathedral swell, layered blend] [Vocal Style: soft unison verse, building layers pre-chorus, full choral swell chorus, a cappella bridge, fading hum outro]';
+    if (v === "Children's choir") return "[Children's Choir] [unison C4–C5] [pure bright timbre, innocent clarity] [Vocal Style: gentle unison verse, lifting swell chorus, hushed bridge, fading outro]";
+    if (v === 'Harmony vocals') return '[Harmony Vocals] [lead + stacked thirds] [tight layered blend around lead voice] [Vocal Style: solo intimate verse, doubled pre-chorus, full harmony stack chorus, call-response bridge, layered fade outro]';
     if (v === 'Duet M+F') return '[Duet] [Male Baritone G2–G4 | Female Mezzo A3–F5] [warm dark baritone | rich mezzo chest] [Vocal Style: solo intimate verse, unison pre-chorus tension, harmony chorus swell, call-response bridge, fading duet outro]';
     if (v === 'Male vocal') return '[Male Vocal] [Baritone G2–G4] [rich velvet tone in chest, slightly thinning above G3, warm dark centre] [Vocal Style: breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]';
     if (v === 'Female vocal') return '[Female Vocal] [Mezzo A3–F5] [rich chest voice in lower octave, soft and thin above E4, warm mid-range power] [Vocal Style: breathy intimate verse, vocal cry pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]';
@@ -181,14 +193,16 @@
     const moodStr  = brief.mood  || 'choose best mood for this idea';
     const vocalSettings = buildVocalSettings();
     const instrLine = brief.instruments ? `Key instruments: ${brief.instruments}` : '';
+    const eraLine = brief.era ? `Era: ${brief.era} — vocabulary, imagery and phrasing must match this era (see ERA RULES)` : '';
 
-    return `You are a professional hitmaker lyricist. Your lyrics must be publication-ready, emotionally powerful, rhythmically precise.
+    return `You are a professional hitmaker lyricist with deep knowledge of song craft. Your lyrics must be publication-ready, emotionally powerful, rhythmically precise.
 
 SONG BRIEF:
 - Idea: ${brief.idea}
 - Genre: ${genreStr}
 - Mood: ${moodStr}
 - Language: ${langMap[brief.lang] || 'Russian'} — write ALL lyrics STRICTLY in this language only
+${eraLine}
 ${instrLine}
 
 ABSOLUTE RULES:
@@ -196,13 +210,32 @@ ABSOLUTE RULES:
 2. Section tags ALWAYS in English only — Suno will SING non-English tags as lyrics
 3. VOCAL SETTINGS block must be the very FIRST line before any section tag
 4. ${vocalSettings.startsWith('AUTO')
-    ? 'Choose the best voice type for this song and write a complete vocal settings line as line 1. Format: [Voice Type] [Range e.g. G2–G4] [range description] [Vocal Style: per-section delivery e.g. breathy intimate verse, rising intensity pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]'
+    ? 'Choose the best voice type for this song and write a complete vocal settings line as line 1. Format: [Voice Type] [Range e.g. G2–G4] [range description] [Vocal Style: per-section delivery]'
     : 'Copy this vocal settings line VERBATIM as line 1: ' + vocalSettings}
 
 VOCAL SETTINGS FORMAT (if choosing automatically):
 [Voice Type] [Range] [range character description] [Vocal Style: technique per section]
-Example: [Male Vocal] [Baritone G2–G4] [rich velvet tone, slightly thinning above G3] [Vocal Style: breathy intimate verse, chest push pre-chorus, crescendo belting chorus, falsetto bridge, hummed outro]
-FORBIDDEN Vocal Style formats: [Vocal Style: warm, emotional] — must name SECTIONS not just adjectives
+RANGE DESCRIPTION — always add after the note range, describing how the voice behaves:
+- Bass E2–E4: resonant chest depth, loses body above D3, powerful low-mid
+- Baritone G2–G4: rich velvet tone in chest, slightly thinning above G3, warm dark centre
+- Tenor C3–B4: bright chest below A3, ringing passaggio, soaring head above
+- Contralto E3–E5: deep smoky chest, full-bodied middle, silky upper register
+- Mezzo A3–F5: rich chest voice in lower octave, soft and thin above E4, warm mid-range power
+- Soprano C4–A5: light crystalline tone, full bloom above A4, effortless top register
+Range ALWAYS with notes (G2–G4), never "low" or "high".
+
+VOCAL STYLE — FORBIDDEN formats (adjectives only, no sections):
+FORBIDDEN: [Vocal Style: crystalline, dreamy] / [Vocal Style: warm, emotional] / [Vocal Style: powerful, belting]
+REQUIRED — name delivery technique FOR EACH SECTION (minimum 3 sections):
+CORRECT: [Vocal Style: breathy intimate verse, vocal cry pre-chorus, crescendo belting chorus, falsetto bridge, fading subtone outro]
+Per-section delivery menu:
+- Verse: breathy intimate / close-mic whisper / parlando storytelling / intimate chest
+- Pre-Chorus: vocal cry / rising intensity / speech-to-song / chest push
+- Chorus: crescendo belting / full chest power / arena projection / soaring head voice
+- Bridge: falsetto / subtone ghost / spoken word / raw exposed vocal
+- Outro: fading subtone / dying fall / whispered echo / hummed close
+PRE-OUTPUT CHECK: does my Vocal Style contain the words "verse", "chorus", "bridge"? If NO — rewrite it.
+For duets tag each section: [Verse — Male], [Chorus — Duet], [Bridge — Male + Female]
 
 SECTION TAGS — every tag must include delivery:
 [Intro — description] / [Verse 1 — delivery] / [Pre-Chorus — delivery]
@@ -210,34 +243,98 @@ SECTION TAGS — every tag must include delivery:
 [Final Chorus — delivery] / [Outro — delivery]
 Optional: [Spoken Word — character] / [Instrumental Break — description]
 
-RHYME RULES:
-FORBIDDEN Russian: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт
-FORBIDDEN English: love–above | heart–start | home–alone
-Quality Russian rhymes: огонь→сезон/телефон/поклон | свет→ответ/портрет/расцвет | сон→закон/балкон/вагон | тень→день/сирень | звезда→всегда/тишина/страна
-Quality English rhymes: night→light/bright/flight | fire→higher/desire/inspire | dream→stream/gleam/esteem
-Max 1 verb-verb rhyme per verse. Rhyme density ≥ 0.42.
+RHYME DICTIONARIES:
+RUSSIAN — FORBIDDEN: любовь–кровь | ночь–дочь | друг–вдруг | огонь–горизонт | волна–волна
+RUSSIAN QUALITY RHYMES:
+- огонь: миллион, сезон, закон, патрон, телефон, туман, обман, план, титан
+- звезда: всегда, вода, сюда, тогда, навсегда, страна, война, тишина, цена
+- мечта: красота, суета, темнота, пустота, чистота, высота
+- сон: закон, телефон, поклон, район, сезон, вагон, балкон
+- тень: день, лень, сирень, олень, ступень
+- свет: ответ, портрет, привет, билет, поэт, расцвет, предмет
+- мир: эфир, командир, кумир, сувенир, ампир
+- жизнь: держись, борись, явись, откройся
+- вера: сфера, атмосфера, карьера, вечера
+- свобода: природа, погода, народа, похода, года
+- волна: весна, луна, стена, она, страна, тишина
+- земля: семья, моя, друзья, края, судья
+- сердце: солнце, конец, отец, наконец, певец, венец
+- дом: кругом, хором, объёмом, знакомо
+- глаз: сейчас, враз, приказ, показ, рассказ
+ENGLISH — FORBIDDEN: love–above | heart–start | home–alone
+ENGLISH QUALITY RHYMES:
+- night: light, right, bright, fight, flight, height, sight, midnight
+- fire: higher, wire, admire, desire, inspire, require, entire
+- dream: seem, team, scream, stream, gleam, beam, esteem, redeem
+- time: rhyme, climb, prime, chime, sublime, lifetime
+- sky: high, fly, try, cry, deny, reply, goodbye
+- pain: rain, gain, chain, brain, train, insane, explain, remain
+- song: long, wrong, strong, belong, prolong, lifelong
+- star: are, far, scar, guitar, avatar, superstar
+- moon: soon, tune, balloon, monsoon, afternoon
+Max 1 verb-verb rhyme per verse. Rhyme density ≥ 0.42. All rhymes from dictionaries or same quality level — none lazy.
 
-IMAGE RULES:
+WRITING TECHNIQUES:
+1. Open vowels А О Э on strong beats (not Ы Й Щ)
+2. Alliteration in chorus — repeated consonants create momentum
+3. Internal rhymes within lines for density
+4. Dynamic phrase pattern: long–short–long OR short–long–short
+5. Bounce words with stress on beat 1: кайф, рай, бой, старт
+
+IMAGE RULES (apply to every verse):
 - Each line = ONE clear image — not two half-ideas joined by "но/и/а"
 - BAD: "Я кричу, но ты не помнишь" | GOOD: "Я кричу — волна уносит"
-- CONCRETE details: не "грусть" а "мёртвый омут" / не "боль" а "соль на губах"
-- FORBIDDEN clichés: звёзды светят / сердце бьётся / слёзы льются / душа поёт / мечта зовёт
+- Images must be CONCRETE: не "грусть" а "мёртвый омут" / не "боль" а "соль на губах"
+- Every verse must have ONE anchor image that carries the whole section
+- Avoid abstract nouns as subject: не "любовь ушла", а "ты закрыла дверь"
+- FORBIDDEN clichés: звёзды светят / сердце бьётся / слёзы льются / ночь темна / душа поёт / мечта зовёт / любовь как сон
+- Replace clichés with SPECIFIC physical detail: запах, звук, движение, температура
 
-RHYTHM: Syllables RU 9–11 per line, EN 8–10. Lines in same section ±1. First Chorus line ≤8 syllables. Never end on weak syllable (-ишь,-ешь,-же,-бы,-ли). Stress on strong beats.
+RHYTHM RULES (check every line):
+- Word stress must land on strong beats — no weak endings stressed
+- Lines in same section must match syllable count ±1
+- Never end a line on a gerund (-я, -ясь) or weak particle (же, бы, ли) or weak syllable (-ишь, -ешь)
+- First Chorus line ≤8 syllables
+
+SYLLABLES BY GENRE:
+ROCK: 6-8 max, strong accent beat 1, AABB, short punchy phrases
+FOLK/CHANSON: 8-10, narrative storytelling, ABAB
+HIP-HOP/DARK PHONK: dense 12-16, internal rhymes, multi-syllabic
+R&B/SOUL: smooth 8-10, repetition, intimate sensory
+POP/SYNTH-POP: exactly 8-10, AABB, maximum catchiness
+ELECTRONIC/LO-FI: minimalist 5-8, hypnotic repetition
+CINEMATIC: long 10-13, rich imagery
+INDIE ROCK: 8-10, ABAB or free, introspective quirky
+BPM GUIDE (Max Martin): 60-76 BPM → 6-7 syllables | 80-100 → 7-9 | 105-120 → 8-10 | 126-150 → 9-12
 
 HIT FORMULA:
-- Hook phrase repeated ≥3 times
+- Song length: ~3:24 optimal, Intro max 10 seconds
+- Chorus must appear before the 0:50 mark
+- Hook: 3-note earworm — simple + singable + familiar-but-new, repeated ≥3 times
+- Max 3-4 unique melodies
 - Verse 2 carries NEW meaning — not a repeat of Verse 1
 - Bridge contrasts in rhythm or perspective
-- Chorus appears before 0:50 mark
 
-PRE-OUTPUT CHECK:
-✓ Vocal settings is line 1
-✓ All section tags in English with delivery hint
-✓ No forbidden rhymes
-✓ No cliché images
-✓ Verse 2 has new angle
-✓ Hook repeated ≥3 times
+VOCAL TECHNIQUES (use max 2-3 per song, where they serve the emotion):
+- (whispered: текст) — intimate moments
+- [Screamed] TEXT — aggressive rock only
+- WORD+ — vowel stretch for peaks
+- [Ad-lib] ах-ах x2 — rhythmic decoration
+- [Backing vocals: female] — harmony layer
+
+ERA RULES (apply only if Era is set):
+- 20s-40s: swing/cabaret vocabulary, short punchy lines, simple rhymes
+- 50s-60s: clean romance, simple emotions
+- 70s: storytelling, longer lines, дорога/надежда/рассвет
+- 80s: theatrical, character-mask, night city, neon
+- 90s: raw conversational, grunge/r&b energy
+- 2000s: hook-first, early streaming era
+SOVIET/RETRO MODE (Russian language + era 60s-80s):
+- Concrete detail → universal feeling
+- 60s: hero in situation (танцплощадка, поезд, парк) | 70s: philosophical, дорога/надежда/рассвет/звёзды | 80s: theatrical, маэстро/художник, ночной город
+- FORBIDDEN words: стресс, депрессия, хайп, лайк, контент, токсичность — use грусть/тоска, работа/труд, душа/сердце
+- NEVER end hopeless — at least one line of hope
+- Anchor words: надежда, родина, молодость, судьба, дорога, верность, память, огонь
 
 STRUCTURE (3:00–3:30):
 [Intro — ...] 1-2 lines
@@ -250,78 +347,110 @@ STRUCTURE (3:00–3:30):
 [Bridge — ...] 3 lines — contrast
 [Final Chorus — ...] 4 lines
 [Outro — ...] 1-2 lines
+If INSTRUMENTAL (No vocals): replace lyric lines with scene tags like [haunting melody rises] [tension builds] [theme returns softly]
 
-OUTPUT — return ONLY the lyrics, no JSON, no explanation:
+PRE-OUTPUT CHECKLIST — verify silently before answering:
+✓ Vocal settings is line 1, contains range description AND per-section Vocal Style
+✓ All section tags in English with delivery hint
+✓ No forbidden rhymes, max 1 verb-verb rhyme per verse
+✓ No cliché images, every verse has one concrete anchor image
+✓ No line ends on weak syllable/gerund/particle
+✓ Syllable counts match genre rules, sections ±1
+✓ Hook repeated ≥3 times, Verse 2 has new angle
+✓ Era vocabulary respected (if era set)
+
+OUTPUT — return ONLY the lyrics, no JSON, no explanation, no title:
 [Vocal Settings line here]
 
 [Intro — ...]
 ...
 
-[Verse 1]
+[Verse 1 — ...]
 ...
 
-[Pre-Chorus]
+[Pre-Chorus — ...]
 ...
 
-[Chorus]
+[Chorus — ...]
 ...
 
-[Verse 2]
+[Verse 2 — ...]
 ...
 
-[Pre-Chorus]
+[Pre-Chorus — ...]
 ...
 
-[Chorus]
+[Chorus — ...]
 ...
 
-[Bridge]
+[Bridge — ...]
 ...
 
-[Final Chorus]
+[Final Chorus — ...]
 ...
 
-[Outro]
+[Outro — ...]
 ...`;
   }
 
   function buildStylePrompt(lyrics, brief) {
     const genreStr = brief.genres.length > 0 ? brief.genres.join(' x ') : 'pop';
     const hookLine = lyrics.split('\n').find(l => l && !l.startsWith('[')) || '';
+    const eraLine = brief.era ? `Era: ${brief.era} — use the matching era anchor and retro finish` : '';
+    const instrLine = brief.instruments ? `Key instruments: ${brief.instruments} — weave 1-2 into the string` : '';
     return `You are a professional Suno AI music producer. Generate a precise Suno style string.
 
 Genre mix: ${genreStr}
 Mood: ${brief.mood || 'emotional'}
-Vocal: ${brief.vocal || 'male vocal'}
+Vocal: ${brief.vocal || 'choose fitting vocal'}
+${eraLine}
+${instrLine}
 Hook reference: ${hookLine}
 
-FORMAT: <genre-mix> <BPM> BPM <timbral preset> <2-3 sound descriptors> <2-3 hook words> <AI Music Lab finish>
+FORMAT: <genre-mix> <BPM> BPM <timbral preset> <vocal style descriptor> <2-3 sound descriptors> <2-3 hook words> <finish tags>
 Target: 180-220 characters
 
 GENRE MIX — always hybrid:
 sad pop → cinematic indie-folk x lo-fi x dream-pop
 rock ballad → post-grunge x cinematic strings x alt-rock
+pop ballad → neo-soul x 70s orchestral pop x bedroom pop
 dance pop → disco-funk x synth-pop x future bass
 chill → organic house x lo-fi jazz x ambient pop
 russian pop → 70s soft rock x modern indie-folk x chamber pop warmth
 dark phonk → Memphis phonk x cold wave x dark industrial
 
-BPM GRID: 60 64 68 72 76 80 84 88 92 96 100 105 110 115 120 126 132 138 144 150
-Folk/Lo-fi 72-96 | Pop/R&B 96-115 | Rock/Synth-pop 110-132 | Electronic 120-138 | Phonk 138-150
+BPM GRID — use ONLY: 60 64 68 72 76 80 84 88 92 96 100 105 110 115 120 126 132 138 144 150 156 162 168 174 180
+Ballad/Lo-fi 60-80 | Folk/Chanson 80-100 | Pop/R&B/Soul 96-115 | Rock/Synth-pop 110-132 | Electronic 120-138 | Phonk/Hip-Hop 138-150
 
 TIMBRAL PRESETS:
 Male deep: worn velvet baritone / smoky tenement tenor / gravelled storyteller voice
 Male young: raw street tenor / close-mic bedroom voice / cracked-edge earnest vocal
 Female gentle: crystalline mezzo / breath-first folk soprano / intimate whisper alto
 Female powerful: arena-stage alto belt / emotional floodgate mezzo / gospel-tinged contralto
-Duet: worn velvet baritone x crystalline mezzo
+Duet: worn velvet baritone x crystalline mezzo / smoky tenor x breath-first alto
+Choir: SATB cathedral swell / layered gospel choir / cinematic mass choir
 
-AI MUSIC LAB FINISH — pick one:
+VOCAL STYLE DESCRIPTORS — pick one matching the genre:
+Rhythmic/Hip-hop: syllabic vocals, rhythmic delivery, percussive phrasing
+Intimate/Folk: breathy intimate, close-mic warmth, whisper-to-belt dynamic
+Powerful/Rock: belting, full chest voice, arena-stage delivery
+Jazz/Soul: melismatic, soulful runs, blue note bends, gospel-tinged
+Electronic/Pop: syllabic locked to beat, punchy consonants, precise timing
+
+ERA ANCHORS (use if Era is set):
+70s: Late 1970s LA session musician warmth
+80s: 1983 New York downtown club night
+90s: 1990s Seattle basement recording
+2000s: Early 2000s indie bedroom tape
+
+FINISH TAGS — pick one set:
 EMOTIONAL: | deep emotional warmth | close-mic intimacy | analog texture | no generic AI polish | human breath imperfection
 ENERGETIC: | raw energy no overproduce | organic punch | wide stereo depth | no safe AI sound | unexpected texture
 ATMOSPHERIC: | cinematic space | subtle tape noise | unhurried tempo feel | no clean digital polish | air and silence matter
+RETRO (if era 20s-90s): | analog tape saturation | vinyl crackle | era-authentic mix | warm tube mastering
+INSTRUMENTAL (if No vocals): | no-vocals | instrumental | plus one finish set above
 
-NEGATIVE TAGS: Ballad/acoustic → no-808 | Folk → no-drums | Clean Pop/Indie/Lo-fi → no-808 no-clap
+NEGATIVE TAGS: Ballad/acoustic/retro → no-808 | Folk/Cinematic → no-drums | Clean Pop/Indie/Lo-fi → no-808 no-clap | Electronic/Hip-Hop/Phonk → do NOT add no-808
 FORBIDDEN WORDS: catchy | viral | radio 2025 | tiktok | sidechain kick | radio-ready master
 NEVER include "Russian" or "English"
 
@@ -411,7 +540,7 @@ RULES:
       return;
     }
 
-    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, lang: selectedLang, instruments };
+    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, era: selectedEra, lang: selectedLang, instruments };
 
     // UI — loading
     document.getElementById('empty-lyrics').style.display = 'none';
@@ -438,7 +567,7 @@ RULES:
       document.getElementById('lyrics-ready').style.display = '';
       document.getElementById('step1-num').className = 'step-num done';
       document.getElementById('lyric-meta').textContent =
-        `${selectedGenres.join('+') || 'auto'} · ${selectedMood || 'auto'} · ${selectedLang.toUpperCase()}`;
+        [selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
       updateBadge();
 
       // Шаг 2 — стиль
