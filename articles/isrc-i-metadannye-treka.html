@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Что такое ISRC и UPC: метаданные трека перед релизом — простой разбор | Track Start</title>
+<meta name="description" content="ISRC и UPC простыми словами: чем отличаются, как получить бесплатно через дистрибьютора, какие метаданные заполнить перед загрузкой трека и какие ошибки задерживают релиз." />
+<link rel="canonical" href="https://www.trackstart.art/articles/isrc-i-metadannye-treka.html" />
+<link rel="stylesheet" href="/styles.css" />
+<link rel="stylesheet" href="/styles-home.css" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Что такое ISRC и UPC: метаданные трека перед релизом",
+  "description": "ISRC и UPC простыми словами: чем отличаются, как получить бесплатно через дистрибьютора и какие метаданные заполнить перед загрузкой трека.",
+  "datePublished": "2026-07-16",
+  "dateModified": "2026-07-16",
+  "inLanguage": "ru",
+  "author": { "@type": "Organization", "name": "Track Start", "url": "https://www.trackstart.art" },
+  "publisher": { "@type": "Organization", "name": "Track Start", "url": "https://www.trackstart.art" },
+  "mainEntityOfPage": "https://www.trackstart.art/articles/isrc-i-metadannye-treka.html"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Что такое ISRC простыми словами?",
+      "acceptedAnswer": { "@type": "Answer", "text": "ISRC (International Standard Recording Code) — это уникальный номер конкретной записи трека, как паспорт у человека. По нему стриминги считают прослушивания и начисляют выплаты именно вам. Один трек = один ISRC; если вы выпускаете ремикс или новую версию — у неё будет свой код." }
+    },
+    {
+      "@type": "Question",
+      "name": "Чем ISRC отличается от UPC?",
+      "acceptedAnswer": { "@type": "Answer", "text": "ISRC — код одного трека (записи), UPC — код всего релиза (сингла, EP или альбома) как товара в магазине. У сингла из одного трека будет и ISRC (на трек), и UPC (на релиз)." }
+    },
+    {
+      "@type": "Question",
+      "name": "Как получить ISRC и UPC бесплатно?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Через дистрибьютора: при загрузке релиза он присваивает оба кода автоматически и бесплатно. Покупать коды отдельно независимому артисту не нужно. После публикации коды видны в личном кабинете дистрибьютора на странице релиза." }
+    },
+    {
+      "@type": "Question",
+      "name": "Нужно ли вшивать ISRC в аудиофайл?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Нет. Для цифровой дистрибуции коды не встраиваются в WAV или обложку — дистрибьютор привязывает их к релизу на своей стороне. Достаточно загрузить чистый аудиофайл и правильно заполнить форму метаданных." }
+    },
+    {
+      "@type": "Question",
+      "name": "Можно ли использовать один ISRC повторно при перезаливке трека?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Если запись та же самая (тот же мастер) — да, нужно использовать тот же ISRC, иначе статистика прослушиваний обнулится. Если запись изменилась (новый мастеринг, ремикс, другая версия) — нужен новый код." }
+    }
+  ]
+}
+</script>
+
+<style>
+.article-wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+.article-wrap h1 { font-size: clamp(30px, 5vw, 42px); line-height: 1.15; margin-bottom: 14px; }
+.article-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 28px; display: flex; gap: 14px; flex-wrap: wrap; }
+.article-wrap h2 { font-size: 26px; margin: 40px 0 14px; }
+.article-wrap h3 { font-size: 18px; margin: 26px 0 10px; }
+.article-wrap p, .article-wrap li { color: var(--ink-2); line-height: 1.7; font-size: 16px; }
+.article-wrap p { margin-bottom: 14px; }
+.article-wrap ul, .article-wrap ol { padding-left: 22px; margin-bottom: 16px; }
+.article-wrap li { margin-bottom: 8px; }
+.article-wrap a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.tldr { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px 22px; margin: 22px 0 6px; }
+.tldr .label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.tldr p { margin-bottom: 8px; }
+.tldr p:last-child { margin-bottom: 0; }
+.fact-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 20px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.fact-table th, .fact-table td { padding: 11px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.fact-table th { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg-2); font-weight: 500; }
+.fact-table tr:last-child td { border-bottom: none; }
+.code-example { font-family: var(--font-mono); font-size: 14px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 14px 0 18px; overflow-x: auto; }
+.cta-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px; margin: 36px 0; }
+.cta-box h3 { margin-top: 0; }
+.sources { font-size: 13px; color: var(--muted); }
+.sources li { font-size: 13px; margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <nav class="nav">
+      <a href="/index.html" class="brand">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
+          <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="brand-name">Track <em>Start</em></span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="/index.html">Главная</a>
+        <a class="nav-link" href="/generator.html">Генератор</a>
+        <a class="nav-link" href="/guide.html">Гид по релизу</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-wrap">
+  <article>
+    <h1>Что такое ISRC и UPC: метаданные трека перед релизом</h1>
+    <div class="article-meta">
+      <span>Обновлено: 16 июля 2026</span>
+      <span>Track Start · База знаний</span>
+      <span>~6 минут чтения</span>
+    </div>
+
+    <div class="tldr">
+      <div class="label">Короткий ответ</div>
+      <p><strong>ISRC — это уникальный номер трека, UPC — номер релиза целиком.</strong> По ISRC стриминги считают прослушивания и начисляют вам деньги, по UPC магазины опознают ваш сингл или альбом как «товар».</p>
+      <p><strong>Покупать коды не нужно:</strong> дистрибьютор присваивает и ISRC, и UPC автоматически и бесплатно при загрузке релиза. Ваша задача — правильно заполнить остальные метаданные, потому что именно ошибки в них чаще всего задерживают релиз на модерации.</p>
+    </div>
+
+    <h2>ISRC: паспорт одной записи</h2>
+    <p>ISRC (International Standard Recording Code) — международный стандартный код записи. Выглядит так:</p>
+    <div class="code-example">RU-A1B-26-00042<br>│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└─ номер записи (уникален внутри года)<br>│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└─ год присвоения кода (2026)<br>│&nbsp;&nbsp;&nbsp;└─ код регистранта (обычно дистрибьютора)<br>└─ страна</div>
+    <p>Ключевые правила, которые стоит знать:</p>
+    <ul>
+      <li><strong>Один трек — один ISRC навсегда.</strong> Код привязан к конкретной записи (мастеру). Переиздаёте тот же мастер на другом альбоме — ISRC сохраняется, и вся статистика прослушиваний продолжает накапливаться.</li>
+      <li><strong>Новая версия — новый код.</strong> Ремикс, акустическая версия, новый мастеринг, radio edit — каждая версия получает собственный ISRC.</li>
+      <li><strong>По ISRC считаются деньги.</strong> Стриминги отчитываются о прослушиваниях именно по этому коду — поэтому дубли и путаница с кодами напрямую бьют по выплатам.</li>
+    </ul>
+
+    <h2>UPC: штрихкод всего релиза</h2>
+    <p>UPC (Universal Product Code) — идентификатор релиза как продукта: сингла, EP или альбома. Это тот же тип штрихкода, что на упаковке товара в супермаркете, только для цифрового релиза. У сингла из одного трека будет <em>и</em> ISRC (на запись), <em>и</em> UPC (на релиз). У альбома из 10 треков — десять ISRC и один UPC.</p>
+    <table class="fact-table">
+      <thead><tr><th></th><th>ISRC</th><th>UPC</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Что идентифицирует</strong></td><td>Одну запись (трек)</td><td>Релиз целиком (сингл/EP/альбом)</td></tr>
+        <tr><td><strong>Для чего нужен</strong></td><td>Подсчёт прослушиваний и выплат</td><td>Учёт релиза в магазинах и чартах</td></tr>
+        <tr><td><strong>Кто выдаёт</strong></td><td>Дистрибьютор, бесплатно</td><td>Дистрибьютор, бесплатно</td></tr>
+        <tr><td><strong>Где посмотреть</strong></td><td>Кабинет дистрибьютора → страница трека</td><td>Кабинет дистрибьютора → страница релиза</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Как получить коды: три сценария</h2>
+    <ol>
+      <li><strong>Обычный путь (99% случаев).</strong> Загружаете релиз дистрибьютору, оставляете поля ISRC/UPC пустыми — коды присвоятся автоматически. После публикации они появятся в личном кабинете на странице релиза.</li>
+      <li><strong>Перенос релиза к другому дистрибьютору.</strong> Найдите старые коды в кабинете прежнего дистрибьютора и укажите их при повторной загрузке — так сохранится статистика и позиции в плейлистах. Это единственный случай, когда поля ISRC/UPC нужно заполнять руками.</li>
+      <li><strong>Свои коды (для лейблов).</strong> Компании могут зарегистрироваться как регистрант и выдавать ISRC самостоятельно, но независимому артисту это не нужно — только лишние расходы и бюрократия.</li>
+    </ol>
+    <p><strong>Вшивать коды в аудиофайл не нужно.</strong> Для цифровой дистрибуции ISRC не встраивается в WAV и не пишется на обложке — дистрибьютор привязывает его на своей стороне.</p>
+
+    <h2>Остальные метаданные: что заполнять и где не ошибиться</h2>
+    <p>Метаданные — это всё, что вы вводите в форму дистрибьютора о треке. Модерация площадок проверяет их строже, чем само аудио. Вот полный список с типичными ошибками:</p>
+    <table class="fact-table">
+      <thead><tr><th>Поле</th><th>Как правильно</th><th>Частая ошибка</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Название трека</strong></td><td>Как есть, без украшений</td><td>ЗАГЛАВНЫЕ БУКВЫ, эмодзи, «(NEW 2026!)» — модерация отклонит</td></tr>
+        <tr><td><strong>Имя артиста</strong></td><td>Одинаковое написание во всех релизах</td><td>Разное написание (латиница/кириллица) — треки разлетаются по разным карточкам артиста</td></tr>
+        <tr><td><strong>Авторы</strong></td><td>Настоящие ФИО автора текста и композитора</td><td>Псевдоним вместо ФИО — площадки требуют реальные имена для учёта прав</td></tr>
+        <tr><td><strong>Версия</strong></td><td>Заполнять только для ремиксов/версий: «Remix», «Acoustic»</td><td>Писать версию в названии трека вместо отдельного поля</td></tr>
+        <tr><td><strong>Жанр</strong></td><td>Ближайший из списка площадки</td><td>«Наугад» — влияет на попадание в жанровые чарты и рекомендации</td></tr>
+        <tr><td><strong>Язык</strong></td><td>Язык вокала (не язык названия)</td><td>Указать английский из-за английского названия у русскоязычного трека</td></tr>
+        <tr><td><strong>Explicit</strong></td><td>Ставить, если есть мат или взрослые темы</td><td>Не поставить метку — площадка может снять трек после жалобы</td></tr>
+        <tr><td><strong>Дата релиза</strong></td><td>Минимум за 2–4 недели — успеете на питчинг в плейлисты</td><td>«Как можно скорее» — релиз выходит без шанса на редакционные плейлисты</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Чек-лист метаданных перед загрузкой</h2>
+    <ul>
+      <li>Название трека — без капса, эмодзи и приписок</li>
+      <li>Имя артиста — буква в букву как в прошлых релизах</li>
+      <li>ФИО авторов текста и музыки — настоящие</li>
+      <li>Поля ISRC/UPC — пустые (для нового релиза) или со старыми кодами (при переносе)</li>
+      <li>Язык = язык вокала, жанр выбран осознанно</li>
+      <li>Explicit-метка стоит, если в тексте есть мат</li>
+      <li>Дата релиза — с запасом 2–4 недели</li>
+    </ul>
+
+    <div class="cta-box">
+      <h3>Трек ещё не написан?</h3>
+      <p>Начните с текста: <a href="/generator.html">генератор Track Start</a> пишет тексты песен с правильной рифмой и готовой style-строкой для Suno — первые 5 генераций бесплатно. А когда трек готов, весь маршрут релиза по шагам — в <a href="/guide.html">гиде по релизу</a>.</p>
+    </div>
+
+    <h2>Частые вопросы</h2>
+    <h3>Что такое ISRC простыми словами?</h3>
+    <p>Паспорт конкретной записи. По нему стриминги понимают, чей трек играет, и кому платить.</p>
+    <h3>Сколько стоят ISRC и UPC?</h3>
+    <p>Для независимого артиста — ничего: дистрибьютор выдаёт оба кода бесплатно при загрузке релиза. Платные «продавцы кодов» вам не нужны.</p>
+    <h3>Где посмотреть коды моего релиза?</h3>
+    <p>В личном кабинете дистрибьютора на странице релиза — обычно после прохождения модерации.</p>
+    <h3>Перезаливаю трек — использовать старый ISRC?</h3>
+    <p>Если мастер тот же — да, обязательно: сохранится статистика. Если версия новая — нужен новый код.</p>
+    <h3>Нужен ли UPC для сингла из одного трека?</h3>
+    <p>Да. Сингл — это тоже релиз, и площадкам нужен его идентификатор. Дистрибьютор присвоит автоматически.</p>
+
+    <h2>Источники</h2>
+    <ul class="sources">
+      <li><a href="https://helpcenter.freshtunes.com/hc/en-us/articles/17254426214300-What-are-UPC-and-ISRC-codes" rel="nofollow noopener">FreshTunes Help Center — What are UPC and ISRC codes</a></li>
+      <li><a href="https://recordsman.digital/isrc-i-upc-kody/" rel="nofollow noopener">Recordsman — ISRC и UPC коды</a></li>
+      <li><a href="https://push-music.ru/glossary/upc" rel="nofollow noopener">Push Music — Что такое UPC в музыке</a></li>
+      <li><a href="https://mirosell.com/kod-isrc-upc-muzykalnogo-reliza/" rel="nofollow noopener">MiroSell — Как получить код ISRC и UPC для музыкального релиза</a></li>
+    </ul>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 Track Start. Маршрут от идеи до релиза.</span>
+      <span>Made with care · Moscow / remote</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
