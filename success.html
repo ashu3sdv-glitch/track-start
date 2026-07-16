@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Track Start — Оплата</title>
+<meta name="robots" content="noindex" />
+<link rel="stylesheet" href="/styles.css" />
+<link rel="stylesheet" href="/styles-home.css" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+.pay-wrap { max-width: 560px; margin: 0 auto; padding: 72px 20px 96px; text-align: center; }
+.pay-icon { font-size: 44px; margin-bottom: 18px; }
+.pay-wrap h1 { font-size: clamp(26px, 4vw, 34px); margin-bottom: 12px; }
+.pay-wrap p { color: var(--ink-2); line-height: 1.65; margin-bottom: 12px; }
+.pay-status { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin: 18px 0 26px; }
+.pay-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <nav class="nav">
+      <a href="/index.html" class="brand">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
+          <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="brand-name">Track <em>Start</em></span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="/index.html">Главная</a>
+        <a class="nav-link" href="/generator.html">Генератор</a>
+        <a class="nav-link" href="/guide.html">Гид по релизу</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="pay-wrap">
+  <div class="pay-icon" id="pay-icon">⏳</div>
+  <h1 id="pay-title">Проверяем оплату…</h1>
+  <p id="pay-text">Это занимает несколько секунд. Не закрывай страницу.</p>
+  <div class="pay-status" id="pay-status"></div>
+  <div class="pay-actions" id="pay-actions" style="display:none;">
+    <a href="/generator.html" class="btn btn-primary">Открыть генератор</a>
+    <a href="/index.html" class="btn btn-secondary">На главную</a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 Track Start. Маршрут от идеи до релиза.</span>
+      <span>Made with care · Moscow / remote</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const icon = document.getElementById('pay-icon');
+  const title = document.getElementById('pay-title');
+  const text = document.getElementById('pay-text');
+  const status = document.getElementById('pay-status');
+  const actions = document.getElementById('pay-actions');
+
+  const PLAN_NAMES = { pro: 'Pro', lite: 'Lite' };
+  const paymentId = localStorage.getItem('ts_pending_payment') || '';
+
+  function fail(msg) {
+    icon.textContent = '✕';
+    title.textContent = 'Не удалось подтвердить оплату';
+    text.textContent = msg;
+    actions.style.display = 'flex';
+  }
+
+  function success(plan, token) {
+    localStorage.setItem('ts_plan_token', token);
+    localStorage.removeItem('ts_pending_payment');
+    icon.textContent = '✓';
+    title.textContent = `Тариф ${PLAN_NAMES[plan] || plan} активирован!`;
+    text.textContent = plan === 'lite'
+      ? 'Доступ на 31 день. Открой генератор, нажми ⚙ и добавь свой API-ключ Claude — дальше безлимит.'
+      : 'Доступ на 31 день, безлимитная генерация уже включена. Приятной работы!';
+    status.textContent = '';
+    actions.style.display = 'flex';
+  }
+
+  if (!paymentId) {
+    fail('Не нашли начатый платёж в этом браузере. Если деньги списались — напиши нам: 7002d@mail.ru, всё решим.');
+    return;
+  }
+
+  let attempts = 0;
+  async function check() {
+    attempts++;
+    status.textContent = `проверка ${attempts}…`;
+    try {
+      const r = await fetch('/api/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (d.status === 'succeeded' && d.token) { success(d.plan, d.token); return; }
+      if (d.status === 'canceled') { fail('Платёж отменён. Можно попробовать ещё раз с главной страницы.'); return; }
+      if (attempts < 6) { setTimeout(check, 3000); return; }
+      fail('Платёж ещё обрабатывается. Обнови эту страницу через минуту — доступ активируется автоматически.');
+    } catch {
+      if (attempts < 6) { setTimeout(check, 3000); return; }
+      fail('Ошибка сети. Обнови страницу через минуту.');
+    }
+  }
+  check();
+})();
+</script>
+
+</body>
+</html>

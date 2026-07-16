@@ -13,7 +13,19 @@
   function getFreeLeft() { return Math.max(0, FREE_TOTAL - getUsed()); }
   function getKey() { return localStorage.getItem('ts_key') || ''; }
   function saveKey(k) { localStorage.setItem('ts_key', k.trim()); }
-  function isPro() { return !!getKey(); }
+
+  // Оплаченный тариф: токен выдаёт сервер после платежа (success.html),
+  // подпись проверяется на сервере — здесь только читаем срок и название
+  function getPlan() {
+    try {
+      const t = localStorage.getItem('ts_plan_token') || '';
+      if (!t) return '';
+      const p = JSON.parse(atob(t.split('.')[0]));
+      if (p && p.exp > Date.now() && (p.plan === 'pro' || p.plan === 'lite')) return p.plan;
+    } catch (e) {}
+    return '';
+  }
+  function hasUnlimited() { return getPlan() === 'pro' || !!getKey(); }
 
   // ── BADGE ──────────────────────────────────────────────────────────────────
   function updateBadge() {
@@ -22,11 +34,22 @@
     const dots  = document.getElementById('free-dots');
     const btn   = document.getElementById('generate');
     if (!badge) return;
-    if (isPro()) {
+    const plan = getPlan();
+    if (plan === 'pro') {
       badge.className = 'free-badge pro-active';
       text.textContent = '✓ Pro — безлимитная генерация';
       dots.innerHTML = '';
       btn.className = 'gen-btn pro';
+    } else if (getKey()) {
+      badge.className = 'free-badge pro-active';
+      text.textContent = plan === 'lite' ? '✓ Lite — безлимит со своим ключом' : '✓ Свой ключ — безлимитная генерация';
+      dots.innerHTML = '';
+      btn.className = 'gen-btn pro';
+    } else if (plan === 'lite') {
+      badge.className = 'free-badge';
+      text.textContent = 'Lite активен — нажми ⚙ и добавь свой API-ключ Claude';
+      dots.innerHTML = '';
+      btn.className = 'gen-btn';
     } else {
       const left = getFreeLeft();
       badge.className = left > 0 ? 'free-badge' : 'free-badge limit';
@@ -382,9 +405,8 @@ RULES:
     const instruments = document.getElementById('instruments').value.trim();
     if (!idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
 
-    const personalKey = getKey();
-    const freeLeft = getFreeLeft();
-    if (!personalKey && freeLeft <= 0) {
+    const unlimited = hasUnlimited();
+    if (!unlimited && getFreeLeft() <= 0) {
       showError('Бесплатные генерации закончились. Подключи тариф на главной странице или нажми ⚙ и добавь свой API ключ.');
       return;
     }
@@ -408,7 +430,7 @@ RULES:
       const lyrics = await ask(buildLyricsPrompt(brief), 2000);
       if (!lyrics.trim()) throw new Error('Пустой ответ от API. Попробуй ещё раз.');
 
-      if (!personalKey) incUsed();
+      if (!unlimited) incUsed();
 
       // Показываем текст
       document.getElementById('gen-status').style.display = 'none';

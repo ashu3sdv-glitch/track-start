@@ -492,7 +492,7 @@
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>Гид по релизу и база знаний</li>
           <li class="muted-feat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>Общий API-ключ включён</li>
         </ul>
-        <a href="mailto:7002d@mail.ru?subject=Track%20Start%20Lite" class="btn btn-secondary pricing-btn">Подключить</a>
+        <a href="#" data-buy="lite" class="btn btn-secondary pricing-btn">Подключить</a>
       </div>
       <div class="pricing-card pricing-card--featured reveal">
         <div class="pricing-badge">Популярный</div>
@@ -507,7 +507,7 @@
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>Гид по релизу и база знаний</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>Приоритетная поддержка</li>
         </ul>
-        <a href="mailto:7002d@mail.ru?subject=Track%20Start%20Pro" class="btn btn-primary pricing-btn">Подключить Pro</a>
+        <a href="#" data-buy="pro" class="btn btn-primary pricing-btn">Подключить Pro</a>
       </div>
     </div>
     <p class="pricing-note">Оплата картой через ЮКасса · <a href="/oferta.html">Оферта</a> · <a href="/privacy.html">Политика конфиденциальности</a></p>
@@ -575,6 +575,39 @@
 <script src="i18n.js"></script>
 <script src="logos.js"></script>
 <script src="app.js"></script>
+<script>
+// Оплата тарифов через ЮКассу
+(function () {
+  document.querySelectorAll('[data-buy]').forEach(function (btn) {
+    btn.addEventListener('click', async function (e) {
+      e.preventDefault();
+      const plan = btn.getAttribute('data-buy');
+      const email = window.prompt('Email — на него придёт чек об оплате:');
+      if (email === null) return;
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
+        alert('Похоже, в email опечатка. Попробуй ещё раз.');
+        return;
+      }
+      const orig = btn.textContent;
+      btn.textContent = 'Секунду…';
+      try {
+        const r = await fetch('/api/pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: plan, email: email.trim() }),
+        });
+        const d = await r.json().catch(function () { return {}; });
+        if (!r.ok || !d.url) throw new Error(d.error || 'Не удалось создать платёж');
+        localStorage.setItem('ts_pending_payment', d.paymentId);
+        window.location.href = d.url;
+      } catch (err) {
+        btn.textContent = orig;
+        alert('Ошибка: ' + err.message);
+      }
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
