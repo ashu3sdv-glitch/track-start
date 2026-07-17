@@ -1,32 +1,32 @@
 // Track Start — серверная генерация.
 // Ключ Claude живёт только здесь (переменная окружения Vercel) и никогда не отдаётся в браузер.
 
-const ALLOWED_HOSTS = [
-  'trackstart.art',
-  'www.trackstart.art',
-  'track-start-sooty.vercel.app',
-  'localhost',
-];
+import {
+  applySecurityHeaders,
+  enforceRateLimit,
+  parseRequestBody,
+  requireTrustedOrigin,
+  verifyPlanToken,
+} from './_security.js';
 
 export default async function handler(req, res) {
+  applySecurityHeaders(res);
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
-  const source = req.headers.origin || req.headers.referer || '';
-  if (!ALLOWED_HOSTS.some((h) => source.includes(h))) {
-    res.status(403).json({ error: 'Forbidden' });
-    return;
-  }
+  if (!requireTrustedOrigin(req, res)) return;
 
-  const { prompt, maxTokens } = req.body || {};
+  const { prompt, maxTokens, planToken } = parseRequestBody(req);
   if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 20000) {
     res.status(400).json({ error: 'Bad request' });
     return;
   }
+  const plan = verifyPlanToken(planToken);
+  if (!enforceRateLimit(req, res, { paid: plan?.plan === 'pro', scope: 'generate' })) return;
 
-  const key = process.env.ANTHROPIC_API_KEY || process.env.VITE_CLAUDE_KEY || process.env.CLAUDE_API_KEY;
+  const key = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
   if (!key) {
     res.status(500).json({ error: 'Сервер не настроен: нет API ключа' });
     return;

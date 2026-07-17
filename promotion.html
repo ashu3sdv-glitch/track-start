@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>План продвижения песни — Track Start</title>
+  <meta name="description" content="Персональный план продвижения песни до релиза и на 30 дней после." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="promotion.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+</head>
+<body>
+<header class="site-header no-print">
+  <div class="container">
+    <nav class="nav">
+      <a href="index.html" class="brand"><span class="brand-mark">TS</span><span class="brand-name">Track <em>Start</em></span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html">Главная</a>
+        <a class="nav-link" href="generator.html">Генератор</a>
+        <a class="nav-link active" href="promotion.html">Продвижение</a>
+        <a class="nav-link" href="guide.html">Гид по релизу</a>
+      </div>
+      <a href="generator.html" class="btn btn-secondary btn-sm">Создать песню</a>
+    </nav>
+  </div>
+</header>
+
+<main class="promotion-main">
+  <div class="container">
+    <section class="promotion-hero no-print">
+      <div class="eyebrow"><span class="dot"></span>от песни до слушателя</div>
+      <h1>План продвижения <span>вашей песни</span></h1>
+      <p>Укажите дату релиза — TrackStart подготовит позиционирование, питчинг, публикации, идеи роликов и календарь с конкретными датами.</p>
+    </section>
+
+    <section id="promotion-form-wrap" class="promotion-layout no-print">
+      <form id="promotion-form" class="promotion-form">
+        <div class="form-section">
+          <div class="form-section-title"><span>01</span><h2>Песня</h2></div>
+          <div class="field-grid two">
+            <label><span>Название *</span><input class="input" id="title" maxlength="120" required /></label>
+            <label><span>Артист / проект *</span><input class="input" id="artist" maxlength="120" required /></label>
+          </div>
+          <label><span>Текст песни *</span><textarea class="textarea lyrics-input" id="lyrics" maxlength="16000" required></textarea></label>
+          <div class="field-grid three">
+            <label><span>Жанр</span><input class="input" id="genre" maxlength="120" /></label>
+            <label><span>Настроение</span><input class="input" id="mood" maxlength="120" /></label>
+            <label><span>Тип вокала</span><input class="input" id="vocalType" maxlength="80" /></label>
+          </div>
+          <label><span>Что важно знать о песне</span><textarea class="textarea" id="description" maxlength="1000" placeholder="История создания, главная мысль или важный контекст"></textarea></label>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title"><span>02</span><h2>Релиз</h2></div>
+          <div class="field-grid two">
+            <label><span>Дата релиза *</span><input class="input" type="date" id="releaseDate" required /></label>
+            <label><span>Бюджет</span><select class="select" id="budget"><option value="Без бюджета">Без бюджета</option><option value="До 5 000 ₽">До 5 000 ₽</option><option value="5 000–20 000 ₽">5 000–20 000 ₽</option><option value="Более 20 000 ₽">Более 20 000 ₽</option></select></label>
+          </div>
+          <fieldset><legend>Основные площадки</legend><div class="platforms"><label><input type="checkbox" value="VK" checked /> VK</label><label><input type="checkbox" value="Telegram" checked /> Telegram</label><label><input type="checkbox" value="YouTube Shorts" checked /> YouTube Shorts</label><label><input type="checkbox" value="VK Клипы" checked /> VK Клипы</label><label><input type="checkbox" value="Дзен" /> Дзен</label><label><input type="checkbox" value="TikTok" /> TikTok</label></div></fieldset>
+        </div>
+
+        <div class="privacy-note">Текст песни отправляется AI только для создания плана и не публикуется на странице сайта. Перед закрытием сохраните готовый результат.</div>
+        <button id="generate-plan" class="btn btn-primary generate-plan" type="submit">Создать план продвижения</button>
+      </form>
+
+      <aside class="result-preview">
+        <span class="mono">В результате</span>
+        <ol><li>Анализ и позиционирование</li><li>Питчинг и готовые публикации</li><li>12 идей и 5 сценариев роликов</li><li>Календарь от −21 до +30 дней</li><li>Одно понятное следующее действие</li></ol>
+        <p>Последний план сохраняется только в этом браузере.</p>
+        <button id="restore-plan" class="btn btn-secondary" type="button" hidden>Открыть последний план</button>
+      </aside>
+    </section>
+
+    <section id="loading" class="loading-card no-print" hidden><div class="spinner"></div><h2>Создаём персональный план…</h2><p id="loading-text">Анализируем текст песни</p></section>
+    <section id="error" class="error-card no-print" hidden></section>
+    <article id="result" class="promotion-result" hidden></article>
+  </div>
+</main>
+<script src="promotion.js"></script>
+</body>
+</html>

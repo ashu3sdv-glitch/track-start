@@ -2,28 +2,20 @@
 // Токен: base64(payload).hmac — подделать без серверного секрета нельзя.
 
 import crypto from 'node:crypto';
-
-const ALLOWED_HOSTS = [
-  'trackstart.art',
-  'www.trackstart.art',
-  'track-start-sooty.vercel.app',
-  'localhost',
-];
+import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin } from './_security.js';
 
 const ACCESS_DAYS = 31;
 
 export default async function handler(req, res) {
+  applySecurityHeaders(res);
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  const source = req.headers.origin || req.headers.referer || '';
-  if (!ALLOWED_HOSTS.some((h) => source.includes(h))) {
-    res.status(403).json({ error: 'Forbidden' });
-    return;
-  }
+  if (!requireTrustedOrigin(req, res)) return;
+  if (!enforceRateLimit(req, res, { scope: 'check-payment' })) return;
 
-  const { paymentId } = req.body || {};
+  const { paymentId } = parseRequestBody(req);
   if (typeof paymentId !== 'string' || !paymentId.trim()) {
     res.status(400).json({ error: 'Нет идентификатора платежа' });
     return;

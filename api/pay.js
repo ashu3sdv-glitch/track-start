@@ -2,13 +2,7 @@
 // Секретный ключ живёт только в env Vercel и в браузер не попадает.
 
 import crypto from 'node:crypto';
-
-const ALLOWED_HOSTS = [
-  'trackstart.art',
-  'www.trackstart.art',
-  'track-start-sooty.vercel.app',
-  'localhost',
-];
+import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin } from './_security.js';
 
 const PLANS = {
   lite: { amount: '450.00', title: 'Track Start Lite — доступ на 1 месяц' },
@@ -50,19 +44,21 @@ async function createPayment(auth, plan, email, withReceipt) {
 }
 
 export default async function handler(req, res) {
+  applySecurityHeaders(res);
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  const source = req.headers.origin || req.headers.referer || '';
-  if (!ALLOWED_HOSTS.some((h) => source.includes(h))) {
-    res.status(403).json({ error: 'Forbidden' });
-    return;
-  }
+  if (!requireTrustedOrigin(req, res)) return;
+  if (!enforceRateLimit(req, res, { scope: 'pay' })) return;
 
-  const { plan, email } = req.body || {};
+  const { plan, email } = parseRequestBody(req);
   if (!PLANS[plan]) {
     res.status(400).json({ error: 'Неизвестный тариф' });
+    return;
+  }
+  if (email && (typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+    res.status(400).json({ error: 'Некорректный email' });
     return;
   }
 

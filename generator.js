@@ -503,7 +503,11 @@ RULES:
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, maxTokens })
+      body: JSON.stringify({
+        prompt,
+        maxTokens,
+        planToken: localStorage.getItem('ts_plan_token') || ''
+      })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data?.error || `Ошибка сервера: ${res.status}`);
@@ -586,6 +590,18 @@ RULES:
         document.getElementById('suno-status').style.display = 'none';
         document.getElementById('suno-ready').style.display = '';
         document.getElementById('step2-num').className = 'step-num done';
+        localStorage.setItem('ts_promotion_draft', JSON.stringify({
+          title: idea.slice(0, 120),
+          lyrics,
+          genre: selectedGenres.join(' + '),
+          mood: selectedMood,
+          vocalType: selectedVocal,
+          language: selectedLang,
+          instruments,
+          sunoPrompt: styleClean,
+          createdAt: new Date().toISOString()
+        }));
+        document.getElementById('promotion-cta').style.display = 'flex';
       } catch {
         document.getElementById('suno-status').style.display = 'none';
         document.getElementById('suno-empty').style.display = '';
@@ -639,6 +655,10 @@ RULES:
 
   document.getElementById('copy-suno').addEventListener('click', e => {
     copyText(document.getElementById('suno-prompt').innerText, e.currentTarget);
+  });
+
+  document.getElementById('promotion-cta').addEventListener('click', () => {
+    window.location.href = 'promotion.html?source=generator';
   });
 
   // ── INIT ───────────────────────────────────────────────────────────────────
