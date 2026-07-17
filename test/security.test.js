@@ -24,6 +24,16 @@ test('rejects a hostname that only contains the allowed domain', () => {
   assert.equal(res.statusCode, 403);
 });
 
+test('accepts only this project Vercel preview while in preview mode', () => {
+  process.env.VERCEL_ENV = 'preview';
+  const accepted = responseStub();
+  assert.equal(requireTrustedOrigin({ headers: { origin: 'https://track-start-git-codex-promo-290e5f-aleksandrs-projects-a3365b25.vercel.app' } }, accepted), true);
+
+  const rejected = responseStub();
+  assert.equal(requireTrustedOrigin({ headers: { origin: 'https://track-start-attacker-projects.vercel.app' } }, rejected), false);
+  delete process.env.VERCEL_ENV;
+});
+
 test('verifies signed, unexpired plan tokens', () => {
   process.env.YOOKASSA_SECRET_KEY = 'test-secret';
   const payload = Buffer.from(JSON.stringify({ plan: 'pro', exp: Date.now() + 60000 })).toString('base64');

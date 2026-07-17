@@ -22,7 +22,10 @@ export function requireTrustedOrigin(req, res) {
     const url = new URL(raw);
     const isLocal = process.env.VERCEL_ENV !== 'production' &&
       (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+    const isProjectPreview = process.env.VERCEL_ENV === 'preview' &&
+      /^track-start-[a-z0-9-]+-aleksandrs-projects-a3365b25\.vercel\.app$/.test(url.hostname);
     if (url.protocol === 'https:' && PUBLIC_HOSTS.has(url.hostname)) return true;
+    if (url.protocol === 'https:' && isProjectPreview) return true;
     if (isLocal && (url.protocol === 'http:' || url.protocol === 'https:')) return true;
   } catch {}
 
