@@ -1,430 +1,175 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Track Start — Гид по релизу</title>
-<link rel="stylesheet" href="styles.css" />
-<link rel="stylesheet" href="styles-home.css" />
-<link rel="stylesheet" href="styles-app.css" />
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-
-<style>
-/* ── Distributor table ─────────────────────────────────────── */
-.dist-filters { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 18px; }
-
-.dist-table-wrap { overflow-x:auto; border-radius:var(--radius-lg); border:1px solid var(--line); }
-.dist-table { width:100%; border-collapse:collapse; font-size:14px; }
-.dist-table thead tr { background:var(--bg-2); border-bottom:1px solid var(--line); }
-.dist-table th { padding:12px 16px; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:500; text-align:left; white-space:nowrap; }
-.dist-table td { padding:14px 16px; border-bottom:1px solid var(--line); vertical-align:middle; }
-.dist-row:last-child td { border-bottom:none; }
-.dist-row:hover td { background:var(--bg-2); }
-
-.dist-name { display:flex; align-items:center; gap:10px; font-weight:500; white-space:nowrap; }
-.dist-logo { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
-
-.dist-tag-row { display:flex; flex-wrap:wrap; gap:4px; }
-.dist-tag { padding:3px 8px; background:var(--bg-2); border:1px solid var(--line); border-radius:999px; font-family:var(--font-mono); font-size:11px; color:var(--muted); white-space:nowrap; }
-
-/* ── KB cards ──────────────────────────────────────────────── */
-.kb-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:2px; margin-top:auto; }
-.kb-list li { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:14px; color:var(--ink-2); }
-.kb-list li:last-child { border-bottom:none; }
-.kb-list .arrow { color:var(--muted-2); font-size:12px; }
-.kb-list a { display:flex; justify-content:space-between; align-items:center; width:100%; color:inherit; text-decoration:none; }
-.kb-list a:hover { color:var(--ink); }
-.kb-list a:hover .arrow { color:var(--ink); }
-
-/* ── Practical guide blocks ───────────────────────────────── */
-.guide-band { padding: 24px 0; }
-.guide-block {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-}
-.guide-block + .guide-block { margin-top: 18px; }
-.guide-block h2 { font-size: 28px; margin-bottom: 10px; }
-.guide-block h3 { font-size: 17px; margin-bottom: 8px; }
-.guide-block p { color: var(--ink-2); line-height: 1.65; }
-.guide-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
-.guide-mini {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px;
-  background: var(--bg-2);
-}
-.guide-mini .num {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.guide-checklist { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
-.guide-checklist li {
-  display: grid;
-  grid-template-columns: 22px 1fr;
-  gap: 10px;
-  color: var(--ink-2);
-  line-height: 1.55;
-}
-.guide-checklist li::before {
-  content: "✓";
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent-ink);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
-.guide-note {
-  margin-top: 18px;
-  padding: 14px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: #fff7ed;
-  color: #92400e;
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-/* ── Reveal fix — показываем сразу если JS не сработал ─────── */
-.reveal { opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease; }
-.reveal.in { opacity:1; transform:translateY(0); }
-
-@media(max-width:768px) {
-  .dist-table th:nth-child(4), .dist-table td:nth-child(4) { display:none; }
-  .guide-columns { grid-template-columns: 1fr; }
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Пошаговый чек-лист выпуска песни: права, файлы, обложка, метаданные, дистрибьютор и проверка релиза." />
+  <title>Track Start — пошаговый гид по релизу</title>
+  <link rel="stylesheet" href="styles.css?v=20260717" />
+  <link rel="stylesheet" href="styles-home.css?v=20260717" />
+  <link rel="stylesheet" href="styles-app.css?v=20260717" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 </head>
-<body data-screen-label="Track Start — Release Guide">
-
+<body class="guide-page">
 <header class="site-header">
   <div class="container">
-    <nav class="nav">
-      <a href="index.html" class="brand">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-          <rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/>
-          <path d="M8 18 L8 10 L14 10 M14 10 L14 18 M14 14 L20 14 M20 14 L20 18 M20 14 L20 10" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
+    <nav class="nav" aria-label="Основная навигация">
+      <a href="index.html" class="brand" aria-label="Track Start — главная">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/><path d="M8 18V10h6v8m0-4h6v4m0-4v-4" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="brand-name">Track <em>Start</em></span>
       </a>
-      <div class="nav-links">
-        <a class="nav-link" href="index.html" data-i18n="nav.home">Главная</a>
-        <a class="nav-link" href="generator.html" data-i18n="nav.generator">Генератор</a>
+      <div class="nav-links" id="guide-menu">
+        <a class="nav-link" href="index.html">Главная</a>
+        <a class="nav-link" href="generator.html">Генератор</a>
         <a class="nav-link" href="promotion.html">Продвижение</a>
-        <a class="nav-link active" href="guide.html" data-i18n="nav.guide">Гид по релизу</a>
+        <a class="nav-link active" href="guide.html">Гид по релизу</a>
       </div>
-      <div class="row" style="gap: 10px;">
-        <div class="lang-switch" data-lang-switch>
-          <button class="lang-switch-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-            <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span class="lang-switch-current">RU</span>
-            <svg class="caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
-          </button>
-          <div class="lang-switch-menu" role="listbox">
-            <button class="lang-opt active" data-lang="ru" role="option">
-              <span class="flag">RU</span>
-              <span class="name">Русский</span>
-              <span class="sub">RU</span>
-              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
-            </button>
-            <button class="lang-opt" data-lang="en" role="option">
-              <span class="flag">EN</span>
-              <span class="name">English</span>
-              <span class="sub">EN</span>
-              <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>
-            </button>
-          </div>
-        </div>
-        <a href="generator.html" class="btn btn-primary btn-sm" data-i18n="nav.start">Начать</a>
+      <div class="nav-actions">
+        <a href="generator.html" class="btn btn-primary btn-sm nav-start">Создать песню</a>
+        <button class="menu-toggle" type="button" aria-controls="guide-menu" aria-expanded="false" aria-label="Открыть меню"><span></span><span></span><span></span></button>
       </div>
     </nav>
   </div>
 </header>
 
 <main>
-  <section class="guide-hero">
-    <div class="container">
-      <div class="eyebrow"><span class="dot"></span><span>release · v1</span></div>
-      <h1 style="margin-top: 18px;" data-i18n="guide.title">Гид по релизу: всё, что нужно знать</h1>
-      <p class="lede" style="margin-top: 18px;" data-i18n="guide.lede">Структурированная база знаний для тех, кто впервые выпускает трек. Без воды.</p>
-      <div class="guide-toc">
-        <a href="#legal" data-i18n="guide.toc_legal">Права</a>
-        <a href="#artwork" data-i18n="guide.toc_artwork">Обложка</a>
-        <a href="#meta" data-i18n="guide.toc_meta">Метаданные</a>
-        <a href="#compare" data-i18n="guide.toc_dist">Дистрибьюция</a>
-        <a href="#pitch" data-i18n="guide.toc_pitch">Питчинг</a>
+  <section class="release-hero">
+    <div class="container release-hero-grid">
+      <div class="release-hero-copy reveal">
+        <div class="eyebrow"><span class="dot"></span><span>Гид по релизу</span></div>
+        <h1>Выпусти трек без паники</h1>
+        <p class="lede">Шесть шагов от готового аудиофайла до проверки релиза на площадках. Отмечай выполненное и двигайся дальше.</p>
+        <div class="release-actions">
+          <a href="#checklist" class="btn btn-primary btn-lg">Начать по шагам</a>
+          <button class="btn btn-secondary btn-lg" type="button" id="download-checklist">Скачать чек-лист</button>
+        </div>
+        <p class="guide-updated">Короткая практическая инструкция · без цен и рекламных рейтингов</p>
       </div>
+      <aside class="release-summary reveal" aria-label="Краткий маршрут релиза">
+        <div class="summary-head"><span>Маршрут релиза</span><strong id="progress-label">0 из 6</strong></div>
+        <ol>
+          <li><a href="#audio"><span>01</span>Финальный аудиофайл</a></li>
+          <li><a href="#rights"><span>02</span>Права и участники</a></li>
+          <li><a href="#artwork"><span>03</span>Обложка</a></li>
+          <li><a href="#metadata"><span>04</span>Данные о релизе</a></li>
+          <li><a href="#distribution"><span>05</span>Дистрибьютор и загрузка</a></li>
+          <li><a href="#after"><span>06</span>Проверка после выхода</a></li>
+        </ol>
+      </aside>
     </div>
   </section>
 
-  <!-- ============ KB CARDS ============ -->
-  <section class="section" id="overview" style="padding-top: 32px;">
-    <div class="container">
-      <div class="kb-grid">
-        <div class="card kb-card reveal">
-          <div class="kb-head"><span class="kb-tag" data-i18n="kb.legal_tag">01 · Юр. часть</span><span class="chip">5</span></div>
-          <h3 data-i18n="kb.legal_title">Права и документы</h3>
-          <ul class="kb-list">
-            <li><a href="/articles/prava-na-ai-muzyku.html"><span data-i18n="kb.legal_a">Авторские права на музыку</span><span class="arrow">→</span></a></li>
-            <li><span data-i18n="kb.legal_b">Регистрация в РАО / ВОИС</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.legal_c">Договоры с дистрибьюторами</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.legal_d">Сэмплы и чужие лупы — что можно</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.legal_e">Соавторство и доли</span><span class="arrow">→</span></li>
-          </ul>
-        </div>
-        <div class="card kb-card reveal">
-          <div class="kb-head"><span class="kb-tag" data-i18n="kb.design_tag">02 · Оформление</span><span class="chip">5</span></div>
-          <h3 data-i18n="kb.design_title">Обложка и метаданные</h3>
-          <ul class="kb-list">
-            <li><span data-i18n="kb.design_a">Требования к обложке (3000×3000, sRGB)</span><span class="arrow">→</span></li>
-            <li><a href="/articles/isrc-i-metadannye-treka.html"><span data-i18n="kb.design_b">Метаданные: ISRC, UPC, жанр</span><span class="arrow">→</span></a></li>
-            <li><span data-i18n="kb.design_c">Оформление страницы артиста</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.design_d">Тексты и тайм-коды</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.design_e">Цензура и explicit-метки</span><span class="arrow">→</span></li>
-          </ul>
-        </div>
-        <div class="card kb-card reveal">
-          <div class="kb-head"><span class="kb-tag" data-i18n="kb.dist_tag">03 · Дистрибьюция</span><span class="chip">5</span></div>
-          <h3 data-i18n="kb.dist_title">Площадки и выплаты</h3>
-          <ul class="kb-list">
-            <li><span data-i18n="kb.dist_a">Сравнение: DistroKid · TuneCore · Я.Музыка</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.dist_b">Пошаговая инструкция загрузки</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.dist_c">Сроки модерации и pre-save</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.dist_d">Выплаты, налоги, валюта</span><span class="arrow">→</span></li>
-            <li><span data-i18n="kb.dist_e">Питчинг в редакционные плейлисты</span><span class="arrow">→</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
+  <section class="section release-work" id="checklist">
+    <div class="container release-layout">
+      <aside class="release-nav reveal">
+        <span class="release-nav-title">На этой странице</span>
+        <a href="#audio">01 · Аудиофайл</a><a href="#rights">02 · Права</a><a href="#artwork">03 · Обложка</a><a href="#metadata">04 · Метаданные</a><a href="#distribution">05 · Дистрибьютор</a><a href="#after">06 · После выхода</a>
+        <div class="release-nav-note">Не обязательно делать всё за один раз. Отметки сохраняются на этом устройстве.</div>
+      </aside>
 
-  <!-- ============ PRACTICAL RELEASE GUIDE ============ -->
-  <section class="guide-band">
-    <div class="container">
-      <div class="guide-block reveal">
-        <div class="eyebrow"><span class="dot"></span><span>route</span></div>
-        <h2>Маршрут релиза без паники</h2>
-        <p>Перед загрузкой трека проверь не только сам аудиофайл. Для стримингов важны права, название, обложка, метаданные, дата релиза и понимание, куда пойдут выплаты.</p>
-        <div class="guide-columns">
-          <div class="guide-mini">
-            <div class="num">01</div>
-            <h3>Подготовь трек</h3>
-            <p>Финальный WAV/FLAC, без клиппинга, с понятным названием файла и версией мастеринга.</p>
+      <div class="release-steps">
+        <article class="release-step reveal" id="audio" data-release-step="audio">
+          <div class="release-step-head"><span class="release-step-num">01</span><div><span class="release-step-kicker">Сначала</span><h2>Подготовь финальный аудиофайл</h2></div></div>
+          <p class="release-step-intro">Выбери окончательную версию трека. После отправки дистрибьютору заменять файл бывает сложно.</p>
+          <div class="task-list">
+            <label><input type="checkbox" data-check="audio-final"><span>Финальная версия трека утверждена</span></label>
+            <label><input type="checkbox" data-check="audio-file"><span>Файл сохранён в WAV или другом формате, который принимает выбранный дистрибьютор</span></label>
+            <label><input type="checkbox" data-check="audio-listen"><span>Трек прослушан целиком в наушниках и на колонках</span></label>
           </div>
-          <div class="guide-mini">
-            <div class="num">02</div>
-            <h3>Собери данные</h3>
-            <p>Артист, название, авторы, explicit-метка, жанр, язык, текст песни и дата релиза.</p>
+          <details class="guide-details"><summary>Что проверить перед загрузкой</summary><div><p>Убедись, что в начале и конце нет случайной тишины, щелчков и обрезанного хвоста. Назови файл понятно, например: <code>Artist_Track_Final.wav</code>.</p></div></details>
+        </article>
+
+        <article class="release-step reveal" id="rights" data-release-step="rights">
+          <div class="release-step-head"><span class="release-step-num">02</span><div><span class="release-step-kicker">До публикации</span><h2>Разберись с правами и участниками</h2></div></div>
+          <p class="release-step-intro">Ты должен понимать, кто написал песню, кому принадлежит запись и разрешено ли использовать все элементы трека.</p>
+          <div class="task-list">
+            <label><input type="checkbox" data-check="rights-authors"><span>Записаны настоящие имена авторов текста и музыки</span></label>
+            <label><input type="checkbox" data-check="rights-splits"><span>С соавторами согласованы доли и выплаты</span></label>
+            <label><input type="checkbox" data-check="rights-samples"><span>На сэмплы, минусы, вокал и изображения есть необходимые разрешения</span></label>
+            <label><input type="checkbox" data-check="rights-ai"><span>Проверены условия AI-сервисов, использованных при создании</span></label>
           </div>
-          <div class="guide-mini">
-            <div class="num">03</div>
-            <h3>Загрузи заранее</h3>
-            <p>Лучше отправлять релиз за 2-4 недели: останется время на модерацию и исправления.</p>
+          <details class="guide-details"><summary>Если песня создана с помощью AI</summary><div><p>Сохрани текст, промпты, исходные файлы и название тарифа сервиса. Условия коммерческого использования могут меняться, поэтому проверяй их непосредственно перед релизом.</p><p class="guide-warning">Для каверов, спорных сэмплов и коммерческих договоров лучше получить консультацию профильного юриста.</p></div></details>
+        </article>
+
+        <article class="release-step reveal" id="artwork" data-release-step="artwork">
+          <div class="release-step-head"><span class="release-step-num">03</span><div><span class="release-step-kicker">Визуал</span><h2>Подготовь обложку</h2></div></div>
+          <p class="release-step-intro">Обложка должна хорошо читаться в маленьком размере и соответствовать требованиям выбранного дистрибьютора.</p>
+          <div class="task-list">
+            <label><input type="checkbox" data-check="art-square"><span>Квадратное изображение подготовлено в хорошем качестве</span></label>
+            <label><input type="checkbox" data-check="art-rights"><span>Есть права на фотографию, шрифт и другие элементы</span></label>
+            <label><input type="checkbox" data-check="art-clean"><span>Нет QR-кодов, контактов, логотипов площадок и водяных знаков</span></label>
+            <label><input type="checkbox" data-check="art-match"><span>Имя артиста и название совпадают с данными релиза</span></label>
           </div>
-        </div>
-      </div>
+          <details class="guide-details"><summary>Практический ориентир</summary><div><p>Часто используется квадрат 3000×3000 px в RGB/sRGB, но окончательные требования всегда проверяй в форме загрузки выбранного дистрибьютора.</p></div></details>
+        </article>
 
-      <div class="guide-block reveal" id="legal">
-        <div class="eyebrow"><span class="dot"></span><span>rights</span></div>
-        <h2>Права и документы</h2>
-        <p>Минимальная задача перед релизом — понимать, кто написал текст, кто сделал музыку, кто владеет мастер-записью и можно ли легально использовать все элементы трека.</p>
-        <ul class="guide-checklist">
-          <li>Если есть соавторы, зафиксируй доли письменно: хотя бы простым соглашением в переписке или документе.</li>
-          <li>Не используй чужие сэмплы, лупы и минусы без лицензии. Даже короткий узнаваемый фрагмент может заблокировать релиз.</li>
-          <li>Если музыка создана с AI-сервисом, проверь условия конкретного сервиса и тарифа на момент релиза.</li>
-          <li>Сохрани исходники: текст, промпт, проект, аудиофайлы, обложку и переписку с участниками.</li>
-        </ul>
-        <div class="guide-note">Это не юридическая консультация. Для спорных прав, сэмплов, каверов и коммерческих договоров лучше обратиться к профильному юристу.</div>
-      </div>
-
-      <div class="guide-block reveal" id="artwork">
-        <div class="eyebrow"><span class="dot"></span><span>artwork</span></div>
-        <h2>Обложка</h2>
-        <p>Обложка должна выглядеть как самостоятельный релиз, а не случайная картинка. Площадки часто отклоняют изображения с лишними логотипами, QR-кодами, контактами, водяными знаками и обещаниями вроде “new hit”.</p>
-        <ul class="guide-checklist">
-          <li>Используй квадратный формат, лучше 3000×3000 px, RGB/sRGB, JPG или PNG.</li>
-          <li>Не ставь чужие бренды, фото людей без разрешения, логотипы стримингов и социальные иконки.</li>
-          <li>Название и артист на обложке должны совпадать с метаданными, если ты их пишешь на изображении.</li>
-          <li>Проверь, читается ли обложка в маленьком размере: 100×100 px часто важнее большого превью.</li>
-        </ul>
-      </div>
-
-      <div class="guide-block reveal" id="meta">
-        <div class="eyebrow"><span class="dot"></span><span>metadata</span></div>
-        <h2>Метаданные</h2>
-        <p>Метаданные — это то, как релиз попадёт в каталоги. Ошибки в имени артиста, версии трека или explicit-метке сложнее исправлять после публикации.</p>
-        <div class="guide-columns">
-          <div class="guide-mini">
-            <div class="num">artist</div>
-            <h3>Имя артиста</h3>
-            <p>Пиши одинаково на всех релизах. Не меняй регистр, пробелы и символы без причины.</p>
+        <article class="release-step reveal" id="metadata" data-release-step="metadata">
+          <div class="release-step-head"><span class="release-step-num">04</span><div><span class="release-step-kicker">Карточка релиза</span><h2>Собери метаданные</h2></div></div>
+          <p class="release-step-intro">Метаданные — это информация, по которой площадки создадут страницу релиза и распределят выплаты.</p>
+          <div class="metadata-grid">
+            <div><strong>Имя артиста</strong><span>Одинаковое написание во всех релизах</span></div><div><strong>Название</strong><span>Без рекламы, жанров и лишних символов</span></div><div><strong>Авторы</strong><span>Настоящие имена и роли участников</span></div><div><strong>Язык и жанр</strong><span>Выбери наиболее близкие варианты</span></div><div><strong>Explicit</strong><span>Отметь ненормативную лексику и взрослые темы</span></div><div><strong>Дата релиза</strong><span>Оставь запас на проверку и исправления</span></div>
           </div>
-          <div class="guide-mini">
-            <div class="num">track</div>
-            <h3>Название</h3>
-            <p>Не добавляй жанры, рекламу и лишние скобки. Версии вроде Remix или Acoustic указывай аккуратно.</p>
+          <div class="task-list task-list--compact"><label><input type="checkbox" data-check="meta-ready"><span>Все данные собраны в одном документе и проверены</span></label></div>
+          <details class="guide-details"><summary>Что такое ISRC и UPC</summary><div><p>ISRC идентифицирует конкретную запись, UPC/EAN — релиз целиком. Обычно эти коды может выдать дистрибьютор. Не создавай новый ISRC для той же самой записи без необходимости.</p><a class="inline-guide-link" href="/articles/isrc-i-metadannye-treka.html">Подробнее о метаданных →</a></div></details>
+        </article>
+
+        <article class="release-step reveal" id="distribution" data-release-step="distribution">
+          <div class="release-step-head"><span class="release-step-num">05</span><div><span class="release-step-kicker">Доставка музыки</span><h2>Выбери дистрибьютора и загрузи релиз</h2></div></div>
+          <div class="definition-card"><strong>Дистрибьютор</strong><p>Принимает твои файлы и доставляет релиз в стриминговые сервисы.</p><span>→</span><strong>Стриминговые сервисы</strong><p>Яндекс Музыка, Spotify, Apple Music и другие места, где слушатели находят трек.</p></div>
+          <h3 class="subheading">Выбирай не по одной цене, а по условиям</h3>
+          <div class="choice-grid"><div><span>01</span><strong>Доступность</strong><p>Работает ли регистрация и вывод средств в твоей стране?</p></div><div><span>02</span><strong>Модель оплаты</strong><p>Подписка, разовая оплата или процент с дохода?</p></div><div><span>03</span><strong>Площадки</strong><p>Есть ли нужные тебе музыкальные сервисы?</p></div><div><span>04</span><strong>После отмены</strong><p>Останется ли музыка доступна, если прекратить оплату?</p></div></div>
+          <div class="task-list">
+            <label><input type="checkbox" data-check="dist-terms"><span>Условия и способы выплат проверены на официальном сайте</span></label>
+            <label><input type="checkbox" data-check="dist-upload"><span>Аудио, обложка и метаданные загружены без ошибок</span></label>
+            <label><input type="checkbox" data-check="dist-date"><span>Выбрана дата с запасом на модерацию и исправления</span></label>
           </div>
-          <div class="guide-mini">
-            <div class="num">flags</div>
-            <h3>Explicit</h3>
-            <p>Если есть мат или взрослые темы, ставь explicit. Неверная отметка может привести к снятию релиза.</p>
+          <details class="guide-details"><summary>Примеры сервисов для самостоятельной проверки</summary><div><p>DistroKid, TuneCore, CD Baby, Amuse и RouteNote — лишь примеры дистрибьюторов, а не рейтинг и не рекомендация. Цены, доступность стран, комиссии и правила AI-контента меняются, поэтому Track Start намеренно не показывает их как постоянные значения.</p></div></details>
+        </article>
+
+        <article class="release-step reveal" id="after" data-release-step="after">
+          <div class="release-step-head"><span class="release-step-num">06</span><div><span class="release-step-kicker">После выхода</span><h2>Проверь релиз на площадках</h2></div></div>
+          <p class="release-step-intro">Не считай работу завершённой, пока не увидишь, как релиз отображается у слушателей.</p>
+          <div class="task-list">
+            <label><input type="checkbox" data-check="after-links"><span>Проверены ссылки и доступность трека на нужных площадках</span></label>
+            <label><input type="checkbox" data-check="after-profile"><span>Релиз попал в правильную карточку артиста</span></label>
+            <label><input type="checkbox" data-check="after-data"><span>Название, авторы, обложка и explicit-метка отображаются верно</span></label>
+            <label><input type="checkbox" data-check="after-promo"><span>Ссылки добавлены в план продвижения и публикации</span></label>
           </div>
-        </div>
-      </div>
-
-      <div class="guide-block reveal" id="pitch">
-        <div class="eyebrow"><span class="dot"></span><span>pitch</span></div>
-        <h2>Питчинг и запуск</h2>
-        <p>Релиз не заканчивается загрузкой файла. Нужны короткое описание, дата, ссылки, визуалы и понятный план первых дней после публикации.</p>
-        <ul class="guide-checklist">
-          <li>Выбери дату релиза с запасом: редакционный питчинг и pre-save требуют времени.</li>
-          <li>Подготовь 2-3 предложения о треке: история, настроение, жанр, для какой аудитории он подходит.</li>
-          <li>Собери короткие видео/обложки для Reels, Shorts, TikTok и постов до даты релиза.</li>
-          <li>После выхода проверь ссылки на площадках, карточку артиста, текст песни и правильность имени.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ DISTRIBUTOR COMPARE ============ -->
-  <section class="section" id="compare" style="padding-top: 24px;">
-    <div class="container">
-      <div class="section-head reveal">
-        <div class="eyebrow"><span class="dot"></span><span>compare</span></div>
-        <h2 data-i18n="guide.dist_title">Сравнение площадок</h2>
-        <p class="lede" data-i18n="guide.dist_lede">Ориентиры по условиям дистрибьюторов. Перед оплатой проверь актуальные цены и правила на сайте площадки.</p>
-      </div>
-
-      <div class="dist-filters">
-        <button class="demo-chip active" data-filter="all" data-i18n="guide.f_all">Все</button>
-        <button class="demo-chip" data-filter="free" data-i18n="guide.f_free">Бесплатно</button>
-        <button class="demo-chip" data-filter="ru" data-i18n="guide.f_ru">Россия</button>
-        <button class="demo-chip" data-filter="fast" data-i18n="guide.f_fast">Быстрая модерация</button>
-        <button class="demo-chip" data-filter="ai" data-i18n="guide.f_ai">AI-music friendly</button>
-      </div>
-
-      <div class="dist-table-wrap reveal">
-        <table class="dist-table">
-          <thead>
-            <tr>
-              <th data-i18n="guide.col_name">Площадка</th>
-              <th data-i18n="guide.col_price">Цена / год</th>
-              <th data-i18n="guide.col_royalty">Роялти</th>
-              <th data-i18n="guide.col_speed">Модерация</th>
-              <th data-i18n="guide.col_notes">Особенности</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="dist-row" data-tags="fast">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#06c167;">DK</div>DistroKid</div></td>
-              <td>$22.99</td>
-              <td>100%</td>
-              <td>1–3 дня</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">unlimited</span><span class="dist-tag">no Russia bank</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="ai">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#000;">TC</div>TuneCore</div></td>
-              <td>$14.99 / single</td>
-              <td>100%</td>
-              <td>2–5 дней</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">per release</span><span class="dist-tag">AI ok</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="free ai">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#7c3aed;">AM</div>Amuse</div></td>
-              <td>$0 (free tier)</td>
-              <td>100%</td>
-              <td>3–7 дней</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">free</span><span class="dist-tag">slower</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="ru fast ai">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#ff3344;">ЯМ</div>Яндекс.Музыка</div></td>
-              <td>через дистрибьютора</td>
-              <td>90–100%</td>
-              <td>3–10 дней</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">Россия</span><span class="dist-tag">RUB выплаты</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="ru free">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#1d1d1f;">МВ</div>МойВклад</div></td>
-              <td>0 ₽</td>
-              <td>80%</td>
-              <td>5–14 дней</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">Россия</span><span class="dist-tag">free</span><span class="dist-tag">slow</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="fast ai">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#0ea5e9;">CD</div>CD Baby</div></td>
-              <td>$9.95 / single</td>
-              <td>91%</td>
-              <td>1–2 дня</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">YouTube ID</span><span class="dist-tag">sync ops</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="ai free">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#f59e0b;">RX</div>RouteNote</div></td>
-              <td>$0 / 15% cut</td>
-              <td>85%</td>
-              <td>5–10 дней</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">free</span><span class="dist-tag">AI ok</span></div></td>
-            </tr>
-            <tr class="dist-row" data-tags="ru ai">
-              <td><div class="dist-name"><div class="dist-logo" style="background:#6d28d9;">BD</div>Band Link / BD</div></td>
-              <td>1 990 ₽</td>
-              <td>92%</td>
-              <td>2–5 дней</td>
-              <td><div class="dist-tag-row"><span class="dist-tag">VK</span><span class="dist-tag">Я.Музыка</span></div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ FINAL CTA reusing the same component ============ -->
-  <section class="section" id="start">
-    <div class="container">
-      <div class="final-cta reveal">
-        <div class="eyebrow" style="margin: 0 auto 16px; color: rgba(255,255,255,0.6);"><span class="dot" style="background: var(--accent-2);"></span><span>start</span></div>
-        <h2 data-i18n="cta.title">Начни свой первый релиз правильно</h2>
-        <p data-i18n="cta.lede">Бесплатно. Без листа ожидания. Без кредитной карты.</p>
-        <div class="ctas">
-          <a href="generator.html" class="btn btn-primary btn-lg" data-i18n="cta.primary">Создать первую песню</a>
-          <a href="index.html" class="btn btn-secondary btn-lg" data-i18n="nav.home">Главная</a>
-        </div>
+          <div class="step-finish"><span>Готово</span><div><strong>Релиз выпущен и проверен</strong><p>Теперь можно сосредоточиться на продвижении.</p></div><a href="promotion.html" class="btn btn-primary">Создать план</a></div>
+        </article>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-bottom">
-      <span data-i18n="footer.copy">© 2026 Track Start. Маршрут от идеи до релиза.</span>
-      <span>Made with care · Moscow / remote</span>
-    </div>
-  </div>
-</footer>
+<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><a href="index.html" class="brand" style="margin-bottom:14px"><span class="brand-name">Track <em>Start</em></span></a><p class="muted" style="font-size:14px;max-width:38ch">Помощник для авторов, которые создают музыку и выпускают её на стримингах.</p></div><div class="footer-col"><h4>Инструменты</h4><a href="generator.html">Генератор песен</a><a href="promotion.html">Продвижение</a></div><div class="footer-col"><h4>Материалы</h4><a href="/articles/prava-na-ai-muzyku.html">Права на AI-музыку</a><a href="/articles/isrc-i-metadannye-treka.html">ISRC и метаданные</a></div><div class="footer-col"><h4>Документы</h4><a href="/privacy.html">Конфиденциальность</a><a href="/oferta.html">Оферта</a></div></div><div class="footer-bottom"><span>© 2026 Track Start</span><span>Гид без рекламных рейтингов</span></div></div></footer>
 
-<div id="tweaks-root"></div>
-
-<script src="i18n.js"></script>
-<script src="logos.js"></script>
 <script src="app.js"></script>
-
 <script>
-// Fallback: если IntersectionObserver не отработал — показываем всё
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    document.querySelectorAll('.reveal').forEach(function(el) {
-      el.classList.add('in');
-    });
-  }, 100);
-});
+(function () {
+  const menuButton = document.querySelector('.menu-toggle');
+  const menu = document.getElementById('guide-menu');
+  if (menuButton && menu) menuButton.addEventListener('click', function () { const open = menuButton.getAttribute('aria-expanded') === 'true'; menuButton.setAttribute('aria-expanded', String(!open)); menu.classList.toggle('open', !open); });
+
+  const boxes = Array.from(document.querySelectorAll('[data-check]'));
+  const stepCards = Array.from(document.querySelectorAll('[data-release-step]'));
+  function updateProgress() {
+    boxes.forEach(function (box) { try { box.checked = localStorage.getItem('ts_release_' + box.dataset.check) === '1'; } catch (_) {} });
+    let complete = 0;
+    stepCards.forEach(function (step) { const own = Array.from(step.querySelectorAll('[data-check]')); const done = own.length && own.every(function (box) { return box.checked; }); step.classList.toggle('is-complete', done); if (done) complete += 1; });
+    const label = document.getElementById('progress-label'); if (label) label.textContent = complete + ' из 6';
+  }
+  boxes.forEach(function (box) { box.addEventListener('change', function () { try { localStorage.setItem('ts_release_' + box.dataset.check, box.checked ? '1' : '0'); } catch (_) {} updateProgress(); }); });
+  updateProgress();
+
+  const download = document.getElementById('download-checklist');
+  if (download) download.addEventListener('click', function () {
+    const lines = ['TRACK START — ЧЕК-ЛИСТ РЕЛИЗА', '', '01. АУДИОФАЙЛ', '□ Утвердить финальную версию', '□ Подготовить файл в формате дистрибьютора', '□ Прослушать трек целиком', '', '02. ПРАВА', '□ Записать авторов и роли', '□ Согласовать доли', '□ Проверить разрешения на все материалы', '□ Проверить условия AI-сервисов', '', '03. ОБЛОЖКА', '□ Подготовить квадратное изображение', '□ Проверить права на элементы', '□ Убрать QR-коды, контакты и чужие логотипы', '', '04. МЕТАДАННЫЕ', '□ Собрать имя артиста, название, авторов, язык, жанр и дату', '□ Проверить explicit-метку', '', '05. ДИСТРИБЬЮТОР', '□ Проверить доступность, договор и выплаты', '□ Загрузить аудио, обложку и данные', '□ Оставить запас на проверку', '', '06. ПОСЛЕ ВЫХОДА', '□ Проверить ссылки и карточку артиста', '□ Проверить обложку и данные', '□ Добавить ссылки в план продвижения'];
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'track-start-release-checklist.txt'; link.click(); URL.revokeObjectURL(url);
+  });
+})();
 </script>
 </body>
 </html>
