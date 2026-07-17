@@ -20,6 +20,43 @@ function extractJson(text) {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+async function callClaude(key, { messages, maxTokens, system }) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: maxTokens,
+      ...(system ? { system } : {}),
+      messages,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.error?.message || `Ошибка AI: ${response.status}`);
+  return { text: data.content?.[0]?.text || '', stopReason: data.stop_reason || '' };
+}
+
+async function parseOrRepairJson(key, text) {
+  try {
+    return extractJson(text);
+  } catch (firstError) {
+    const repair = await callClaude(key, {
+      maxTokens: 10000,
+      system: 'Ты исправляешь JSON. Верни только один валидный JSON-объект без markdown. Не сокращай, не переписывай и не добавляй содержание: исправь только синтаксис, кавычки, запятые и скобки.',
+      messages: [{ role: 'user', content: `Исправь синтаксис этого JSON:\n\n${String(text).slice(0, 45000)}` }],
+    });
+    try {
+      return extractJson(repair.text);
+    } catch {
+      throw new Error('AI не смог правильно оформить большой план. Пожалуйста, нажмите «Создать план» ещё раз.');
+    }
+  }
+}
+
 export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (req.method !== 'POST') {
@@ -88,25 +125,15 @@ JSON СТРОГО ТАКОЙ СТРУКТУРЫ:
 Требования к количеству: ровно 10 hooks, 12 contentIdeas, 5 scripts. В calendar создай ровно 15 элементов и используй offsets строго в этом порядке: ${OFFSETS.join(', ')}. На каждую дату дай 2–4 конкретные задачи. В contentIdea календаря указывай тему ролика, когда ролик нужен; иначе пустую строку.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 7000,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+    const generated = await callClaude(key, {
+      maxTokens: 12000,
+      messages: [{ role: 'user', content: prompt }],
     });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      res.status(502).json({ error: data?.error?.message || `Ошибка AI: ${response.status}` });
+    if (generated.stopReason === 'max_tokens') {
+      res.status(502).json({ error: 'План получился слишком длинным. Пожалуйста, нажмите «Создать план» ещё раз.' });
       return;
     }
-    const result = extractJson(data.content?.[0]?.text);
+    const result = await parseOrRepairJson(key, generated.text);
     res.status(200).json({ result, generatedAt: new Date().toISOString() });
   } catch (error) {
     res.status(502).json({ error: error.message || 'Не удалось создать план. Попробуйте ещё раз.' });
