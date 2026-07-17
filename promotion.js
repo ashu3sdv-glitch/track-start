@@ -120,6 +120,13 @@
     try {
       const response = await fetch('/api/promotion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
       const body = await response.json().catch(() => ({}));
+      if (response.status === 402 && body.code === 'PRO_REQUIRED') {
+        loading.hidden = true;
+        wrap.hidden = false;
+        errorBox.hidden = false;
+        errorBox.innerHTML = '<strong>Пробный план уже использован.</strong><br>Новые планы продвижения доступны на тарифе Pro.<br><a class="btn btn-primary" href="index.html#pricing" style="margin-top:16px">Подключить Pro</a>';
+        return;
+      }
       if (!response.ok || !body.result) throw new Error(body.error || 'Не удалось создать план');
       const saved = { input: { ...input, planToken: undefined }, result: body.result, generatedAt: body.generatedAt };
       localStorage.setItem(LAST_PLAN_KEY, JSON.stringify(saved));

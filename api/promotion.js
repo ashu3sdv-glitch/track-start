@@ -1,6 +1,8 @@
 import {
   applySecurityHeaders,
   enforceRateLimit,
+  hasUsedPromotionTrial,
+  markPromotionTrialUsed,
   parseRequestBody,
   requireTrustedOrigin,
   verifyPlanToken,
@@ -67,7 +69,15 @@ export default async function handler(req, res) {
 
   const body = parseRequestBody(req);
   const plan = verifyPlanToken(body.planToken);
-  if (!enforceRateLimit(req, res, { paid: plan?.plan === 'pro', scope: 'promotion' })) return;
+  const isPro = plan?.plan === 'pro';
+  if (!isPro && hasUsedPromotionTrial(req)) {
+    res.status(402).json({
+      code: 'PRO_REQUIRED',
+      error: 'Пробный план уже использован. Новые планы доступны на тарифе Pro.',
+    });
+    return;
+  }
+  if (!enforceRateLimit(req, res, { paid: isPro, scope: 'promotion' })) return;
 
   const song = {
     title: clean(body.title, 120),
@@ -134,6 +144,10 @@ JSON СТРОГО ТАКОЙ СТРУКТУРЫ:
       return;
     }
     const result = await parseOrRepairJson(key, generated.text);
+    if (!isPro && !markPromotionTrialUsed(res)) {
+      res.status(500).json({ error: 'Не настроена защита пробной генерации' });
+      return;
+    }
     res.status(200).json({ result, generatedAt: new Date().toISOString() });
   } catch (error) {
     res.status(502).json({ error: error.message || 'Не удалось создать план. Попробуйте ещё раз.' });

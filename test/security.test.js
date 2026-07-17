@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
-import { requireTrustedOrigin, verifyPlanToken } from '../api/_security.js';
+import { hasUsedPromotionTrial, markPromotionTrialUsed, requireTrustedOrigin, verifyPlanToken } from '../api/_security.js';
 
 function responseStub() {
   return {
@@ -40,4 +40,14 @@ test('verifies signed, unexpired plan tokens', () => {
   const signature = crypto.createHmac('sha256', 'test-secret').update(payload).digest('hex');
   assert.equal(verifyPlanToken(`${payload}.${signature}`).plan, 'pro');
   assert.equal(verifyPlanToken(`${payload}.${'0'.repeat(64)}`), null);
+});
+
+test('marks and verifies the one-time promotion trial', () => {
+  process.env.TRIAL_COOKIE_SECRET = 'trial-test-secret';
+  const res = { headers: {}, setHeader(name, value) { this.headers[name] = value; } };
+  assert.equal(markPromotionTrialUsed(res), true);
+  const cookie = res.headers['Set-Cookie'].split(';')[0];
+  assert.equal(hasUsedPromotionTrial({ headers: { cookie } }), true);
+  assert.equal(hasUsedPromotionTrial({ headers: { cookie: 'ts_promo_trial=used.invalid' } }), false);
+  delete process.env.TRIAL_COOKIE_SECRET;
 });

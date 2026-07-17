@@ -61,6 +61,32 @@ export function verifyPlanToken(token) {
   }
 }
 
+function trialSecret() {
+  return process.env.TRIAL_COOKIE_SECRET || process.env.YOOKASSA_SECRET_KEY || '';
+}
+
+function signTrial(value) {
+  const secret = trialSecret();
+  return secret ? crypto.createHmac('sha256', secret).update(value).digest('hex') : '';
+}
+
+export function hasUsedPromotionTrial(req) {
+  const cookies = String(req.headers.cookie || '').split(';').map((part) => part.trim());
+  const raw = cookies.find((part) => part.startsWith('ts_promo_trial='))?.slice('ts_promo_trial='.length) || '';
+  const [value, signature] = raw.split('.');
+  if (value !== 'used' || !/^[a-f0-9]{64}$/i.test(signature || '')) return false;
+  const expected = signTrial(value);
+  if (!expected) return false;
+  return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
+}
+
+export function markPromotionTrialUsed(res) {
+  const signature = signTrial('used');
+  if (!signature) return false;
+  res.setHeader('Set-Cookie', `ts_promo_trial=used.${signature}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`);
+  return true;
+}
+
 export function enforceRateLimit(req, res, { paid = false, scope = 'api' } = {}) {
   const windowMs = 60 * 60 * 1000;
   const limit = paid ? 120 : 20;
