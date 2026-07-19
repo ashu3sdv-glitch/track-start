@@ -601,6 +601,12 @@ RULES:
           sunoPrompt: styleClean,
           createdAt: new Date().toISOString()
         }));
+        localStorage.setItem('ts_vocal_draft', JSON.stringify({
+          title: idea.slice(0, 120), lyrics, genre: selectedGenres.join(' + '),
+          mood: selectedMood, vocalType: selectedVocal, language: selectedLang,
+          createdAt: new Date().toISOString()
+        }));
+        document.getElementById('vocal-cta').style.display = 'flex';
         document.getElementById('promotion-cta').style.display = 'flex';
       } catch {
         document.getElementById('suno-status').style.display = 'none';
@@ -659,6 +665,9 @@ RULES:
 
   document.getElementById('promotion-cta').addEventListener('click', () => {
     window.location.href = 'promotion.html?source=generator';
+  });
+  document.getElementById('vocal-cta').addEventListener('click', () => {
+    window.location.href = 'vocal.html?source=generator';
   });
 
   // ── INIT ───────────────────────────────────────────────────────────────────

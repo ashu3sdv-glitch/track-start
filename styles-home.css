@@ -535,7 +535,7 @@ body.density-cozy .svc-card { padding: 28px; }
 .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 5px rgba(16,185,129,.1); flex: 0 0 auto; }
 
 .route-section { background: var(--bg-2); }
-.product-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.product-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
 .product-card { display: flex; flex-direction: column; min-height: 420px; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .product-card--accent { border-color: rgba(139,92,246,.35); background: linear-gradient(160deg,#fff 58%,var(--accent-soft)); }
