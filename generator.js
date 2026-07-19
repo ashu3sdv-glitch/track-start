@@ -608,36 +608,6 @@ RULES:
     }
   }
 
-  // Переводит английские пометки подачи из applyPerformanceSettings (generator-engine.js)
-  // в понятную человеку русскую расшифровку под панелью стиля.
-  const DELIVERY_DICT = [
-    [/full vocal stack|choir backing/, 'плотный многослойный вокал, хор на подпевках'],
-    [/falsetto/, 'фальцетом, легко и воздушно'],
-    [/gospel|soulful|testimony|ad-lib|runs/, 'с распевами и подголосками, госпел-манера'],
-    [/anthemic|full chest|open and powerful|full release|soaring|powerful/, 'мощно, во весь голос'],
-    [/stripped|vulnerable|bare|exposed|confessional|revelation/, 'обнажённо, на грани откровения'],
-    [/tense|tension|pressure|build|rising|rise|lift/, 'нарастающе, с растущим напряжением'],
-    [/rhythmic|chant|half-time|spoken|processed|filtered|hypnotic|repetitive|synth-driven/, 'ритмично, почти речитативом'],
-    [/storytelling|narrative|communal|heartfelt/, 'повествовательно, как рассказ'],
-    [/intimate|conversational|restrained|close-mic|hushed|minimal|warm|cool|low/, 'тихо, сдержанно, близко к микрофону'],
-    [/fading|fade|resolved/, 'затихая к концу'],
-  ];
-  function describeDelivery(text) {
-    const hits = [];
-    DELIVERY_DICT.forEach(([re, desc]) => { if (re.test(text) && !hits.includes(desc)) hits.push(desc); });
-    return hits.join('; ');
-  }
-  function buildVocalGuide(lyricsText) {
-    const rows = [];
-    (lyricsText || '').split('\n').forEach(line => {
-      const m = line.match(/^\[([^—\]]+)\s*—\s*([^\]]+)\]/);
-      if (!m) return;
-      const desc = describeDelivery(m[2].toLowerCase());
-      if (desc) rows.push(`<div><b>${m[1].trim()}:</b> ${desc}</div>`);
-    });
-    return rows.join('');
-  }
-
   async function runStyle() {
     const cleanLyrics = document.getElementById('lyrics-text').value.trim();
     if (!cleanLyrics || !currentBrief) { alert('Сначала создай текст песни'); return; }
@@ -655,7 +625,6 @@ RULES:
           .replace(/\|/g,'<span style="color:var(--muted)">|</span>')
           .replace(/(\d{2,3})( BPM)/g,'<span style="color:#f59e0b">$1</span>$2');
         document.getElementById('suno-prompt').innerHTML = html;
-        document.getElementById('vocal-guide-list').innerHTML = buildVocalGuide(performanceLyrics) || '<div>Секционные пометки подачи не найдены в тексте.</div>';
         document.getElementById('suno-status').style.display = 'none';
         document.getElementById('suno-ready').style.display = '';
         document.getElementById('step2-num').className = 'step-num done';
