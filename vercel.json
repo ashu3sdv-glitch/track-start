@@ -16,5 +16,10 @@
         { "key": "Cache-Control", "value": "no-store" }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/book.js": {
+      "includeFiles": "private-books/voice-in-suno.pdf.enc"
+    }
+  }
 }

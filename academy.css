@@ -2,3 +2,4 @@
 @media(max-width:960px){.academy-grid{grid-template-columns:repeat(2,1fr)}.learning-path{grid-template-columns:repeat(2,1fr)}.article-layout{grid-template-columns:1fr}.article-aside{position:static}.book-hero{grid-template-columns:240px 1fr}}
 @media(max-width:680px){.academy-main{padding-top:34px}.academy-grid,.learning-path,.toc,.book-hero{grid-template-columns:1fr}.academy-card{min-height:0}.academy-section-head{display:block}.academy-section-head p{margin-top:8px}.book-cover{max-width:300px}.book-details h1{font-size:40px}.article-body{font-size:16px}.nav-links{display:none}}
 .book-cover .cover-title{font-size:42px;font-weight:600;line-height:1;margin:28px 0 16px}
+.book-access{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-lg);padding:26px}.book-access h2{margin-bottom:8px}.book-access-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px}.book-access [data-book-status]{min-height:20px;font-size:13px}
