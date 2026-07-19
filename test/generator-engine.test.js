@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getVocalPlan, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getSignatureTail, getVocalPlan, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -14,10 +14,11 @@ test('first stage returns clean lyrics without vocal settings', () => {
 
 test('second stage adds voice and genre-specific section delivery', () => {
   const brief = { vocal: 'Male vocal', genres: ['Pop'] };
-  const result = applyPerformanceSettings('[Verse 1]\nТихо горит окно\n[Chorus]\nОстанься со мной', brief);
+  const result = applyPerformanceSettings('[Verse 1]\nТихо горит окно\n[Chorus]\nОстанься со мной\n[Final Chorus]\nОстанься со мной', brief);
   assert.ok(result.startsWith(getVocalPlan(brief).header));
   assert.match(result, /\[Verse 1 — intimate conversational\]/);
   assert.match(result, /\[Chorus — open and powerful\]/);
+  assert.match(result, /\[Final Chorus — open and powerful, full vocal stack, choir backing\]/);
 });
 
 test('genre changes section delivery and meter architecture', () => {
@@ -49,4 +50,16 @@ test('style finalizer locks selected voice and removes the opposite one', () => 
   const style = finalizeStyle('dream pop, 105 BPM, female vocals, soprano, warm synths', { vocal: 'Male vocal' });
   assert.match(style, /^male vocals/);
   assert.doesNotMatch(style, /female|soprano/i);
+  assert.match(style, /no generic AI polish \| human breath imperfection$/);
+});
+
+test('selects energetic and atmospheric anti-AI tails from the brief', () => {
+  assert.match(getSignatureTail({ mood: 'Energetic', genres: ['Pop'] }), /no safe AI sound/);
+  assert.match(getSignatureTail({ mood: 'Dreamy', genres: ['Cinematic'] }), /no clean digital polish/);
+});
+
+test('style finalizer replaces a model tail with exactly one selected signature', () => {
+  const style = finalizeStyle('pop, 100 BPM | raw energy no overproduce | unwanted duplicate words', { vocal: 'Female vocal', mood: 'Dreamy', genres: ['Cinematic'] });
+  assert.equal((style.match(/no clean digital polish/g) || []).length, 1);
+  assert.doesNotMatch(style, /raw energy no overproduce/);
 });

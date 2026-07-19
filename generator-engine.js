@@ -15,6 +15,11 @@ const GENRE_ARCHITECTURES = {
 
 const DEFAULT_ARCHITECTURE = { craft: 'clear scene, emotional turn, memorable hook', delivery: ['intimate', 'building', 'full memorable', 'contrasting stripped', 'soft fading'], syllables: [[7, 11], [6, 10], [5, 10], [6, 11], [4, 9]] };
 const SECTION_KEYS = ['verse', 'pre-chorus', 'chorus', 'bridge', 'outro'];
+const SIGNATURE_TAILS = {
+  emotional: 'deep emotional warmth | close-mic intimacy | analog texture | no generic AI polish | human breath imperfection',
+  energetic: 'raw energy no overproduce | organic punch | wide stereo depth | no safe AI sound | unexpected texture',
+  atmospheric: 'cinematic space | subtle tape noise | unhurried tempo feel | no clean digital polish | air and silence matter',
+};
 
 const PROFILES = {
   'Male vocal': { identity: '[Male Vocal] [Baritone G2–G4] [warm dark centre, rich chest tone]', style: 'male vocals, warm baritone', forbidden: /female|mezzo|soprano|contralto/i },
@@ -43,6 +48,12 @@ export function getVocalPlan(brief = {}) {
 }
 
 function rangeText(a) { return SECTION_KEYS.map((key, i) => `${key} ${a.syllables[i][0]}–${a.syllables[i][1]}`).join(', '); }
+
+export function getSignatureTail(brief = {}) {
+  if (['Energetic', 'Angry', 'Euphoric'].includes(brief.mood) || ['Indie Rock', 'Dark Phonk', 'Hip-Hop'].includes(brief.genres?.[0])) return SIGNATURE_TAILS.energetic;
+  if (['Dreamy', 'Peaceful', 'Dark'].includes(brief.mood) || ['Lo-fi', 'Electronic', 'Cinematic'].includes(brief.genres?.[0])) return SIGNATURE_TAILS.atmospheric;
+  return SIGNATURE_TAILS.emotional;
+}
 
 export function buildLyricsPrompt(brief) {
   const profile = getVocalPlan(brief);
@@ -74,6 +85,8 @@ SONGCRAFT
 - Verse 1 establishes a concrete scene; Verse 2 adds an event or angle; Bridge reveals a turn or decision.
 - Prefer physical details, gestures, places and active verbs over abstract labels and clichés.
 - Use natural rhyme, slant rhyme, assonance and internal rhyme. Never distort grammar for rhyme.
+- At no more than one emotional peak, you may write a short singable vowel extension with hyphens, such as О-о-о or А-а-а. For R&B or Soul, one natural word melisma such as Лю-ю-ю-блю is allowed. Never stretch consonants.
+${a.rhythmic ? '- Do not use vowel extensions or melisma in rhythmic verses; keep every syllable precise.' : '- Vocal extensions are optional: omit them unless they strengthen a real emotional peak.'}
 - Do not copy existing songs or imitate a named living artist.
 
 FORMAT
@@ -86,8 +99,8 @@ Silently verify vocal identity, sections, hook, development, natural stress and 
 }
 
 export function buildStylePrompt(lyrics, brief) {
-  const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief);
-  return `Create one compact AI music style string. Genre: ${brief.genres?.join(' x ') || a.genre}. Mood: ${brief.mood || 'coherent'}. Era: ${brief.era || 'modern'}. Instruments: ${brief.instruments || 'choose 2-4'}. Genre craft: ${a.craft}. Lyrics:\n${lyrics.slice(0, 5000)}\nLocked voice: ${profile.style}. Do not add another vocal identity. Return only genre blend, BPM, arrangement, production and dynamic arc, under 220 characters. No artists or model versions.`;
+  const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief); const tail = getSignatureTail(brief);
+  return `Create one compact AI music style string. Genre: ${brief.genres?.join(' x ') || a.genre}. Mood: ${brief.mood || 'coherent'}. Era: ${brief.era || 'modern'}. Instruments: ${brief.instruments || 'choose 2-4'}. Genre craft: ${a.craft}. Lyrics:\n${lyrics.slice(0, 5000)}\nLocked voice: ${profile.style}. Final chorus uses full vocal stack and choir backing. Do not add another vocal identity. Return only genre blend, BPM, arrangement, production and dynamic arc. Keep the part before the signature tail under 190 characters. End with exactly: | ${tail}. No artists, model versions, catchy, viral, TikTok or radio-ready.`;
 }
 
 function cleanModelText(value) { return String(value || '').trim().replace(/^```(?:text)?\s*/i, '').replace(/\s*```$/i, '').trim(); }
@@ -144,7 +157,7 @@ export function buildRepairPrompt(lyrics, brief, issues) {
 export function applyPerformanceSettings(lyrics, brief = {}) {
   const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief);
   let clean = finalizeLyrics(lyrics, brief);
-  const delivery = { 'Verse 1': a.delivery[0], 'Verse 2': a.delivery[0], 'Pre-Chorus': a.delivery[1], Chorus: a.delivery[2], Bridge: a.delivery[3], 'Final Chorus': a.delivery[2], Outro: a.delivery[4] };
+  const delivery = { 'Verse 1': a.delivery[0], 'Verse 2': a.delivery[0], 'Pre-Chorus': a.delivery[1], Chorus: a.delivery[2], Bridge: a.delivery[3], 'Final Chorus': `${a.delivery[2]}, full vocal stack, choir backing`, Outro: a.delivery[4] };
   clean = clean.replace(/^\[(Verse 1|Verse 2|Pre-Chorus|Chorus|Bridge|Final Chorus|Outro)\]$/gim, (_, section) => `[${section} — ${delivery[section]}]`);
   return `${profile.header}\n${clean}`.trim();
 }
@@ -153,5 +166,10 @@ export function finalizeStyle(raw, brief) {
   const profile = getVocalPlan(brief); let style = cleanModelText(raw).replace(/^['"]|['"]$/g, '');
   if (brief.vocal === 'Male vocal') style = style.replace(/female vocals?|mezzo|soprano|contralto/gi, '');
   if (brief.vocal === 'Female vocal') style = style.replace(/male vocals?|baritone|tenor|bass vocals?/gi, '');
-  style = style.replace(/\s{2,}/g, ' ').replace(/\s+,/g, ',').trim(); return `${profile.style}, ${style}`.slice(0, 320);
+  style = style
+    .replace(/\|?\s*(?:deep emotional warmth|raw energy no overproduce|cinematic space)\b[\s\S]*$/i, '')
+    .replace(/\b(?:catchy|viral|tiktok|radio-ready(?: master)?)\b/gi, '')
+    .replace(/\s{2,}/g, ' ').replace(/\s+,/g, ',').replace(/[|,\s]+$/g, '').trim();
+  const base = `${profile.style}, ${style}`.slice(0, 190).replace(/[|,\s]+$/g, '');
+  return `${base} | ${getSignatureTail(brief)}`;
 }
