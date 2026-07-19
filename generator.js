@@ -1,4 +1,4 @@
-import { buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, validateLyrics } from './generator-engine.js';
+import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, validateLyrics } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -115,6 +115,7 @@ import { buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildS
   let selectedVocal  = '';
   let selectedEra    = '';
   let selectedLang   = 'ru';
+  let currentBrief = null;
 
   function getGenreStatus(g, selected) {
     if (selected.length === 0) return 'neutral';
@@ -566,6 +567,7 @@ RULES:
     document.getElementById('suno-panel').style.opacity = '0.4';
     document.getElementById('suno-ready').style.display = 'none';
     document.getElementById('suno-empty').style.display = '';
+    document.getElementById('style-action').style.display = 'none';
     document.getElementById('suno-status').style.display = 'none';
     document.getElementById('step1-num').className = 'step-num';
     document.getElementById('step2-num').className = 'step-num dim';
@@ -592,14 +594,32 @@ RULES:
         [selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
       updateBadge();
 
-      // Шаг 2 — стиль
+      currentBrief = brief;
+      // Шаг 2 становится доступен после проверки и редактирования текста
       document.getElementById('suno-panel').style.opacity = '1';
       document.getElementById('suno-empty').style.display = 'none';
-      document.getElementById('suno-status').style.display = 'flex';
+      document.getElementById('style-action').style.display = '';
+      document.getElementById('step2-num').className = 'step-num';
 
-      try {
-        const style = await ask(buildEngineStylePrompt(lyrics, brief), 500);
-        const styleClean = finalizeStyle(style, brief);
+    } catch (err) {
+      showError(err.message || 'Что-то пошло не так. Попробуй ещё раз.');
+    } finally {
+      document.getElementById('generate').disabled = false;
+    }
+  }
+
+  async function runStyle() {
+    const cleanLyrics = document.getElementById('lyrics-text').value.trim();
+    if (!cleanLyrics || !currentBrief) { alert('Сначала создай текст песни'); return; }
+    const btn = document.getElementById('generate-style');
+    btn.disabled = true;
+    document.getElementById('style-action').style.display = 'none';
+    document.getElementById('suno-status').style.display = 'flex';
+    try {
+        const style = await ask(buildEngineStylePrompt(cleanLyrics, currentBrief), 500);
+        const styleClean = finalizeStyle(style, currentBrief);
+        const performanceLyrics = applyPerformanceSettings(cleanLyrics, currentBrief);
+        document.getElementById('lyrics-text').value = performanceLyrics;
         const html = styleClean
           .replace(/&/g,'&amp;').replace(/</g,'&lt;')
           .replace(/\|/g,'<span style="color:var(--muted)">|</span>')
@@ -609,33 +629,26 @@ RULES:
         document.getElementById('suno-ready').style.display = '';
         document.getElementById('step2-num').className = 'step-num done';
         localStorage.setItem('ts_promotion_draft', JSON.stringify({
-          title: idea.slice(0, 120),
-          lyrics,
-          genre: selectedGenres.join(' + '),
-          mood: selectedMood,
-          vocalType: selectedVocal,
-          language: selectedLang,
-          instruments,
+          title: currentBrief.idea.slice(0, 120), lyrics: performanceLyrics,
+          genre: currentBrief.genres.join(' + '), mood: currentBrief.mood,
+          vocalType: currentBrief.vocal, language: currentBrief.lang,
+          instruments: currentBrief.instruments,
           sunoPrompt: styleClean,
           createdAt: new Date().toISOString()
         }));
         localStorage.setItem('ts_vocal_draft', JSON.stringify({
-          title: idea.slice(0, 120), lyrics, genre: selectedGenres.join(' + '),
-          mood: selectedMood, vocalType: selectedVocal, language: selectedLang,
+          title: currentBrief.idea.slice(0, 120), lyrics: performanceLyrics, genre: currentBrief.genres.join(' + '),
+          mood: currentBrief.mood, vocalType: currentBrief.vocal, language: currentBrief.lang,
           createdAt: new Date().toISOString()
         }));
         document.getElementById('vocal-cta').style.display = 'flex';
         document.getElementById('promotion-cta').style.display = 'flex';
-      } catch {
+      } catch (err) {
         document.getElementById('suno-status').style.display = 'none';
-        document.getElementById('suno-empty').style.display = '';
-        document.getElementById('suno-empty').textContent = 'Не удалось сгенерировать стиль. Попробуй ещё раз.';
-      }
-
-    } catch (err) {
-      showError(err.message || 'Что-то пошло не так. Попробуй ещё раз.');
+        document.getElementById('style-action').style.display = '';
+        alert('Не удалось создать стиль: ' + (err.message || 'попробуй ещё раз'));
     } finally {
-      document.getElementById('generate').disabled = false;
+      btn.disabled = false;
     }
   }
 
@@ -692,6 +705,7 @@ RULES:
   document.getElementById('generate').addEventListener('click', runGenerate);
   document.getElementById('regen-btn').addEventListener('click', runGenerate);
   document.getElementById('fix-btn').addEventListener('click', runFix);
+  document.getElementById('generate-style').addEventListener('click', runStyle);
 
   initChips();
   initSettings();

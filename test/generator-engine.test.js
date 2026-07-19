@@ -1,14 +1,23 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getVocalPlan, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getVocalPlan, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
-test('male selection always receives the locked male header', () => {
+test('first stage returns clean lyrics without vocal settings', () => {
   const brief = { vocal: 'Male vocal' };
   const result = finalizeLyrics(`[Female Vocal] [Soprano]\n${song}`, brief);
+  assert.ok(result.startsWith('[Verse 1]'));
+  assert.doesNotMatch(result, /Vocal Style/);
+  assert.deepEqual(validateLyrics(result, brief).issues, ['too-short']);
+});
+
+test('second stage adds voice and genre-specific section delivery', () => {
+  const brief = { vocal: 'Male vocal', genres: ['Pop'] };
+  const result = applyPerformanceSettings('[Verse 1]\nТихо горит окно\n[Chorus]\nОстанься со мной', brief);
   assert.ok(result.startsWith(getVocalPlan(brief).header));
-  assert.equal(validateLyrics(result, brief).ok, true);
+  assert.match(result, /\[Verse 1 — intimate conversational\]/);
+  assert.match(result, /\[Chorus — open and powerful\]/);
 });
 
 test('genre changes section delivery and meter architecture', () => {

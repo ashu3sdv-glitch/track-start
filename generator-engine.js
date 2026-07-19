@@ -60,9 +60,7 @@ Era: ${brief.era || 'modern'}
 Instruments: ${brief.instruments || 'not specified'}
 
 LOCKED VOCAL IDENTITY
-The first line MUST be copied exactly:
-${profile.header}
-Section delivery plan: ${profile.sections}.
+The selected voice is arrangement context only: ${profile.style}. Do not print vocal or performance settings yet.
 
 GENRE ARCHITECTURE
 - Craft: ${a.craft}.
@@ -79,9 +77,8 @@ SONGCRAFT
 - Do not copy existing songs or imitate a named living artist.
 
 FORMAT
-- Output only lyrics; no title, explanations or markdown fences.
-- Line 1 is the locked vocal settings line.
-- English tags with delivery guidance: [Verse 1 — ${a.delivery[0]}], [Pre-Chorus — ${a.delivery[1]}], [Chorus — ${a.delivery[2]}], [Verse 2 — ${a.delivery[0]}], [Pre-Chorus — ${a.delivery[1]}], [Chorus — ${a.delivery[2]}], [Bridge — ${a.delivery[3]}], [Final Chorus — ${a.delivery[2]}], [Outro — ${a.delivery[4]}].
+- Output only clean lyrics; no title, explanations, vocal settings, performance notes or markdown fences.
+- Use simple English tags only: [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Pre-Chorus], [Chorus], [Bridge], [Final Chorus], [Outro].
 - Repeat chorus text consistently; final chorus may add a small intensification.
 ${profile.instrumental ? '- Replace lyric lines with concise musical scene directions.' : '- Lyrics must remain strictly in the requested language.'}
 
@@ -123,17 +120,16 @@ export function analyzeSyllables(lyrics, brief = {}) {
 }
 
 export function finalizeLyrics(raw, brief) {
-  const profile = getVocalPlan(brief); let text = cleanModelText(raw); const lines = text.split(/\r?\n/);
+  let text = cleanModelText(raw); const lines = text.split(/\r?\n/);
   if (/^\[(?:Male Vocal|Female Vocal|Duet|Choir|Children's Choir|Harmony Vocals|Lead Vocal|Instrumental)/i.test(lines[0] || '')) lines.shift();
-  return `${profile.header}\n${lines.join('\n').trim()}`.trim();
+  return lines.join('\n').trim().replace(/^\[(Verse 1|Verse 2|Pre-Chorus|Chorus|Bridge|Final Chorus|Outro)\s*[—-][^\]]*\]/gim, '[$1]');
 }
 
 export function validateLyrics(lyrics, brief) {
   const profile = getVocalPlan(brief); const issues = [];
-  if (!lyrics.startsWith(profile.header)) issues.push('vocal-header');
   if (!profile.instrumental) {
     for (const section of ['Verse 1', 'Chorus', 'Verse 2', 'Bridge', 'Final Chorus']) if (!new RegExp(`\\[${section}(?:\\s|—|\\])`, 'i').test(lyrics)) issues.push(`missing-${section.toLowerCase().replaceAll(' ', '-')}`);
-    if (profile.forbidden?.test(lyrics.slice(profile.header.length))) issues.push('conflicting-vocal');
+    if (profile.forbidden?.test(lyrics)) issues.push('conflicting-vocal');
     const meter = analyzeSyllables(lyrics, brief); if (meter.total >= 8 && meter.ratio > 0.45) issues.push('syllable-balance');
   }
   if (lyrics.length < 500) issues.push('too-short');
@@ -142,7 +138,15 @@ export function validateLyrics(lyrics, brief) {
 
 export function buildRepairPrompt(lyrics, brief, issues) {
   const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief); const meter = analyzeSyllables(lyrics, brief);
-  return `Repair this song because it failed: ${issues.join(', ')}. Return only corrected lyrics. First line exactly: ${profile.header}\nKeep the idea, language and ${a.genre} architecture. Target ranges: ${rangeText(a)}; natural grammar wins. Current meter has ${meter.outside}/${meter.total} strongly outlying lines. Remove conflicting voice, restore required English tags, and preserve good lines.\n\n${lyrics}`;
+  return `Repair this song because it failed: ${issues.join(', ')}. Return only clean corrected lyrics, without vocal settings or performance notes. Keep the idea, language and ${a.genre} architecture. Target ranges: ${rangeText(a)}; natural grammar wins. Current meter has ${meter.outside}/${meter.total} strongly outlying lines. Use simple English tags [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Final Chorus], [Outro]. Preserve good lines.\n\n${lyrics}`;
+}
+
+export function applyPerformanceSettings(lyrics, brief = {}) {
+  const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief);
+  let clean = finalizeLyrics(lyrics, brief);
+  const delivery = { 'Verse 1': a.delivery[0], 'Verse 2': a.delivery[0], 'Pre-Chorus': a.delivery[1], Chorus: a.delivery[2], Bridge: a.delivery[3], 'Final Chorus': a.delivery[2], Outro: a.delivery[4] };
+  clean = clean.replace(/^\[(Verse 1|Verse 2|Pre-Chorus|Chorus|Bridge|Final Chorus|Outro)\]$/gim, (_, section) => `[${section} — ${delivery[section]}]`);
+  return `${profile.header}\n${clean}`.trim();
 }
 
 export function finalizeStyle(raw, brief) {
