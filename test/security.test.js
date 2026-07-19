@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
-import { hasUsedPromotionTrial, markPromotionTrialUsed, requireTrustedOrigin, verifyPlanToken } from '../api/_security.js';
+import { hasUsedPromotionTrial, hasUsedVocalTrial, markPromotionTrialUsed, markVocalTrialUsed, requireTrustedOrigin, verifyPlanToken } from '../api/_security.js';
 
 function responseStub() {
   return {
@@ -49,5 +49,15 @@ test('marks and verifies the one-time promotion trial', () => {
   const cookie = res.headers['Set-Cookie'].split(';')[0];
   assert.equal(hasUsedPromotionTrial({ headers: { cookie } }), true);
   assert.equal(hasUsedPromotionTrial({ headers: { cookie: 'ts_promo_trial=used.invalid' } }), false);
+  delete process.env.TRIAL_COOKIE_SECRET;
+});
+
+test('keeps vocal and promotion trials independent', () => {
+  process.env.TRIAL_COOKIE_SECRET = 'trial-test-secret';
+  const res = { headers: {}, setHeader(name, value) { this.headers[name] = value; } };
+  assert.equal(markVocalTrialUsed(res), true);
+  const cookie = res.headers['Set-Cookie'].split(';')[0];
+  assert.equal(hasUsedVocalTrial({ headers: { cookie } }), true);
+  assert.equal(hasUsedPromotionTrial({ headers: { cookie } }), false);
   delete process.env.TRIAL_COOKIE_SECRET;
 });

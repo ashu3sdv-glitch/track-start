@@ -1,4 +1,4 @@
-import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin, verifyPlanToken } from './_security.js';
+import { applySecurityHeaders, enforceRateLimit, hasUsedVocalTrial, markVocalTrialUsed, parseRequestBody, requireTrustedOrigin, verifyPlanToken } from './_security.js';
 
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 function jsonFrom(text) {
@@ -12,8 +12,9 @@ export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!requireTrustedOrigin(req, res)) return;
-  const body = parseRequestBody(req); const plan = verifyPlanToken(body.planToken);
-  if (!enforceRateLimit(req, res, { paid: plan?.plan === 'pro', scope: 'vocal' })) return;
+  const body = parseRequestBody(req); const plan = verifyPlanToken(body.planToken); const isPro = plan?.plan === 'pro';
+  if (!isPro && hasUsedVocalTrial(req)) return res.status(402).json({ code:'PRO_REQUIRED', error:'Пробная карта уже использована. Новые карты исполнения доступны на тарифе Pro.' });
+  if (!enforceRateLimit(req, res, { paid: isPro, scope: 'vocal' })) return;
   const song = { title: clean(body.title,120), lyrics: clean(body.lyrics,16000), genre: clean(body.genre,120), mood: clean(body.mood,120), vocalType: clean(body.vocalType,80), experience: clean(body.experience,40) };
   if (!song.title || !song.lyrics) return res.status(400).json({ error: 'Заполните название и текст песни' });
   const key = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
@@ -26,6 +27,8 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data?.error?.message || `Ошибка AI: ${response.status}`);
     if (data.stop_reason === 'max_tokens') throw new Error('Карта получилась слишком длинной. Попробуйте ещё раз.');
-    return res.status(200).json({ result: jsonFrom(data.content?.[0]?.text), generatedAt:new Date().toISOString() });
+    const result = jsonFrom(data.content?.[0]?.text);
+    if (!isPro && !markVocalTrialUsed(res)) return res.status(500).json({ error:'Не настроена защита пробной карты' });
+    return res.status(200).json({ result, generatedAt:new Date().toISOString() });
   } catch (error) { return res.status(502).json({ error:error.message || 'Не удалось создать карту' }); }
 }

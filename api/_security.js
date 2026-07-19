@@ -70,9 +70,9 @@ function signTrial(value) {
   return secret ? crypto.createHmac('sha256', secret).update(value).digest('hex') : '';
 }
 
-export function hasUsedPromotionTrial(req) {
+function hasUsedTrial(req, cookieName) {
   const cookies = String(req.headers.cookie || '').split(';').map((part) => part.trim());
-  const raw = cookies.find((part) => part.startsWith('ts_promo_trial='))?.slice('ts_promo_trial='.length) || '';
+  const raw = cookies.find((part) => part.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1) || '';
   const [value, signature] = raw.split('.');
   if (value !== 'used' || !/^[a-f0-9]{64}$/i.test(signature || '')) return false;
   const expected = signTrial(value);
@@ -80,11 +80,27 @@ export function hasUsedPromotionTrial(req) {
   return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
 }
 
-export function markPromotionTrialUsed(res) {
+function markTrialUsed(res, cookieName) {
   const signature = signTrial('used');
   if (!signature) return false;
-  res.setHeader('Set-Cookie', `ts_promo_trial=used.${signature}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`);
+  res.setHeader('Set-Cookie', `${cookieName}=used.${signature}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`);
   return true;
+}
+
+export function hasUsedPromotionTrial(req) {
+  return hasUsedTrial(req, 'ts_promo_trial');
+}
+
+export function markPromotionTrialUsed(res) {
+  return markTrialUsed(res, 'ts_promo_trial');
+}
+
+export function hasUsedVocalTrial(req) {
+  return hasUsedTrial(req, 'ts_vocal_trial');
+}
+
+export function markVocalTrialUsed(res) {
+  return markTrialUsed(res, 'ts_vocal_trial');
 }
 
 export function enforceRateLimit(req, res, { paid = false, scope = 'api' } = {}) {
