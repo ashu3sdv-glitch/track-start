@@ -1,6 +1,7 @@
 import {
   applySecurityHeaders,
   enforceRateLimit,
+  hasOwnerAccess,
   hasUsedPromotionTrial,
   markPromotionTrialUsed,
   parseRequestBody,
@@ -69,7 +70,7 @@ export default async function handler(req, res) {
 
   const body = parseRequestBody(req);
   const plan = verifyPlanToken(body.planToken);
-  const isPro = plan?.plan === 'pro';
+  const isPro = plan?.plan === 'pro' || hasOwnerAccess(req);
   if (!isPro && hasUsedPromotionTrial(req)) {
     res.status(402).json({
       code: 'PRO_REQUIRED',

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
-import { hasUsedPromotionTrial, hasUsedVocalTrial, markPromotionTrialUsed, markVocalTrialUsed, requireTrustedOrigin, verifyPlanToken } from '../api/_security.js';
+import { hasOwnerAccess, hasUsedPromotionTrial, hasUsedVocalTrial, markPromotionTrialUsed, markVocalTrialUsed, requireTrustedOrigin, setOwnerAccess, verifyOwnerPassword, verifyPlanToken } from '../api/_security.js';
 
 function responseStub() {
   return {
@@ -60,4 +60,17 @@ test('keeps vocal and promotion trials independent', () => {
   assert.equal(hasUsedVocalTrial({ headers: { cookie } }), true);
   assert.equal(hasUsedPromotionTrial({ headers: { cookie } }), false);
   delete process.env.TRIAL_COOKIE_SECRET;
+});
+
+test('owner access uses a signed HttpOnly cookie', () => {
+  process.env.OWNER_ACCESS_PASSWORD = 'owner-test-password';
+  assert.equal(verifyOwnerPassword('owner-test-password'), true);
+  assert.equal(verifyOwnerPassword('wrong'), false);
+  const res = { headers: {}, setHeader(name, value) { this.headers[name] = value; } };
+  assert.equal(setOwnerAccess(res), true);
+  assert.match(res.headers['Set-Cookie'], /HttpOnly/);
+  const cookie = res.headers['Set-Cookie'].split(';')[0];
+  assert.equal(hasOwnerAccess({ headers: { cookie } }), true);
+  assert.equal(hasOwnerAccess({ headers: { cookie: 'ts_owner=' + '0'.repeat(64) } }), false);
+  delete process.env.OWNER_ACCESS_PASSWORD;
 });

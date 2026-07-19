@@ -1,4 +1,4 @@
-import { applySecurityHeaders, enforceRateLimit, hasUsedVocalTrial, markVocalTrialUsed, parseRequestBody, requireTrustedOrigin, verifyPlanToken } from './_security.js';
+import { applySecurityHeaders, enforceRateLimit, hasOwnerAccess, hasUsedVocalTrial, markVocalTrialUsed, parseRequestBody, requireTrustedOrigin, verifyPlanToken } from './_security.js';
 
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 function jsonFrom(text) {
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!requireTrustedOrigin(req, res)) return;
-  const body = parseRequestBody(req); const plan = verifyPlanToken(body.planToken); const isPro = plan?.plan === 'pro';
+  const body = parseRequestBody(req); const plan = verifyPlanToken(body.planToken); const isPro = plan?.plan === 'pro' || hasOwnerAccess(req);
   if (!isPro && hasUsedVocalTrial(req)) return res.status(402).json({ code:'PRO_REQUIRED', error:'Пробная карта уже использована. Новые карты исполнения доступны на тарифе Pro.' });
   if (!enforceRateLimit(req, res, { paid: isPro, scope: 'vocal' })) return;
   const song = { title: clean(body.title,120), lyrics: clean(body.lyrics,16000), genre: clean(body.genre,120), mood: clean(body.mood,120), vocalType: clean(body.vocalType,80), experience: clean(body.experience,40) };

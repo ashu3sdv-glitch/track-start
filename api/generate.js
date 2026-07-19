@@ -4,6 +4,7 @@
 import {
   applySecurityHeaders,
   enforceRateLimit,
+  hasOwnerAccess,
   parseRequestBody,
   requireTrustedOrigin,
   verifyPlanToken,
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
     return;
   }
   const plan = verifyPlanToken(planToken);
-  if (!enforceRateLimit(req, res, { paid: plan?.plan === 'pro', scope: 'generate' })) return;
+  if (!enforceRateLimit(req, res, { paid: plan?.plan === 'pro' || hasOwnerAccess(req), scope: 'generate' })) return;
 
   const key = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
   if (!key) {

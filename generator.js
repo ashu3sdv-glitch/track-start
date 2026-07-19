@@ -3,6 +3,7 @@
 (function () {
 
   const FREE_TOTAL = 5; // всего на пробу, без ежедневного сброса
+  let ownerAccess = false;
   function getUsed() {
     // миграция со старого суточного счётчика
     const legacy = parseInt(localStorage.getItem('ts_used') || '0', 10);
@@ -17,6 +18,7 @@
   // Оплаченный тариф: токен выдаёт сервер после платежа (success.html),
   // подпись проверяется на сервере — здесь только читаем срок и название
   function getPlan() {
+    if (ownerAccess) return 'pro';
     try {
       const t = localStorage.getItem('ts_plan_token') || '';
       if (!t) return '';
@@ -26,6 +28,15 @@
     return '';
   }
   function hasUnlimited() { return getPlan() === 'pro' || !!getKey(); }
+
+  async function loadOwnerAccess() {
+    try {
+      const response = await fetch('/api/owner', { cache: 'no-store' });
+      const data = await response.json();
+      ownerAccess = data.owner === true;
+      updateBadge();
+    } catch {}
+  }
 
   // ── BADGE ──────────────────────────────────────────────────────────────────
   function updateBadge() {
@@ -37,7 +48,7 @@
     const plan = getPlan();
     if (plan === 'pro') {
       badge.className = 'free-badge pro-active';
-      text.textContent = '✓ Pro — безлимитная генерация';
+      text.textContent = ownerAccess ? '✓ Режим владельца — все функции Pro' : '✓ Pro — безлимитная генерация';
       dots.innerHTML = '';
       btn.className = 'gen-btn pro';
     } else if (getKey()) {
@@ -678,5 +689,6 @@ RULES:
   initChips();
   initSettings();
   updateBadge();
+  loadOwnerAccess();
 
 })();

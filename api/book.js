@@ -3,6 +3,7 @@ import { decryptBook } from './_book-crypto.js';
 import {
   applySecurityHeaders,
   enforceRateLimit,
+  hasOwnerAccess,
   parseRequestBody,
   requireTrustedOrigin,
   verifyPlanToken,
@@ -17,7 +18,7 @@ export default async function handler(req, res) {
 
   const body = parseRequestBody(req);
   const plan = verifyPlanToken(body.planToken);
-  if (plan?.plan !== 'pro') {
+  if (plan?.plan !== 'pro' && !hasOwnerAccess(req)) {
     return res.status(402).json({ code: 'PRO_REQUIRED', error: 'Полная книга доступна на тарифе Pro.' });
   }
   if (!enforceRateLimit(req, res, { paid: true, scope: 'book' })) return;

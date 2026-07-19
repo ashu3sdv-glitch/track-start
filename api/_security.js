@@ -61,6 +61,38 @@ export function verifyPlanToken(token) {
   }
 }
 
+function ownerSignature() {
+  const secret = process.env.OWNER_ACCESS_PASSWORD || '';
+  return secret ? crypto.createHmac('sha256', secret).update('track-start-owner').digest('hex') : '';
+}
+
+export function hasOwnerAccess(req) {
+  const cookies = String(req.headers.cookie || '').split(';').map((part) => part.trim());
+  const signature = cookies.find((part) => part.startsWith('ts_owner='))?.slice('ts_owner='.length) || '';
+  const expected = ownerSignature();
+  if (!expected || !/^[a-f0-9]{64}$/i.test(signature)) return false;
+  return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
+}
+
+export function verifyOwnerPassword(password) {
+  const expected = process.env.OWNER_ACCESS_PASSWORD || '';
+  if (!expected || typeof password !== 'string' || password.length > 200) return false;
+  const actualHash = crypto.createHash('sha256').update(password).digest();
+  const expectedHash = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(actualHash, expectedHash);
+}
+
+export function setOwnerAccess(res) {
+  const signature = ownerSignature();
+  if (!signature) return false;
+  res.setHeader('Set-Cookie', `ts_owner=${signature}; Max-Age=2592000; Path=/; HttpOnly; Secure; SameSite=Strict`);
+  return true;
+}
+
+export function clearOwnerAccess(res) {
+  res.setHeader('Set-Cookie', 'ts_owner=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict');
+}
+
 function trialSecret() {
   return process.env.TRIAL_COOKIE_SECRET || process.env.YOOKASSA_SECRET_KEY || '';
 }
