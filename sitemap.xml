@@ -20,6 +20,16 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url><loc>https://www.trackstart.art/ru/academy/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/en/academy/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/ru/academy/library/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/en/academy/library/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/ru/academy/vocals/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/en/academy/vocals/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/ru/academy/vocals/baritone-in-suno/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/en/academy/vocals/baritone-in-suno/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/ru/academy/library/voice-in-suno/</loc><lastmod>2026-07-19</lastmod></url>
+  <url><loc>https://www.trackstart.art/en/academy/library/voice-in-suno/</loc><lastmod>2026-07-19</lastmod></url>
   <url>
     <loc>https://www.trackstart.art/guide.html</loc>
     <changefreq>monthly</changefreq>
