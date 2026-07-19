@@ -1,4 +1,6 @@
-// Track Start — Generator v7 (по образцу Suno Assistant)
+import { buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, validateLyrics } from './generator-engine.js';
+
+// Track Start — Generator v8 quality engine
 
 (function () {
 
@@ -571,8 +573,13 @@ RULES:
 
     try {
       // Шаг 1 — текст
-      const lyrics = await ask(buildLyricsPrompt(brief), 2000);
-      if (!lyrics.trim()) throw new Error('Пустой ответ от API. Попробуй ещё раз.');
+      let lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
+      let quality = validateLyrics(lyrics, brief);
+      if (!quality.ok) {
+        lyrics = finalizeLyrics(await ask(buildRepairPrompt(lyrics, brief, quality.issues), 2600), brief);
+        quality = validateLyrics(lyrics, brief);
+      }
+      if (!quality.ok) throw new Error('Песня не прошла проверку качества. Попытка не списана — запустите генерацию ещё раз.');
 
       if (!unlimited) incUsed();
 
@@ -591,8 +598,8 @@ RULES:
       document.getElementById('suno-status').style.display = 'flex';
 
       try {
-        const style = await ask(buildStylePrompt(lyrics, brief), 400);
-        const styleClean = style.trim().replace(/^["']|["']$/g, '');
+        const style = await ask(buildEngineStylePrompt(lyrics, brief), 500);
+        const styleClean = finalizeStyle(style, brief);
         const html = styleClean
           .replace(/&/g,'&amp;').replace(/</g,'&lt;')
           .replace(/\|/g,'<span style="color:var(--muted)">|</span>')
