@@ -39,6 +39,7 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
       updateBadge();
     } catch {}
   }
+  window.addEventListener('trackstart:account', updateBadge);
 
   // ── BADGE ──────────────────────────────────────────────────────────────────
   function updateBadge() {

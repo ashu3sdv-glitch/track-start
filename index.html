@@ -107,6 +107,7 @@
 <footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><a href="index.html" class="brand" style="margin-bottom:14px"><span class="brand-name">Track <em>Start</em></span></a><p class="muted" style="font-size:14px;max-width:38ch">Помощник для авторов, которые создают музыку и выпускают её на стримингах.</p></div><div class="footer-col"><h4>Инструменты</h4><a href="generator.html">Генератор песен</a><a href="guide.html">Гид по релизу</a><a href="promotion.html">Продвижение</a></div><div class="footer-col"><h4>Помощь</h4><a href="#faq">FAQ</a><a href="mailto:7002d@mail.ru">Написать нам</a></div><div class="footer-col"><h4>Документы</h4><a href="/privacy.html">Конфиденциальность</a><a href="/oferta.html">Оферта</a></div></div><div class="footer-bottom"><span>© 2026 Track Start</span><span>Сделано для независимых артистов</span></div></div></footer>
 
 <script src="app.js"></script>
+<script type="module" src="/auth.js"></script>
 <script>
 (function () {
   const toggle = document.querySelector('.menu-toggle');
@@ -124,12 +125,12 @@
   document.querySelectorAll('[data-buy]').forEach(function (btn) {
     btn.addEventListener('click', async function (e) {
       e.preventDefault();
-      const email = window.prompt('Email — на него придёт чек об оплате:');
-      if (email === null) return;
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { alert('Похоже, в email опечатка. Попробуй ещё раз.'); return; }
+      const user = await window.TrackStartAuth.requireUser();
+      if (!user) return;
       const original = btn.textContent; btn.textContent = 'Секунду…';
       try {
-        const response = await fetch('/api/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: btn.getAttribute('data-buy'), email: email.trim() }) });
+        const authHeaders = await window.TrackStartAuth.headers();
+        const response = await fetch('/api/pay', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify({ plan: btn.getAttribute('data-buy') }) });
         const data = await response.json().catch(function () { return {}; });
         if (!response.ok || !data.url) throw new Error(data.error || 'Не удалось создать платёж');
         localStorage.setItem('ts_pending_payment', data.paymentId); window.location.href = data.url;

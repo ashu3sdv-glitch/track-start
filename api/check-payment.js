@@ -3,6 +3,7 @@
 
 import crypto from 'node:crypto';
 import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin } from './_security.js';
+import { activateSubscription, getAuthUser, supabaseConfigured } from './_supabase.js';
 
 const ACCESS_DAYS = 31;
 
@@ -20,6 +21,9 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'Нет идентификатора платежа' });
     return;
   }
+  if (!supabaseConfigured()) return res.status(503).json({ error: 'Авторизация ещё не настроена' });
+  const user = await getAuthUser(req);
+  if (!user?.email) return res.status(401).json({ error: 'Сначала войдите по email' });
 
   const shopId = process.env.YOOKASSA_SHOP_ID;
   const secret = process.env.YOOKASSA_SECRET_KEY;
@@ -44,10 +48,14 @@ export default async function handler(req, res) {
     }
 
     const plan = data.metadata?.plan === 'lite' ? 'lite' : 'pro';
+    if (data.metadata?.user_id !== user.id) return res.status(403).json({ error: 'Этот платёж принадлежит другому аккаунту' });
+    const accessUntil = Date.now() + ACCESS_DAYS * 24 * 60 * 60 * 1000;
+    await activateSubscription({ userId: user.id, email: user.email, plan, paymentId: data.id, accessUntil });
     const payload = Buffer.from(JSON.stringify({
       plan,
+      uid: user.id,
       pid: data.id,
-      exp: Date.now() + ACCESS_DAYS * 24 * 60 * 60 * 1000,
+      exp: accessUntil,
     })).toString('base64');
     const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 

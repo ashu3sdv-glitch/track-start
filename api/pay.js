@@ -3,19 +3,20 @@
 
 import crypto from 'node:crypto';
 import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin } from './_security.js';
+import { getAuthUser, supabaseConfigured } from './_supabase.js';
 
 const PLANS = {
   lite: { amount: '450.00', title: 'Track Start Lite — доступ на 1 месяц' },
   pro:  { amount: '900.00', title: 'Track Start Pro — доступ на 1 месяц' },
 };
 
-async function createPayment(auth, plan, email, withReceipt) {
+async function createPayment(auth, plan, email, userId, withReceipt) {
   const body = {
     amount: { value: PLANS[plan].amount, currency: 'RUB' },
     capture: true,
     confirmation: { type: 'redirect', return_url: 'https://www.trackstart.art/success.html' },
     description: PLANS[plan].title,
-    metadata: { plan },
+    metadata: { plan, user_id: userId },
   };
   if (withReceipt && email) {
     body.receipt = {
@@ -52,15 +53,15 @@ export default async function handler(req, res) {
   if (!requireTrustedOrigin(req, res)) return;
   if (!enforceRateLimit(req, res, { scope: 'pay' })) return;
 
-  const { plan, email } = parseRequestBody(req);
+  const { plan } = parseRequestBody(req);
   if (!PLANS[plan]) {
     res.status(400).json({ error: 'Неизвестный тариф' });
     return;
   }
-  if (email && (typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
-    res.status(400).json({ error: 'Некорректный email' });
-    return;
-  }
+  if (!supabaseConfigured()) return res.status(503).json({ error: 'Авторизация ещё не настроена' });
+  const user = await getAuthUser(req);
+  if (!user?.email) return res.status(401).json({ error: 'Сначала войдите по email' });
+  const email = user.email;
 
   const shopId = process.env.YOOKASSA_SHOP_ID;
   const secret = process.env.YOOKASSA_SECRET_KEY;
@@ -71,10 +72,10 @@ export default async function handler(req, res) {
   const auth = 'Basic ' + Buffer.from(`${shopId}:${secret}`).toString('base64');
 
   try {
-    let result = await createPayment(auth, plan, email, true);
+    let result = await createPayment(auth, plan, email, user.id, true);
     // если магазин не использует чеки ЮКассы — пробуем без receipt
     if (!result.ok && JSON.stringify(result.data).toLowerCase().includes('receipt')) {
-      result = await createPayment(auth, plan, email, false);
+      result = await createPayment(auth, plan, email, user.id, false);
     }
     if (!result.ok) {
       res.status(502).json({ error: result.data?.description || 'ЮКасса отклонила запрос' });
