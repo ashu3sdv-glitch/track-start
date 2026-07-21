@@ -31,6 +31,14 @@ const PROFILES = {
   'No vocals': { identity: '[Instrumental] [No Vocals]', style: 'instrumental, no vocals', forbidden: null, instrumental: true },
 };
 const AUTO = { identity: '[Lead Vocal]', style: 'expressive lead vocals', forbidden: null };
+const VOICE_TIMBRES = {
+  Bass: { identity: '[Male Vocal] [Bass E2–E4] [resonant chest depth, powerful low-mid]', style: 'male vocals, resonant deep bass' },
+  Baritone: { identity: '[Male Vocal] [Baritone G2–G4] [warm dark centre, rich chest tone]', style: 'male vocals, warm baritone' },
+  Tenor: { identity: '[Male Vocal] [Tenor C3–B4] [bright chest tone, ringing upper register]', style: 'male vocals, bright tenor' },
+  Contralto: { identity: '[Female Vocal] [Contralto E3–E5] [deep smoky chest, silky upper register]', style: 'female vocals, smoky contralto' },
+  'Mezzo-soprano': { identity: '[Female Vocal] [Mezzo-soprano A3–F5] [warm mid-range, clear upper tone]', style: 'female vocals, warm mezzo-soprano' },
+  Soprano: { identity: '[Female Vocal] [Soprano C4–A5] [light crystalline tone, effortless top register]', style: 'female vocals, crystalline soprano' },
+};
 
 export function getGenreArchitecture(brief = {}) {
   const genre = brief.genres?.[0];
@@ -39,8 +47,26 @@ export function getGenreArchitecture(brief = {}) {
 
 export function getVocalProfile(vocal) { return PROFILES[vocal] || AUTO; }
 
+export function resolveTimbre(brief = {}) {
+  if (brief.timbre && brief.timbre !== 'Auto' && VOICE_TIMBRES[brief.timbre]) return brief.timbre;
+  const primary = brief.genres?.[0];
+  if (brief.vocal === 'Male vocal') {
+    if (primary === 'Dark Phonk' || (primary === 'Cinematic' && brief.mood === 'Dark')) return 'Bass';
+    if (['Pop', 'Synth-pop', 'Indie Rock', 'Electronic'].includes(primary) && ['Energetic', 'Hopeful', 'Euphoric'].includes(brief.mood)) return 'Tenor';
+    return 'Baritone';
+  }
+  if (brief.vocal === 'Female vocal') {
+    if (['Dark', 'Melancholic'].includes(brief.mood) && ['Soul', 'Chanson', 'Cinematic'].includes(primary)) return 'Contralto';
+    if (['Pop', 'Synth-pop', 'Cinematic'].includes(primary) && ['Hopeful', 'Euphoric'].includes(brief.mood)) return 'Soprano';
+    return 'Mezzo-soprano';
+  }
+  return '';
+}
+
 export function getVocalPlan(brief = {}) {
-  const profile = getVocalProfile(brief.vocal);
+  const baseProfile = getVocalProfile(brief.vocal);
+  const timbre = resolveTimbre(brief);
+  const profile = timbre ? { ...baseProfile, ...VOICE_TIMBRES[timbre] } : baseProfile;
   if (profile.instrumental) return { ...profile, header: profile.identity, sections: 'instrumental scene directions only' };
   const a = getGenreArchitecture(brief);
   const sections = SECTION_KEYS.map((key, i) => `${key}: ${a.delivery[i]}`).join('; ');

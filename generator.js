@@ -113,6 +113,7 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
   let selectedGenres = [];
   let selectedMood   = '';
   let selectedVocal  = '';
+  let selectedTimbre = '';
   let selectedEra    = '';
   let selectedLang   = 'ru';
   let currentBrief = null;
@@ -137,13 +138,13 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
   }
 
   function initChips() {
-    // Genre — multiple (max 2)
+    // Genre — primary + up to two compatible influences
     document.querySelector('[data-field="genre"]')?.querySelectorAll('.chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const v = btn.getAttribute('data-v');
         if (selectedGenres.includes(v)) {
           selectedGenres = selectedGenres.filter(g => g !== v);
-        } else if (selectedGenres.length < 2) {
+        } else if (selectedGenres.length < 3 && !selectedGenres.some(s => COMPAT[s]?.conflict?.includes(v))) {
           selectedGenres.push(v);
         }
         updateGenreChips();
@@ -163,8 +164,10 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
       btn.addEventListener('click', () => {
         const v = btn.getAttribute('data-v');
         selectedVocal = selectedVocal === v ? '' : v;
+        selectedTimbre = '';
         document.querySelectorAll('[data-field="vocal"] .chip-btn').forEach(b =>
           b.classList.toggle('active', b.getAttribute('data-v') === selectedVocal));
+        updateTimbreOptions();
       });
     });
     // Era — single toggle
@@ -184,6 +187,30 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
         selectedLang = btn.getAttribute('data-lang-pick');
       });
     });
+  }
+
+  const TIMBRE_OPTIONS = {
+    'Male vocal': [
+      ['Auto', 'подобрать'], ['Bass', 'очень низкий'], ['Baritone', 'глубокий и тёплый'], ['Tenor', 'высокий и яркий']
+    ],
+    'Female vocal': [
+      ['Auto', 'подобрать'], ['Contralto', 'низкий и дымный'], ['Mezzo-soprano', 'тёплый средний'], ['Soprano', 'высокий и светлый']
+    ]
+  };
+
+  function updateTimbreOptions() {
+    const field = document.getElementById('timbre-field');
+    const box = document.getElementById('timbre-options');
+    const options = TIMBRE_OPTIONS[selectedVocal];
+    if (!options) { field.style.display = 'none'; box.innerHTML = ''; return; }
+    field.style.display = '';
+    box.innerHTML = options.map(([value, description]) =>
+      `<button class="chip-btn${selectedTimbre === value ? ' active' : ''}" data-timbre="${value}" title="${description}">${value} · ${description}</button>`
+    ).join('');
+    box.querySelectorAll('[data-timbre]').forEach(button => button.addEventListener('click', () => {
+      selectedTimbre = button.getAttribute('data-timbre');
+      updateTimbreOptions();
+    }));
   }
 
   // ── VOCAL SETTINGS ─────────────────────────────────────────────────────────
@@ -558,7 +585,7 @@ RULES:
       return;
     }
 
-    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, era: selectedEra, lang: selectedLang, instruments };
+    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, timbre: selectedTimbre, era: selectedEra, lang: selectedLang, instruments };
 
     // UI — loading
     document.getElementById('empty-lyrics').style.display = 'none';

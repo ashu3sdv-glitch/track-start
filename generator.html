@@ -138,7 +138,7 @@
 
           <!-- Жанр -->
           <div>
-            <label class="gen-label" data-i18n="gen.genre">Жанр <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional">(необязательно, макс. 2)</span></label>
+            <label class="gen-label"><span data-i18n="gen.genre">Жанр</span> <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.genre_optional">(необязательно, макс. 3)</span></label>
             <p class="gen-hint" data-i18n="gen.genre_hint">Не знаешь? Оставь пустым — AI выберет сам</p>
             <div class="chip-group" style="margin-top:8px;" data-field="genre">
               <button class="chip-btn" data-v="Pop">Pop</button>
@@ -185,6 +185,13 @@
               <button class="chip-btn" data-v="Children's choir">Children's choir</button>
               <button class="chip-btn" data-v="No vocals">No vocals</button>
             </div>
+          </div>
+
+          <!-- Тембр голоса: показывается после выбора мужского или женского вокала -->
+          <div id="timbre-field" style="display:none;">
+            <label class="gen-label" data-i18n="gen.timbre">Voice timbre</label>
+            <p class="gen-hint" data-i18n="gen.timbre_hint">Название передаётся генератору на английском</p>
+            <div class="chip-group" id="timbre-options" style="margin-top:8px;"></div>
           </div>
 
           <!-- Эпоха -->

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getSignatureTail, getVocalPlan, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getSignatureTail, getVocalPlan, resolveTimbre, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -27,6 +27,17 @@ test('genre changes section delivery and meter architecture', () => {
   assert.match(pop.header, /open and powerful/);
   assert.match(hiphop.header, /melodic or chanted hook/);
   assert.notDeepEqual(getGenreArchitecture({ genres: ['Pop'] }).syllables, getGenreArchitecture({ genres: ['Hip-Hop'] }).syllables);
+});
+
+test('uses an explicitly selected English vocal timbre', () => {
+  const plan = getVocalPlan({ vocal: 'Male vocal', timbre: 'Tenor', genres: ['Pop'] });
+  assert.match(plan.header, /\[Tenor C3–B4\]/);
+  assert.match(plan.style, /bright tenor/);
+});
+
+test('auto timbre stays compatible with vocal type and genre', () => {
+  assert.equal(resolveTimbre({ vocal: 'Male vocal', timbre: 'Auto', genres: ['Dark Phonk'], mood: 'Dark' }), 'Bass');
+  assert.equal(resolveTimbre({ vocal: 'Female vocal', timbre: 'Auto', genres: ['Pop'], mood: 'Euphoric' }), 'Soprano');
 });
 
 test('counts Russian syllables by vowels', () => {
