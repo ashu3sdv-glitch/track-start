@@ -21,6 +21,92 @@ const SIGNATURE_TAILS = {
   atmospheric: 'cinematic space | subtle tape noise | unhurried tempo feel | no clean digital polish | air and silence matter',
 };
 
+// Compatible technique libraries restored from the Hitmaker vocal materials.
+// Each family follows: verse, pre-chorus, chorus, bridge, outro.
+const DELIVERY_FAMILIES = {
+  pop: [
+    ['breathy close-mic', 'conversational chest voice', 'rhythmic syllabic delivery'],
+    ['rising vocal cry', 'speech-to-song build', 'controlled chest push'],
+    ['crescendo belting', 'open layered harmonies', 'full chest anthemic delivery'],
+    ['soft falsetto contrast', 'raw exposed vocal', 'intimate spoken-word turn'],
+    ['fading subtone', 'whispered echo', 'hummed close'],
+  ],
+  rock: [
+    ['restrained rasp', 'gritty chest voice', 'raw conversational delivery'],
+    ['tense chest push', 'rising vocal cry', 'building rasp'],
+    ['full-power belting', 'arena projection', 'gritty layered harmonies'],
+    ['bare exposed vocal', 'half-time spoken tension', 'fragile head-voice break'],
+    ['rough fading vocal', 'breathless close', 'distant group response'],
+  ],
+  soul: [
+    ['breathy intimate phrasing', 'smooth chest-led vocal', 'laid-back melismatic touches'],
+    ['gospel-tinged rise', 'vocal cry build', 'soulful speech-to-song lift'],
+    ['soulful belting with vocal runs', 'call-and-response with choir', 'rich layered harmonies'],
+    ['falsetto revelation', 'raw gospel testimony', 'rubato melismatic break'],
+    ['soft vocal runs', 'hummed gospel fade', 'breathy ad-lib close'],
+  ],
+  narrative: [
+    ['parlando storytelling', 'natural close-mic phrasing', 'warm intimate chest voice'],
+    ['gentle speech-to-song lift', 'restrained vocal cry', 'communal build'],
+    ['open heartfelt delivery', 'warm layered refrain', 'lead-and-group response'],
+    ['bare confessional vocal', 'spoken-word revelation', 'rubato exposed turn'],
+    ['gentle resolved fade', 'hummed close', 'quiet communal echo'],
+  ],
+  rhythmic: [
+    ['precise syllabic delivery', 'percussive phrasing', 'low rhythmic flow'],
+    ['staccato pressure build', 'tight speech-to-song rise', 'compressed rhythmic lift'],
+    ['hard layered chant', 'melodic hook without runs', 'call-and-response hook'],
+    ['half-time spoken-word turn', 'raw declamatory break', 'stripped rhythmic confession'],
+    ['filtered spoken fade', 'short echoed chant', 'low ad-lib close'],
+  ],
+  electronic: [
+    ['cool close-mic restraint', 'precise syllabic pulse', 'breathy processed vocal'],
+    ['filtered rising layers', 'tight rhythmic build', 'speech-to-song automation lift'],
+    ['wide stacked harmonies', 'punchy beat-locked chorus', 'processed call-and-response'],
+    ['minimal vocoder contrast', 'filtered exposed vocal', 'spoken breakdown'],
+    ['echoing vocal fragments', 'tape-like fade', 'wordless processed hum'],
+  ],
+  cinematic: [
+    ['restrained narrative vocal', 'close-mic dramatic phrasing', 'low intimate register'],
+    ['tension-rising vocal cry', 'orchestral speech-to-song lift', 'controlled crescendo'],
+    ['wide soaring delivery', 'cinematic layered harmonies', 'lead with choir response'],
+    ['stripped revelation', 'rubato exposed vocal', 'near-whisper dramatic turn'],
+    ['spacious resolved fade', 'distant choir echo', 'breathy final line'],
+  ],
+  lofi: [
+    ['hushed close-mic vocal', 'understated conversational phrasing', 'soft breath-first delivery'],
+    ['subtle melodic lift', 'restrained layered build', 'gentle speech-to-song rise'],
+    ['hushed stacked harmonies', 'soft repetitive hook', 'warm doubled vocal'],
+    ['minimal spoken confession', 'fragile falsetto touch', 'bare bedroom vocal'],
+    ['tape-worn whisper', 'fading hum', 'distant breathy echo'],
+  ],
+};
+
+const GENRE_DELIVERY_FAMILY = {
+  Pop: 'pop', 'Synth-pop': 'electronic', 'Lo-fi': 'lofi', 'Indie Rock': 'rock',
+  'R&B': 'soul', Folk: 'narrative', Soul: 'soul', 'Dark Phonk': 'rhythmic',
+  Electronic: 'electronic', 'Hip-Hop': 'rhythmic', Chanson: 'narrative', Cinematic: 'cinematic',
+};
+
+const MOOD_ARCS = {
+  Nostalgic: ['warm reflective', 'gently lifting', 'yearning', 'memory-like', 'distant'],
+  Melancholic: ['restrained aching', 'fragile rising', 'wide sorrowful', 'exposed', 'fading'],
+  Romantic: ['tender intimate', 'yearning', 'warm open', 'vulnerable', 'soft'],
+  Energetic: ['bright driven', 'fast-rising', 'high-energy', 'tense contrasting', 'breathless'],
+  Hopeful: ['clear intimate', 'steadily lifting', 'radiant open', 'honest', 'uplifting'],
+  Dark: ['low restrained', 'ominous building', 'intense shadowed', 'haunted', 'cold fading'],
+  Dreamy: ['airy intimate', 'floating rise', 'wide ethereal', 'weightless', 'distant'],
+  Angry: ['clipped tense', 'pressure-rising', 'forceful', 'raw confrontational', 'unresolved'],
+  Peaceful: ['gentle close-mic', 'unhurried lift', 'warm spacious', 'quiet exposed', 'calm fading'],
+  Euphoric: ['bright expectant', 'surging', 'soaring celebratory', 'suspended', 'triumphant'],
+};
+
+const TIMBRE_ACCENTS = {
+  Bass: ['chest-led', '', 'low-register power', '', ''], Baritone: ['warm-centred', '', 'rich chest resonance', '', ''],
+  Tenor: ['ringing', '', 'bright upper projection', '', ''], Contralto: ['smoky low-register', '', 'full-bodied middle', '', ''],
+  'Mezzo-soprano': ['warm mid-range', '', 'clear upper lift', '', ''], Soprano: ['light crystalline', '', 'open top register', '', ''],
+};
+
 const PROFILES = {
   'Male vocal': { identity: '[Male Vocal] [Baritone G2–G4] [warm dark centre, rich chest tone]', style: 'male vocals, warm baritone', forbidden: /female|mezzo|soprano|contralto/i },
   'Female vocal': { identity: '[Female Vocal] [Mezzo A3–F5] [warm mid-range, clear upper tone]', style: 'female vocals, warm mezzo', forbidden: /male|baritone|tenor|bass range/i },
@@ -63,13 +149,34 @@ export function resolveTimbre(brief = {}) {
   return '';
 }
 
+function stableHash(value) {
+  let hash = 2166136261;
+  for (const char of String(value || '')) { hash ^= char.codePointAt(0); hash = Math.imul(hash, 16777619); }
+  return hash >>> 0;
+}
+
+export function getDeliveryPlan(brief = {}) {
+  const architecture = getGenreArchitecture(brief);
+  if (brief.vocal === 'Choir') return ['soft choral unison', 'building SATB layers', 'full choral swell', 'a cappella contrast', 'fading hum'];
+  if (brief.vocal === "Children's choir") return ['gentle bright unison', 'lifting child-choir layers', 'pure open choral swell', 'hushed unison', 'fading hum'];
+  const familyName = GENRE_DELIVERY_FAMILY[architecture.genre] || 'pop';
+  const family = DELIVERY_FAMILIES[familyName];
+  const mood = MOOD_ARCS[brief.mood] || ['', '', '', '', ''];
+  const timbre = TIMBRE_ACCENTS[resolveTimbre(brief)] || ['', '', '', '', ''];
+  const seed = stableHash([brief.idea, brief.mood, brief.genres?.join('|'), brief.timbre, brief.vocal].join('|'));
+  return family.map((options, index) => {
+    const technique = options[(seed + index * 17) % options.length];
+    return [mood[index], timbre[index], technique].filter(Boolean).join(', ');
+  });
+}
+
 export function getVocalPlan(brief = {}) {
   const baseProfile = getVocalProfile(brief.vocal);
   const timbre = resolveTimbre(brief);
   const profile = timbre ? { ...baseProfile, ...VOICE_TIMBRES[timbre] } : baseProfile;
   if (profile.instrumental) return { ...profile, header: profile.identity, sections: 'instrumental scene directions only' };
-  const a = getGenreArchitecture(brief);
-  const sections = SECTION_KEYS.map((key, i) => `${key}: ${a.delivery[i]}`).join('; ');
+  const delivery = getDeliveryPlan(brief);
+  const sections = SECTION_KEYS.map((key, i) => `${key}: ${delivery[i]}`).join('; ');
   return { ...profile, header: `${profile.identity} [Vocal Style: ${sections}]`, sections };
 }
 
@@ -181,9 +288,13 @@ export function buildRepairPrompt(lyrics, brief, issues) {
 }
 
 export function applyPerformanceSettings(lyrics, brief = {}) {
-  const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief);
+  const profile = getVocalPlan(brief); const deliveryPlan = getDeliveryPlan(brief);
   let clean = finalizeLyrics(lyrics, brief);
-  const delivery = { 'Verse 1': a.delivery[0], 'Verse 2': a.delivery[0], 'Pre-Chorus': a.delivery[1], Chorus: a.delivery[2], Bridge: a.delivery[3], 'Final Chorus': `${a.delivery[2]}, full vocal stack, choir backing`, Outro: a.delivery[4] };
+  const delivery = { 'Verse 1': deliveryPlan[0], 'Verse 2': deliveryPlan[0], 'Pre-Chorus': deliveryPlan[1], Chorus: deliveryPlan[2], Bridge: deliveryPlan[3], 'Final Chorus': `${deliveryPlan[2]}, full vocal stack, choir backing`, Outro: deliveryPlan[4] };
+  if (brief.vocal === 'Duet M+F') {
+    delivery['Verse 1'] += ', male lead'; delivery['Verse 2'] += ', female lead';
+    delivery.Chorus += ', duet harmony'; delivery['Final Chorus'] += ', duet harmony'; delivery.Bridge += ', male-female call and response';
+  }
   clean = clean.replace(/^\[(Verse 1|Verse 2|Pre-Chorus|Chorus|Bridge|Final Chorus|Outro)\]$/gim, (_, section) => `[${section} — ${delivery[section]}]`);
   return `${profile.header}\n${clean}`.trim();
 }

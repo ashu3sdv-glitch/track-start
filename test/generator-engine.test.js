@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getGenreArchitecture, getSignatureTail, getVocalPlan, resolveTimbre, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, resolveTimbre, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -13,20 +13,36 @@ test('first stage returns clean lyrics without vocal settings', () => {
 });
 
 test('second stage adds voice and genre-specific section delivery', () => {
-  const brief = { vocal: 'Male vocal', genres: ['Pop'] };
+  const brief = { vocal: 'Male vocal', genres: ['Pop'], mood: 'Romantic', idea: 'встреча на пустой платформе' };
+  const delivery = getDeliveryPlan(brief);
   const result = applyPerformanceSettings('[Verse 1]\nТихо горит окно\n[Chorus]\nОстанься со мной\n[Final Chorus]\nОстанься со мной', brief);
   assert.ok(result.startsWith(getVocalPlan(brief).header));
-  assert.match(result, /\[Verse 1 — intimate conversational\]/);
-  assert.match(result, /\[Chorus — open and powerful\]/);
-  assert.match(result, /\[Final Chorus — open and powerful, full vocal stack, choir backing\]/);
+  assert.ok(result.includes(`[Verse 1 — ${delivery[0]}]`));
+  assert.ok(result.includes(`[Chorus — ${delivery[2]}]`));
+  assert.ok(result.includes(`[Final Chorus — ${delivery[2]}, full vocal stack, choir backing]`));
 });
 
 test('genre changes section delivery and meter architecture', () => {
   const pop = getVocalPlan({ vocal: 'Male vocal', genres: ['Pop'] });
   const hiphop = getVocalPlan({ vocal: 'Male vocal', genres: ['Hip-Hop'] });
-  assert.match(pop.header, /open and powerful/);
-  assert.match(hiphop.header, /melodic or chanted hook/);
+  assert.doesNotMatch(hiphop.header, /melisma|vocal runs/i);
+  assert.notEqual(pop.sections, hiphop.sections);
   assert.notDeepEqual(getGenreArchitecture({ genres: ['Pop'] }).syllables, getGenreArchitecture({ genres: ['Hip-Hop'] }).syllables);
+});
+
+test('delivery varies between songs while remaining stable for the same brief', () => {
+  const briefs = ['ночной поезд', 'утро у моря', 'последний телефонный звонок', 'танец на крыше'].map(idea => ({ idea, vocal: 'Female vocal', genres: ['Pop'], mood: 'Romantic' }));
+  const plans = briefs.map(getDeliveryPlan);
+  assert.deepEqual(getDeliveryPlan(briefs[0]), plans[0]);
+  assert.ok(new Set(plans.map(plan => plan.join('|'))).size > 1);
+});
+
+test('R&B can use melisma while Hip-Hop keeps precise rhythmic techniques', () => {
+  const soulPlans = ['a', 'b', 'c', 'd', 'e', 'f'].map(idea => getDeliveryPlan({ idea, genres: ['R&B'], mood: 'Romantic' }).join(' '));
+  assert.ok(soulPlans.some(plan => /melisma|vocal runs/i.test(plan)));
+  const rap = getDeliveryPlan({ idea: 'городской манифест', genres: ['Hip-Hop'], mood: 'Energetic' }).join(' ');
+  assert.doesNotMatch(rap, /melisma|vocal runs|falsetto/i);
+  assert.match(rap, /syllabic|rhythmic|staccato|chant|spoken|declamatory/i);
 });
 
 test('uses an explicitly selected English vocal timbre', () => {
