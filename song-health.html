@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Выборочная очистка Suno-стемов без обработки всей дорожки.">
+  <title>Song Health — Track Start</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="song-health.css">
+</head>
+<body>
+  <header class="sh-header">
+    <a class="sh-logo" href="index.html">Track <em>Start</em></a>
+    <div class="nav-actions"><a class="sh-back" href="index.html">← На главную</a></div>
+  </header>
+  <main class="sh-shell">
+    <section class="sh-hero">
+      <span class="sh-kicker">Gentle Clean v0.3</span>
+      <h1>Очистка стемов без потери характера</h1>
+      <p>Алгоритм находит редкие проблемные интервалы и применяет мягкие фильтры только там. Остальная дорожка не обрабатывается.</p>
+    </section>
+
+    <section class="sh-card" id="song-health-app">
+      <div class="sh-limits">
+        <span>До 12 стемов</span><span>До 5 минут</span><span>3 песни в месяц</span><span>Тариф Pro</span>
+      </div>
+      <label class="sh-drop" id="drop-zone">
+        <input id="stem-files" type="file" accept=".wav,.flac,audio/wav,audio/flac" multiple>
+        <strong>Перетащите WAV или FLAC сюда</strong>
+        <small>или нажмите, чтобы выбрать файлы</small>
+      </label>
+      <div id="file-list" class="sh-files" aria-live="polite"></div>
+      <button id="start-health" class="sh-start" type="button" disabled>Начать обработку</button>
+      <p class="sh-note">Файлы приватны. Исходники удаляются после обработки, результат — после истечения срока скачивания.</p>
+      <div id="health-status" class="sh-status" aria-live="polite"></div>
+      <div class="sh-progress" id="health-progress" hidden><i></i></div>
+      <a id="health-download" class="sh-download" hidden>Скачать результат ZIP</a>
+    </section>
+  </main>
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="song-health.js"></script>
+</body>
+</html>

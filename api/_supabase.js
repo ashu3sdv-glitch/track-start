@@ -32,6 +32,20 @@ function adminHeaders(extra = {}) {
   };
 }
 
+export async function adminRequest(path, options = {}) {
+  if (!supabaseConfigured()) throw new Error('Supabase is not configured');
+  const response = await fetch(`${baseUrl()}${path}`, {
+    ...options,
+    headers: adminHeaders(options.headers || {}),
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    throw new Error(`Supabase request failed: ${response.status} ${detail.slice(0, 300)}`);
+  }
+  if (response.status === 204) return null;
+  return response.json().catch(() => null);
+}
+
 export async function getSubscription(userId) {
   if (!supabaseConfigured() || !userId) return null;
   const query = new URLSearchParams({ user_id: `eq.${userId}`, select: 'user_id,plan,access_until', limit: '1' });

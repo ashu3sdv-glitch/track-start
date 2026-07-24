@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
-const state = { client: null, session: null, configured: false };
+const state = { client: null, session: null, configured: false, url: '' };
 let readyResolve;
 const ready = new Promise((resolve) => { readyResolve = resolve; });
 
@@ -65,6 +65,7 @@ mount();
     const config = await fetch('/api/auth-config', { cache: 'no-store' }).then((r) => r.json());
     if (!config.configured) throw new Error('not configured');
     state.client = createClient(config.url, config.anonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
+    state.url = config.url;
     state.configured = true;
     state.session = (await state.client.auth.getSession()).data.session;
     state.updateButton(); await syncAccount();
@@ -79,4 +80,9 @@ window.TrackStartAuth = {
   ready,
   async requireUser() { await ready; if (!state.configured) throw new Error('Авторизация ещё не настроена'); if (!state.session) { state.open(); return null; } return state.session.user; },
   async headers() { await ready; return state.session ? { Authorization: `Bearer ${state.session.access_token}` } : {}; },
+  async storageContext() {
+    await ready;
+    if (!state.session) return null;
+    return { accessToken: state.session.access_token, user: state.session.user, supabaseUrl: state.url };
+  },
 };
