@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, resolveTimbre, validateLyrics, validateRewriteCraft, validateRewritePreservation } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewriteAuditPrompt, buildRewritePrompt, buildRewriteRepairPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteAudit, parseRewriteResponse, resolveTimbre, validateLyrics, validateRewriteCraft, validateRewritePreservation } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -91,7 +91,7 @@ test('style finalizer replaces a model tail with exactly one selected signature'
   assert.doesNotMatch(style, /raw energy no overproduce/);
 });
 
-test('rewrite prompt preserves author intent and requires five problem-linked result notes', () => {
+test('rewrite prompt preserves author intent and leaves evaluation to the auditor', () => {
   const prompt = buildRewritePrompt(
     '[Куплет]\nЯ оставил ключи на столе\n[Припев]\nНе выключай свет',
     { genres: ['Pop'], mood: 'Melancholic', lang: 'ru' },
@@ -99,7 +99,7 @@ test('rewrite prompt preserves author intent and requires five problem-linked re
   );
   assert.match(prompt, /Preserve the author's story, point of view, emotional intent/);
   assert.match(prompt, /Correct all five diagnosed problems/);
-  assert.match(prompt, /5\. how diagnosed problem 5 was corrected/);
+  assert.doesNotMatch(prompt, /<<<NOTES/);
   assert.match(prompt, /Я оставил ключи на столе/);
 });
 
@@ -148,6 +148,8 @@ test('song diagnosis uses a selected genre only as context', () => {
   assert.match(prompt, /exactly five/i);
   assert.match(prompt, /exactly four/i);
   assert.match(prompt, /reference every problem number from 1 through 5/i);
+  assert.match(prompt, /MEASURED METER FACTS/);
+  assert.match(prompt, /Never call an allowed line outside the allowed range/i);
 });
 
 test('diagnosis parser returns exactly five problems and four improvements', () => {
@@ -199,8 +201,8 @@ ISSUES
 4. Четвёртый шаг
 PLAN`);
   assert.equal(diagnosis.planCoversAllProblems, true);
-  assert.match(diagnosis.plan, /проблемы 1 и 2/);
-  assert.match(diagnosis.plan, /проблемы 5/);
+  assert.match(diagnosis.plan, /\[1,2\]/);
+  assert.match(diagnosis.plan, /\[5\]/);
 });
 
 test('rewrite prompt follows the approved result and diagnosis', () => {
@@ -230,15 +232,57 @@ test('numbered list normalizer keeps five concise result items', () => {
   assert.doesNotMatch(result.text, /Лишнее/);
 });
 
-test('rewrite verifier checks every diagnosed problem after editing', () => {
-  const prompt = buildRewriteVerificationPrompt('Исходник', 'Новая версия', { raw: '1. Нет рифмы' }, 'poem');
-  assert.match(prompt, /all five diagnosed problems/i);
-  assert.match(prompt, /For a poem, do not require song sections/i);
-  assert.equal(parseRewriteVerification('<<<STATUS\nPASS\nSTATUS\n<<<REMAINING\n\nREMAINING').ok, true);
-  assert.equal(parseRewriteVerification('<<<STATUS\nPASS\nSTATUS\n<<<REMAINING\nНет замечаний.\nREMAINING').ok, true);
-  const failed = parseRewriteVerification('<<<STATUS\nFAIL\nSTATUS\n<<<REMAINING\n1. Осталась сбитая строка\nREMAINING');
-  assert.equal(failed.ok, false);
-  assert.equal(failed.remainingCount, 1);
+test('independent audit reports five grounded checks in the lyric language', () => {
+  const prompt = buildRewriteAuditPrompt(
+    '[Verse 1]\nЯ вижу свет',
+    '[Verse 1]\nЯ вижу свет вдали',
+    { raw: '1. Слабый образ' },
+    { lang: 'ru', genres: ['Pop'] },
+  );
+  assert.match(prompt, /You did not write the revision/);
+  assert.match(prompt, /PROGRAM-MEASURED METER/);
+  assert.match(prompt, /Use Russian only/);
+  const audit = parseRewriteAudit(`<<<STATUS
+FAIL
+STATUS
+<<<CHECKS
+1. ИСПРАВЛЕНО — образ стал конкретнее
+2. ОСТАЛОСЬ — ритм требует выравнивания
+3. ИСПРАВЛЕНО — припев выделен
+4. ОСТАЛОСЬ — рифма неточна
+5. ИСПРАВЛЕНО — история развивается
+CHECKS`, 'ru', 'Слабый образ и ритм', 'Образ стал конкретнее, припев выделен');
+  assert.equal(audit.checkCount, 5);
+  assert.equal(audit.languageOk, true);
+  assert.equal(audit.ok, false);
+});
+
+test('audit rejects English self-report for Russian lyrics', () => {
+  const audit = parseRewriteAudit(`<<<STATUS
+PASS
+STATUS
+<<<CHECKS
+1. FIXED — line improved
+2. FIXED — rhyme improved
+3. FIXED — hook improved
+4. FIXED — image improved
+5. FIXED — bridge improved
+CHECKS`, 'ru');
+  assert.equal(audit.languageOk, false);
+});
+
+test('audit rejects a quoted source line that never existed', () => {
+  const audit = parseRewriteAudit(`<<<STATUS
+PASS
+STATUS
+<<<CHECKS
+1. ИСПРАВЛЕНО — удалено слово «компас»
+2. ИСПРАВЛЕНО — ритм ровнее
+3. ИСПРАВЛЕНО — припев усилен
+4. ИСПРАВЛЕНО — образ конкретнее
+5. ИСПРАВЛЕНО — бридж короче
+CHECKS`, 'ru', 'Я вижу дорогу', 'Я вижу свет');
+  assert.equal(audit.grounded, false);
 });
 
 test('rewrite difference ignores section labels and detects cosmetic edits', () => {

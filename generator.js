@@ -1,4 +1,4 @@
-import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, validateLyrics, validateRewriteCraft, validateRewritePreservation } from './generator-engine.js';
+import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewriteAuditPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, parseDiagnosisResponse, parseRewriteAudit, parseRewriteResponse, validateLyrics, validateRewriteCraft, validateRewritePreservation } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -740,23 +740,20 @@ RULES:
           }), 2800)
         );
         lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
-        let normalizedNotes = normalizeNumberedList(rewriteResult.notes, 5);
-        editorNotes = normalizedNotes.text;
         const minimumDifference = rewriteIntent === 'poem' ? 0.12 : 0.2;
         let difference = measureRewriteDifference(sourceLyrics, lyrics);
         let preservation = validateRewritePreservation(sourceLyrics, lyrics);
         let craft = validateRewriteCraft(lyrics, brief);
-        let verification = parseRewriteVerification(await ask(
-          buildRewriteVerificationPrompt(sourceLyrics, lyrics, currentDiagnosis, rewriteIntent),
-          700,
-        ));
+        let audit = parseRewriteAudit(await ask(
+          buildRewriteAuditPrompt(sourceLyrics, lyrics, currentDiagnosis, brief),
+          900,
+        ), brief.lang, sourceLyrics, lyrics);
         const tooCosmetic = difference.afterLines >= 4 && difference.changedRatio < minimumDifference;
-        if (tooCosmetic || !preservation.ok || !craft.ok || normalizedNotes.count !== 5 || !verification.ok) {
+        if (tooCosmetic || !preservation.ok || !craft.ok || !audit.ok) {
           const qualityIssues = [
             ...preservation.issues,
             ...craft.issues,
-            ...(normalizedNotes.count !== 5 ? ['editor-notes-not-five'] : []),
-            ...(verification.remaining ? [`remaining-errors: ${verification.remaining}`] : []),
+            ...(audit.checks ? [`independent-audit: ${audit.checks}`] : []),
           ];
           rewriteResult = parseRewriteResponse(await ask(
             buildRewriteRepairPrompt(
@@ -770,21 +767,32 @@ RULES:
             2800,
           ));
           lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
-          normalizedNotes = normalizeNumberedList(rewriteResult.notes, 5);
-          editorNotes = normalizedNotes.text;
           difference = measureRewriteDifference(sourceLyrics, lyrics);
           preservation = validateRewritePreservation(sourceLyrics, lyrics);
           craft = validateRewriteCraft(lyrics, brief);
+          audit = parseRewriteAudit(await ask(
+            buildRewriteAuditPrompt(sourceLyrics, lyrics, currentDiagnosis, brief),
+            900,
+          ), brief.lang, sourceLyrics, lyrics);
         }
+        if (audit.checkCount !== 5 || !audit.languageOk || !audit.grounded) {
+          audit = parseRewriteAudit(await ask(
+            `${buildRewriteAuditPrompt(sourceLyrics, lyrics, currentDiagnosis, brief)}
+
+STRICT RETRY: exactly five checks, only ${brief.lang === 'en' ? 'English' : 'Russian'}, and no invented wording.`,
+            900,
+          ), brief.lang, sourceLyrics, lyrics);
+        }
+        editorNotes = audit.checkCount === 5 && audit.languageOk && audit.grounded
+          ? audit.checks
+          : currentDiagnosis.issues.split(/\r?\n/).slice(0, 5).map((line, index) =>
+            `${index + 1}. ТРЕБУЕТ ПРОВЕРКИ — ${line.replace(/^\d+\.\s*/, '')}`).join('\n');
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
         if (!preservation.ok) {
           throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');
         }
         if (!craft.ok) {
           throw new Error('В тексте появились слова не на выбранном языке. Попытка не списана — запустите улучшение ещё раз.');
-        }
-        if (normalizedNotes.count !== 5) {
-          throw new Error('Редактор не смог подтвердить исправление всех пяти проблем. Попытка не списана — запустите улучшение снова.');
         }
         if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
           throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');

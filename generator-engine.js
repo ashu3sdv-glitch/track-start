@@ -233,6 +233,10 @@ Silently verify vocal identity, sections, hook, development, natural stress and 
 
 export function buildDiagnosisPrompt(draft, brief = {}, intent = 'song') {
   const a = getGenreArchitecture(brief);
+  const meter = analyzeSyllables(draft, brief);
+  const meterFacts = meter.lines.slice(0, 80)
+    .map((item, index) => `${index + 1}. [${item.section}] ${item.count} слогов; цель ${item.range[0]}–${item.range[1]}; допустимо ${Math.max(1, item.range[0] - 2)}–${item.range[1] + 2}; ${item.outside ? 'вне допустимого диапазона' : 'допустимо'} — ${item.line}`)
+    .join('\n') || 'Нет строк, пригодных для автоматического подсчёта.';
   const language = { ru: 'Russian', en: 'English', mix: 'mostly Russian with some English phrases' }[brief.lang] || 'the draft language';
   const intentRules = {
     poem: 'Improve it as a standalone poem. Do not demand a chorus or song sections. Check line-length consistency, rhythm, rhyme scheme, natural language and imagery.',
@@ -252,13 +256,19 @@ TASK
 - Mood: ${brief.mood || 'not selected'}
 - ${intentRules[intent] || intentRules.song}
 
+MEASURED METER FACTS — these numbers were calculated by the program and are authoritative:
+${meterFacts}
+TOTAL: ${meter.total}; OUTSIDE TARGET: ${meter.outside}.
+
 DIAGNOSTIC METHOD
 - Find exactly five most important, concrete problems.
 - Always check line lengths/syllable spread, rhythm/stress, rhyme pattern, clarity/imagery and form appropriate to the chosen result.
+- Any claim about syllable counts or ranges must match MEASURED METER FACTS exactly. Never call an allowed line outside the allowed range.
+- If few or no lines are outside the target, do not invent a meter violation; describe a real stress or phrasing problem instead.
 - When converting to a song, also check whether a memorable chorus/hook and section development are missing.
-- Describe each problem in one short sentence. No essays, scores, compliments or repeated explanations.
-- Propose exactly four concrete editing actions, each in one short sentence.
-- Every action must name the problem numbers it solves, for example: "1. Выровнять длину строк и ударения — проблемы 1 и 2."
+- Describe each problem in one short sentence, maximum 18 words. No essays, scores, compliments or repeated explanations.
+- Propose exactly four concrete editing actions, maximum 14 words each.
+- Put covered problem numbers at the START of every action, for example: "[1,2] Выровнять длину строк и ударения."
 - Across the four actions, reference every problem number from 1 through 5 at least once.
 
 OUTPUT FORMAT — use these delimiters exactly and write values in the author's language:
@@ -276,10 +286,10 @@ SUMMARY
 5. problem
 ISSUES
 <<<PLAN
-1. improvement — problems 1 and 2
-2. improvement — problem 3
-3. improvement — problem 4
-4. improvement — problem 5
+1. [1,2] improvement
+2. [3] improvement
+3. [4] improvement
+4. [5] improvement
 PLAN
 
 Do not output any other text.`;
@@ -290,12 +300,12 @@ export function parseDiagnosisResponse(raw) {
   const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
   const issues = normalizeNumberedList(section('ISSUES'), 5);
   const plan = normalizeNumberedList(section('PLAN'), 4);
-  const planLines = plan.text.split(/\r?\n/);
-  const fallbackProblems = ['1 и 2', '3', '4', '5'];
-  const coveredPlan = planLines.map((line, index) =>
-    /(?:problem|проблем|пункт)/iu.test(line)
-      ? line
-      : `${line} — проблемы ${fallbackProblems[index] || index + 1}`);
+  const fallbackProblems = ['1,2', '3', '4', '5'];
+  const coveredPlan = plan.text.split(/\r?\n/).map((line, index) => {
+    const item = line.replace(/^\d+\.\s*/, '');
+    return `${index + 1}. ${/^\[[1-5,\s]+\]/.test(item) ? item : `[${fallbackProblems[index]}] ${item}`}`;
+  });
+  const canonical = `Кратко: ${section('SUMMARY')}\nПроблемы:\n${issues.text}\nПлан:\n${coveredPlan.join('\n')}`;
   return {
     type: section('TYPE') || 'song',
     summary: section('SUMMARY') || text,
@@ -304,7 +314,7 @@ export function parseDiagnosisResponse(raw) {
     plan: coveredPlan.join('\n'),
     planCount: plan.count,
     planCoversAllProblems: plan.count === 4,
-    raw: text,
+    raw: canonical,
   };
 }
 
@@ -365,13 +375,6 @@ OUTPUT FORMAT — use these delimiters exactly:
 <<<REVISED
 complete revised lyrics
 REVISED
-<<<NOTES
-1. how diagnosed problem 1 was corrected, maximum 14 words
-2. how diagnosed problem 2 was corrected, maximum 14 words
-3. how diagnosed problem 3 was corrected, maximum 14 words
-4. how diagnosed problem 4 was corrected, maximum 14 words
-5. how diagnosed problem 5 was corrected, maximum 14 words
-NOTES
 
 Silently verify that the revision still feels like the author's song rather than a replacement.`;
 }
@@ -389,50 +392,73 @@ export function parseRewriteResponse(raw) {
   return { lyrics: text.replace(/<<<NOTES[\s\S]*$/i, '').trim(), notes: '' };
 }
 
-export function buildRewriteVerificationPrompt(original, revision, diagnosis = {}, intent = 'song') {
-  return `You are a strict Track Start quality controller. Compare the revision with the approved diagnosis. Do not rewrite the text.
+export function buildRewriteAuditPrompt(original, revision, diagnosis = {}, brief = {}) {
+  const language = brief.lang === 'en' ? 'English' : 'Russian';
+  const originalMeter = analyzeSyllables(original, brief);
+  const revisedMeter = analyzeSyllables(revision, brief);
+  const meterSummary = meter => `lines ${meter.total}; outside target ${meter.outside}; counts ${meter.lines.map(item => item.count).join(', ')}`;
+  return `You are an independent Track Start lyric auditor. You did not write the revision. Compare facts only; do not praise it automatically and do not rewrite it.
 
 ORIGINAL
 ${String(original || '').trim()}
 
-APPROVED DIAGNOSIS AND PLAN
-${diagnosis.raw || diagnosis.summary || ''}
-
 REVISION
 ${String(revision || '').trim()}
 
-CHECK
-- Verify that all five diagnosed problems were actually corrected and all four planned improvements were completed.
-- Verify natural grammar, consistent narrator, clear meaning, rhythm and rhyme.
-- For a poem, do not require song sections. For a song, require a usable structure and a distinct memorable chorus.
-- Intended result: ${intent}.
-- Be strict: PASS only when no important diagnosed problem remains.
+APPROVED FIVE PROBLEMS AND FOUR-STEP PLAN
+${diagnosis.raw || diagnosis.summary || ''}
+
+PROGRAM-MEASURED METER
+- Original: ${meterSummary(originalMeter)}
+- Revision: ${meterSummary(revisedMeter)}
+
+AUDIT RULES
+- Return exactly five checks, one for each diagnosed problem in the same order.
+- Start each check with ИСПРАВЛЕНО or ОСТАЛОСЬ when writing Russian; use FIXED or REMAINS only for English.
+- Use ${language} only.
+- Maximum 16 words per check.
+- Never mention a word, line or image that is absent from ORIGINAL or REVISION.
+- Put any exact wording you reference in «quotes»; every quoted fragment must occur verbatim in ORIGINAL or REVISION.
+- Never invent a previous version. Base meter claims only on PROGRAM-MEASURED METER.
+- Mark a problem FIXED only when the revision itself proves it. Otherwise mark it REMAINS.
 
 OUTPUT FORMAT
 <<<STATUS
-PASS | FAIL
+PASS if all five are fixed, otherwise FAIL
 STATUS
-<<<REMAINING
-If FAIL, list up to four remaining concrete errors, one short numbered sentence each. If PASS, leave empty.
-REMAINING
+<<<CHECKS
+1. status — factual result for problem 1
+2. status — factual result for problem 2
+3. status — factual result for problem 3
+4. status — factual result for problem 4
+5. status — factual result for problem 5
+CHECKS
 
 Do not output any other text.`;
 }
 
-export function parseRewriteVerification(raw) {
+export function parseRewriteAudit(raw, lang = 'ru', original = '', revision = '') {
   const text = cleanModelText(raw);
   const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
+  const checks = normalizeNumberedList(section('CHECKS'), 5, 180);
   const status = section('STATUS').toUpperCase();
-  const remaining = normalizeNumberedList(section('REMAINING'), 4);
+  const wrongLanguage = lang === 'ru'
+    ? checks.text.split(/\r?\n/).some(line => /\b(?:FIXED|REMAINS|problem|line|verse)\b/i.test(line))
+    : /[А-Яа-яЁё]/.test(checks.text);
+  const sourceText = `${original}\n${revision}`.toLowerCase();
+  const quoted = [...checks.text.matchAll(/[«"]([^»"]+)[»"]/g)].map(match => match[1].trim().toLowerCase());
+  const grounded = quoted.every(fragment => sourceText.includes(fragment));
   return {
     ok: status === 'PASS',
     status: status || 'FAIL',
-    remaining: remaining.text,
-    remainingCount: remaining.count,
+    checks: checks.text,
+    checkCount: checks.count,
+    languageOk: !wrongLanguage,
+    grounded,
   };
 }
 
-export function normalizeNumberedList(value, expectedCount) {
+export function normalizeNumberedList(value, expectedCount, maxChars = 140) {
   const expanded = String(value || '').replace(/\s+(?=\d+[.)]\s+)/g, '\n');
   const items = expanded.split(/\r?\n/)
     .map(line => line.trim().replace(/^(?:[-*•]|\d+[.)])\s*/, '').trim())
@@ -440,7 +466,7 @@ export function normalizeNumberedList(value, expectedCount) {
     .slice(0, expectedCount);
   return {
     count: items.length,
-    text: items.map((item, index) => `${index + 1}. ${item.slice(0, 140)}`).join('\n'),
+    text: items.map((item, index) => `${index + 1}. ${item.slice(0, maxChars)}`).join('\n'),
   };
 }
 
@@ -518,19 +544,13 @@ REQUIREMENTS
 - Repair whole stanzas so rhyme, rhythm and meaning work together; do not patch isolated line endings.
 - Never invent a word or mix alphabets. For Russian lyrics, Latin letters are allowed only in English section labels.
 - Correct every problem listed in the approved diagnosis.
-- Return the complete revised text and exactly five short numbered notes: one confirmed correction for each diagnosed problem.
+- Return the complete revised text only. Do not evaluate your own work.
 
 OUTPUT FORMAT
 <<<REVISED
 complete revised text
 REVISED
-<<<NOTES
-1. correction of diagnosed problem 1
-2. correction of diagnosed problem 2
-3. correction of diagnosed problem 3
-4. correction of diagnosed problem 4
-5. correction of diagnosed problem 5
-NOTES`;
+`;
 }
 
 export function buildStylePrompt(lyrics, brief) {
