@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Банк статей — Track Start</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    body{min-height:100vh;background:var(--bg)}
+    .content-wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:42px 0 72px}
+    .content-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px}
+    .content-head h1{margin:8px 0;font-size:clamp(34px,5vw,54px)}
+    .content-head p{max-width:720px;color:var(--muted);line-height:1.6}
+    .content-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .content-toolbar{display:grid;grid-template-columns:1fr 190px 190px;gap:10px;margin:24px 0}
+    .content-toolbar .input,.content-toolbar select{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
+    .content-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .content-stat{padding:7px 11px;border-radius:999px;background:var(--bg-2);color:var(--muted);font-size:12px}
+    .topic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .topic-card{display:grid;gap:14px;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+    .topic-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .topic-category{color:var(--accent-ink);font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+    .topic-priority{color:var(--muted);font-size:11px}
+    .topic-card h2{font-size:20px;line-height:1.25}
+    .topic-meta{display:grid;gap:5px;color:var(--muted);font-size:12px;line-height:1.45}
+    .topic-controls{display:flex;align-items:center;gap:8px;margin-top:auto}
+    .topic-controls select{flex:1;min-height:38px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--bg-2);color:var(--ink)}
+    .topic-controls .btn{min-height:38px;padding:8px 12px}
+    .topic-card.is-week{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,92,246,.1)}
+    .owner-gate{max-width:520px;margin:15vh auto;padding:30px;border:1px solid var(--line);border-radius:20px;background:var(--surface);text-align:center}
+    .owner-gate p{margin:12px 0 22px;color:var(--muted)}
+    @media(max-width:780px){.content-head{display:grid}.content-toolbar{grid-template-columns:1fr}.topic-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main id="owner-gate" class="owner-gate" hidden>
+    <h1>Банк статей</h1>
+    <p>Эта страница доступна после входа в режим владельца.</p>
+    <a class="btn btn-primary" href="../owner-access/">Войти как владелец</a>
+  </main>
+  <main id="content-app" class="content-wrap" hidden>
+    <div class="content-head">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Track Start · владелец</div>
+        <h1>Банк статей</h1>
+        <p>Постоянный план SEO/GEO-контента. Выбирайте две темы в неделю, меняйте их статус и копируйте готовое техническое задание.</p>
+      </div>
+      <div class="content-actions">
+        <a class="btn btn-secondary" href="../generator.html">Генератор</a>
+        <button class="btn btn-primary" id="pick-week" type="button">Выбрать 2 темы на неделю</button>
+      </div>
+    </div>
+    <div class="content-toolbar">
+      <input class="input" id="topic-search" type="search" placeholder="Найти тему или запрос…">
+      <select id="category-filter" aria-label="Рубрика"><option value="">Все рубрики</option></select>
+      <select id="status-filter" aria-label="Статус">
+        <option value="">Все статусы</option><option value="idea">Идея</option><option value="week">На эту неделю</option><option value="writing">В работе</option><option value="published">Опубликовано</option>
+      </select>
+    </div>
+    <div class="content-stats" id="content-stats"></div>
+    <section class="topic-grid" id="topic-grid" aria-live="polite"></section>
+  </main>
+  <script src="../owner-content.js"></script>
+</body>
+</html>
