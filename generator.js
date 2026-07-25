@@ -691,7 +691,7 @@ RULES:
         [isRewrite ? 'Редактор' : 'Новый текст', selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
       if (isRewrite) {
         document.getElementById('editor-notes-text').textContent = editorNotes || 'Сохранён исходный смысл, а строки доработаны по выбранным задачам.';
-        document.getElementById('editor-notes').style.display = '';
+        document.getElementById('editor-notes').style.display = 'block';
       }
       updateBadge();
 
