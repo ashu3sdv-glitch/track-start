@@ -90,8 +90,6 @@
 .diagnosis-section strong { display:block; margin-bottom:5px; font-size:12px; }
 .diagnosis-section div { white-space:pre-line; color:var(--muted); font-size:12px; line-height:1.5; }
 .approve-rewrite { width:100%; margin-top:14px; }
-.song-setting.is-hidden,
-#suno-panel.is-hidden { display:none; }
 </style>
 </head>
 <body>
@@ -136,8 +134,8 @@
 
     <div class="app-title" style="margin-bottom:28px;">
       <div>
-        <h1 style="font-size:32px;">Генератор текстов песен</h1>
-        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Опиши идею — получи редактируемый текст. Настройки для Suno можно добавить после.</p>
+        <h1 style="font-size:32px;">Генератор и редактор текстов песен</h1>
+        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Создайте песню с нуля или превратите свой черновик в готовый песенный текст.</p>
       </div>
     </div>
 
@@ -169,15 +167,10 @@
           </div>
 
           <div class="rewrite-panel" id="rewrite-panel">
-            <label class="gen-label" for="source-lyrics">Ваш черновик</label>
+            <label class="gen-label" for="source-lyrics">Черновик текста песни</label>
             <textarea id="source-lyrics" class="idea-field" rows="11" maxlength="12000"
-              placeholder="Вставьте текст целиком. Можно с названиями секций: [Куплет], [Припев], [Бридж]…"></textarea>
-            <p class="gen-hint">Смысл, история и лучшие строки будут сохранены.</p>
-            <label class="gen-label" style="margin-top:16px;">Что вы хотите получить</label>
-            <div class="intent-options" id="rewrite-intent">
-              <button class="intent-btn" type="button" data-intent="poem"><strong>Улучшить стихотворение</strong><span>Сохранить поэтическую форму и авторскую интонацию</span></button>
-              <button class="intent-btn active" type="button" data-intent="song"><strong>Сделать стихотворение песней</strong><span>Создать певучую структуру, куплеты и запоминающийся припев</span></button>
-            </div>
+              placeholder="Вставьте стихотворение, набросок или текст с куплетами — Track Start подготовит песню."></textarea>
+            <p class="gen-hint">Сохраним историю и лучшие строки, исправим ритм и рифмы, усилим припев.</p>
             <div class="diagnosis-card" id="diagnosis-card" style="margin-top:16px;">
               <h3 id="diagnosis-title">Диагностика текста</h3>
               <div class="diagnosis-summary" id="diagnosis-summary"></div>
@@ -188,7 +181,7 @@
           </div>
 
           <!-- Жанр -->
-          <div class="song-setting">
+          <div>
             <label class="gen-label"><span data-i18n="gen.genre">Жанр</span> <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.genre_optional">(необязательно, макс. 3)</span></label>
             <p class="gen-hint" data-i18n="gen.genre_hint">Не знаешь? Оставь пустым — AI выберет сам</p>
             <div class="chip-group" style="margin-top:8px;" data-field="genre">
@@ -208,7 +201,7 @@
           </div>
 
           <!-- Настроение -->
-          <div class="song-setting">
+          <div>
             <label class="gen-label" data-i18n="gen.mood">Mood <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <div class="chip-group" data-field="mood">
               <button class="chip-btn" data-v="Nostalgic">Nostalgic</button>
@@ -222,48 +215,6 @@
               <button class="chip-btn" data-v="Peaceful">Peaceful</button>
               <button class="chip-btn" data-v="Euphoric">Euphoric</button>
             </div>
-          </div>
-
-          <!-- Голос -->
-          <div class="song-setting">
-            <label class="gen-label" data-i18n="gen.vocal">Voice <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
-            <div class="chip-group" data-field="vocal">
-              <button class="chip-btn" data-v="Male vocal">Male vocal</button>
-              <button class="chip-btn" data-v="Female vocal">Female vocal</button>
-              <button class="chip-btn" data-v="Duet M+F">Duet M+F</button>
-              <button class="chip-btn" data-v="Choir">Choir</button>
-              <button class="chip-btn" data-v="Harmony vocals">Harmony vocals</button>
-              <button class="chip-btn" data-v="Children's choir">Children's choir</button>
-              <button class="chip-btn" data-v="No vocals">No vocals</button>
-            </div>
-          </div>
-
-          <!-- Тембр голоса: показывается после выбора мужского или женского вокала -->
-          <div class="song-setting" id="timbre-field" style="display:none;">
-            <label class="gen-label" data-i18n="gen.timbre">Voice timbre</label>
-            <p class="gen-hint" data-i18n="gen.timbre_hint">Название передаётся генератору на английском</p>
-            <div class="chip-group" id="timbre-options" style="margin-top:8px;"></div>
-          </div>
-
-          <!-- Эпоха -->
-          <div class="song-setting">
-            <label class="gen-label" data-i18n="gen.era">Эпоха <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
-            <div class="chip-group" data-field="era">
-              <button class="chip-btn" data-v="60s">60s</button>
-              <button class="chip-btn" data-v="70s">70s</button>
-              <button class="chip-btn" data-v="80s">80s</button>
-              <button class="chip-btn" data-v="90s">90s</button>
-            </div>
-            <p class="gen-hint" data-i18n="gen.era_hint">Русский + 60s–80s включает советский режим: язык эпохи, без англицизмов</p>
-          </div>
-
-          <!-- Инструменты -->
-          <div class="song-setting">
-            <label class="gen-label" data-i18n="gen.instruments">Instruments <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
-            <input type="text" id="instruments" class="idea-field" style="height:44px; min-height:unset; resize:none;"
-              data-i18n-attr="placeholder:gen.instruments_ph"
-              placeholder="accordion, duduk, piano, guitar…" />
-            <p class="gen-hint" data-i18n="gen.instruments_hint">1–2 инструмента — оптимально</p>
           </div>
 
           <!-- Язык -->
@@ -357,6 +308,38 @@
 
           <div id="style-action" style="display:none;">
             <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">Добавим настройки голоса и исполнения к разделам, затем создадим общую строку Style.</p>
+            <div style="display:grid;gap:16px;margin-bottom:18px;">
+              <div>
+                <label class="gen-label" data-i18n="gen.vocal">Вокал <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;">(необязательно)</span></label>
+                <div class="chip-group" data-field="vocal">
+                  <button class="chip-btn" data-v="Male vocal">Мужской</button>
+                  <button class="chip-btn" data-v="Female vocal">Женский</button>
+                  <button class="chip-btn" data-v="Duet M+F">Дуэт</button>
+                  <button class="chip-btn" data-v="Choir">Хор</button>
+                  <button class="chip-btn" data-v="Harmony vocals">Гармонии</button>
+                  <button class="chip-btn" data-v="Children's choir">Детский хор</button>
+                  <button class="chip-btn" data-v="No vocals">Без вокала</button>
+                </div>
+              </div>
+              <div id="timbre-field" style="display:none;">
+                <label class="gen-label" data-i18n="gen.timbre">Тембр голоса</label>
+                <div class="chip-group" id="timbre-options" style="margin-top:8px;"></div>
+              </div>
+              <div>
+                <label class="gen-label" data-i18n="gen.era">Эпоха <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;">(необязательно)</span></label>
+                <div class="chip-group" data-field="era">
+                  <button class="chip-btn" data-v="60s">60s</button>
+                  <button class="chip-btn" data-v="70s">70s</button>
+                  <button class="chip-btn" data-v="80s">80s</button>
+                  <button class="chip-btn" data-v="90s">90s</button>
+                </div>
+              </div>
+              <div>
+                <label class="gen-label" data-i18n="gen.instruments">Инструменты <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;">(необязательно)</span></label>
+                <input type="text" id="instruments" class="idea-field" style="height:44px;min-height:unset;resize:none;"
+                  placeholder="piano, guitar, strings…" />
+              </div>
+            </div>
             <button class="btn btn-primary" id="generate-style" style="width:100%;height:46px;">Создать стиль и исполнение</button>
           </div>
 

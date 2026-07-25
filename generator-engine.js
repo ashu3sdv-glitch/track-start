@@ -342,6 +342,12 @@ NON-NEGOTIABLE EDITORIAL RULES
 - Do not invent a different plot, narrator, relationship or ending.
 - Never imitate or quote an existing song or named artist.
 - Use natural modern language and speakable syntax. For Russian, avoid stress collisions, dense consonant clusters and literary inversions made for rhyme.
+- Rebuild weak material by complete stanzas, not by replacing isolated lines independently.
+- Infer the intended rhyme scheme stanza by stanza (such as ABAB, AABB or intentional free verse) and make line endings work together.
+- Silently consider several natural endings for each rhyming pair. Never use filler, broken grammar or a meaningless image for rhyme.
+- Keep neighboring lines rhythmically compatible; natural stress and meaning are more important than exact syllable equality.
+- Give each verse a clear job, make the chorus simpler and more memorable, and ensure the second verse develops the story.
+- For Russian output, use Cyrillic only inside lyric lines. English is allowed only in section labels such as [Verse 1] and [Chorus].
 - Keep existing section labels and section order when they work. If labels are missing, add only the minimum useful English labels such as [Verse 1], [Chorus], [Verse 2], [Bridge].
 - Do not add vocal settings, performance notes, a title, markdown fences or a Suno style prompt.
 - Return the complete revised lyric, not fragments.
@@ -477,6 +483,17 @@ export function validateRewritePreservation(original, revised) {
   return { ok: issues.length === 0, issues };
 }
 
+export function validateRewriteCraft(revised, brief = {}) {
+  const issues = [];
+  const lyricText = String(revised || '').split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line && !/^\[[^\]]+\]$/.test(line))
+    .join(' ');
+  if (brief.lang === 'ru' && /[A-Za-z]/.test(lyricText)) issues.push('foreign-script-in-russian-lyrics');
+  if (brief.lang === 'en' && /[А-Яа-яЁё]/.test(lyricText)) issues.push('foreign-script-in-english-lyrics');
+  return { ok: issues.length === 0, issues };
+}
+
 export function buildRewriteRepairPrompt(original, revision, brief = {}, diagnosis = {}, minimumRatio = 0.2, qualityIssues = []) {
   const issueText = qualityIssues.length
     ? qualityIssues.join(', ')
@@ -498,6 +515,8 @@ REQUIREMENTS
 - Substantially rewrite the weak lines identified in the diagnosis.
 - Do not count section labels as meaningful changes.
 - Improve hook, rhythm, natural stress, rhyme and concrete imagery where the diagnosis requests it.
+- Repair whole stanzas so rhyme, rhythm and meaning work together; do not patch isolated line endings.
+- Never invent a word or mix alphabets. For Russian lyrics, Latin letters are allowed only in English section labels.
 - Correct every problem listed in the approved diagnosis.
 - Return the complete revised text and exactly five short numbered notes: one confirmed correction for each diagnosed problem.
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, resolveTimbre, validateLyrics, validateRewritePreservation } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, resolveTimbre, validateLyrics, validateRewriteCraft, validateRewritePreservation } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -211,6 +211,16 @@ test('rewrite prompt follows the approved result and diagnosis', () => {
   assert.match(prompt, /Intended result: song/);
   assert.match(prompt, /Convert it into a complete singable song/);
   assert.match(prompt, /Припев не отличается/);
+  assert.match(prompt, /complete stanzas/i);
+  assert.match(prompt, /intended rhyme scheme/i);
+});
+
+test('rewrite craft validator rejects accidental Latin words in Russian lyrics', () => {
+  assert.deepEqual(
+    validateRewriteCraft('[Verse 1]\nЯ вижу горный grad', { lang: 'ru' }).issues,
+    ['foreign-script-in-russian-lyrics'],
+  );
+  assert.equal(validateRewriteCraft('[Verse 1]\nЯ вижу горный град', { lang: 'ru' }).ok, true);
 });
 
 test('numbered list normalizer keeps five concise result items', () => {

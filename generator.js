@@ -1,4 +1,4 @@
-import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, validateLyrics, validateRewritePreservation } from './generator-engine.js';
+import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, validateLyrics, validateRewriteCraft, validateRewritePreservation } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -118,7 +118,7 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
   let selectedEra    = '';
   let selectedLang   = 'ru';
   let editorMode     = 'create';
-  let rewriteIntent  = 'song';
+  const rewriteIntent = 'song';
   let currentDiagnosis = null;
   let diagnosisFingerprint = '';
   let currentBrief = null;
@@ -219,28 +219,12 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
         ? 'Вставьте черновик и сначала проведите диагностику'
         : 'Заполните бриф слева и нажмите «Создать текст песни»';
       document.getElementById('editor-notes').style.display = 'none';
-      renderIntent();
-    }
-
-    function renderIntent() {
-      const poemMode = editorMode === 'rewrite' && rewriteIntent === 'poem';
-      document.querySelectorAll('.song-setting').forEach(field => field.classList.toggle('is-hidden', poemMode));
-      document.getElementById('suno-panel').classList.toggle('is-hidden', poemMode);
-      document.getElementById('step1-title').textContent = poemMode ? 'Стихотворение' : 'Текст песни';
     }
 
     buttons.forEach(button => button.addEventListener('click', () => {
       editorMode = button.getAttribute('data-mode') === 'rewrite' ? 'rewrite' : 'create';
       invalidateDiagnosis();
       renderMode();
-    }));
-
-    document.querySelectorAll('[data-intent]').forEach(button => button.addEventListener('click', () => {
-      rewriteIntent = button.getAttribute('data-intent') || 'song';
-      document.querySelectorAll('[data-intent]').forEach(item =>
-        item.classList.toggle('active', item.getAttribute('data-intent') === rewriteIntent));
-      invalidateDiagnosis();
-      renderIntent();
     }));
 
     document.getElementById('source-lyrics').addEventListener('input', invalidateDiagnosis);
@@ -645,7 +629,7 @@ RULES:
   }
 
   function renderDiagnosis(diagnosis) {
-    const typeLabels = { poem: 'Улучшение стихотворения', song: 'Преобразование в песню' };
+    const typeLabels = { song: 'Редактура текста песни' };
     document.getElementById('diagnosis-title').textContent = `Диагностика · ${typeLabels[diagnosis.type] || diagnosis.type}`;
     document.getElementById('diagnosis-summary').textContent = diagnosis.summary;
     document.getElementById('diagnosis-issues').textContent = diagnosis.issues || 'Критических проблем не обнаружено.';
@@ -706,16 +690,15 @@ RULES:
     }
 
     const draftAnchor = sourceLyrics.split(/\r?\n/).map(line => line.trim()).find(line => line && !line.startsWith('[')) || 'Авторский черновик';
-    const poemRewrite = isRewrite && rewriteIntent === 'poem';
     const brief = {
       idea: isRewrite ? draftAnchor.slice(0, 180) : idea,
-      genres: poemRewrite ? [] : selectedGenres,
-      mood: poemRewrite ? '' : selectedMood,
-      vocal: poemRewrite ? '' : selectedVocal,
-      timbre: poemRewrite ? '' : selectedTimbre,
-      era: poemRewrite ? '' : selectedEra,
+      genres: selectedGenres,
+      mood: selectedMood,
+      vocal: selectedVocal,
+      timbre: selectedTimbre,
+      era: selectedEra,
       lang: selectedLang,
-      instruments: poemRewrite ? '' : instruments,
+      instruments,
       mode: isRewrite ? 'rewrite' : 'create',
     };
 
@@ -762,14 +745,16 @@ RULES:
         const minimumDifference = rewriteIntent === 'poem' ? 0.12 : 0.2;
         let difference = measureRewriteDifference(sourceLyrics, lyrics);
         let preservation = validateRewritePreservation(sourceLyrics, lyrics);
+        let craft = validateRewriteCraft(lyrics, brief);
         let verification = parseRewriteVerification(await ask(
           buildRewriteVerificationPrompt(sourceLyrics, lyrics, currentDiagnosis, rewriteIntent),
           700,
         ));
         const tooCosmetic = difference.afterLines >= 4 && difference.changedRatio < minimumDifference;
-        if (tooCosmetic || !preservation.ok || normalizedNotes.count !== 5 || !verification.ok) {
+        if (tooCosmetic || !preservation.ok || !craft.ok || normalizedNotes.count !== 5 || !verification.ok) {
           const qualityIssues = [
             ...preservation.issues,
+            ...craft.issues,
             ...(normalizedNotes.count !== 5 ? ['editor-notes-not-five'] : []),
             ...(verification.remaining ? [`remaining-errors: ${verification.remaining}`] : []),
           ];
@@ -789,10 +774,14 @@ RULES:
           editorNotes = normalizedNotes.text;
           difference = measureRewriteDifference(sourceLyrics, lyrics);
           preservation = validateRewritePreservation(sourceLyrics, lyrics);
+          craft = validateRewriteCraft(lyrics, brief);
         }
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
         if (!preservation.ok) {
           throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');
+        }
+        if (!craft.ok) {
+          throw new Error('В тексте появились слова не на выбранном языке. Попытка не списана — запустите улучшение ещё раз.');
         }
         if (normalizedNotes.count !== 5) {
           throw new Error('Редактор не смог подтвердить исправление всех пяти проблем. Попытка не списана — запустите улучшение снова.');
@@ -827,12 +816,10 @@ RULES:
 
       currentBrief = brief;
       // Шаг 2 становится доступен после проверки и редактирования текста
-      if (!(isRewrite && rewriteIntent === 'poem')) {
-        document.getElementById('suno-panel').style.opacity = '1';
-        document.getElementById('suno-empty').style.display = 'none';
-        document.getElementById('style-action').style.display = '';
-        document.getElementById('step2-num').className = 'step-num';
-      }
+      document.getElementById('suno-panel').style.opacity = '1';
+      document.getElementById('suno-empty').style.display = 'none';
+      document.getElementById('style-action').style.display = '';
+      document.getElementById('step2-num').className = 'step-num';
 
     } catch (err) {
       showError(err.message || 'Что-то пошло не так. Попробуй ещё раз.');
@@ -844,6 +831,13 @@ RULES:
   async function runStyle() {
     const cleanLyrics = document.getElementById('lyrics-text').value.trim();
     if (!cleanLyrics || !currentBrief) { alert('Сначала создай текст песни'); return; }
+    currentBrief = {
+      ...currentBrief,
+      vocal: selectedVocal,
+      timbre: selectedTimbre,
+      era: selectedEra,
+      instruments: document.getElementById('instruments').value.trim(),
+    };
     const btn = document.getElementById('generate-style');
     btn.disabled = true;
     document.getElementById('style-action').style.display = 'none';
