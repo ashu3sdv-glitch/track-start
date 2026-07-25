@@ -218,6 +218,54 @@ PLAN`);
   assert.match(diagnosis.plan, /\[5\]/);
 });
 
+test('diagnosis parser does not split a wrapped list of source line numbers', () => {
+  const diagnosis = parseDiagnosisResponse(`<<<TYPE
+song
+TYPE
+<<<SUMMARY
+Нужна редактура.
+SUMMARY
+<<<ISSUES
+1. Шесть строк (1, 2, 3, 11, 12,
+13. короче целевого диапазона.
+2. Неровный ритм.
+3. Слабые рифмы.
+4. Нет хука.
+5. Нет развития.
+ISSUES
+<<<PLAN
+1. [1] Выровнять строки.
+2. [2] Исправить ритм.
+3. [3,4] Усилить рифмы и хук.
+4. [5] Добавить развитие.
+PLAN`);
+  assert.equal(diagnosis.issueCount, 5);
+  assert.match(diagnosis.issues, /12, 13\. короче/);
+});
+
+test('diagnosis parser rejects genre-driven emotional recoloring', () => {
+  const diagnosis = parseDiagnosisResponse(`<<<TYPE
+song
+TYPE
+<<<SUMMARY
+Нужна редактура.
+SUMMARY
+<<<ISSUES
+1. Неровный ритм.
+2. Слабые рифмы.
+3. Нет хука.
+4. Светлые образы не адаптированы к эстетике Dark Phonk.
+5. Нет развития.
+ISSUES
+<<<PLAN
+1. [1] Выровнять строки.
+2. [2] Исправить рифмы.
+3. [3,4] Усилить хук.
+4. [5] Добавить развитие.
+PLAN`);
+  assert.equal(diagnosis.semanticConstraintsOk, false);
+});
+
 test('rewrite prompt follows the approved result and diagnosis', () => {
   const prompt = buildRewritePrompt('Старый текст', { genres: ['Pop'], lang: 'ru' }, {
     intent: 'song',

@@ -310,6 +310,10 @@ export function parseDiagnosisResponse(raw) {
   const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
   const issues = normalizeNumberedList(section('ISSUES'), 5, 200);
   const plan = normalizeNumberedList(section('PLAN'), 4, 180);
+  const semanticText = `${issues.text}\n${plan.text}`.toLowerCase();
+  const genreRecolorsMeaning = /(образ|весн|светл|нежн|юмор)[^\n]{0,100}(?:не адапт|противореч|несовмест)[^\n]{0,80}(?:жанр|phonk|фонк|dark)/i.test(semanticText)
+    || /(?:жанр|phonk|фонк|dark)[^\n]{0,80}(?:требует|нужн)[^\n]{0,80}(?:мрач|тёмн|агрессивн)[^\n]{0,80}(?:образ|метафор|текст)/i.test(semanticText);
+  const swapsRecognizedSections = /(?:pre-?chorus|пре-?хорус|предприпев)[^\n]{0,100}(?:перепут|неверн|ошибочн)[^\n]{0,80}(?:chorus|хорус|припев|размет)/i.test(semanticText);
   const fallbackProblems = ['1,2', '3', '4', '5'];
   const coveredPlan = plan.text.split(/\r?\n/).map((line, index) => {
     const item = line.replace(/^\d+\.\s*/, '');
@@ -324,6 +328,7 @@ export function parseDiagnosisResponse(raw) {
     plan: coveredPlan.join('\n'),
     planCount: plan.count,
     planCoversAllProblems: plan.count === 4,
+    semanticConstraintsOk: !genreRecolorsMeaning && !swapsRecognizedSections,
     raw: canonical,
   };
 }
@@ -484,11 +489,18 @@ export function parseRewriteAudit(raw, lang = 'ru', original = '', revision = ''
 }
 
 export function normalizeNumberedList(value, expectedCount, maxChars = 140) {
-  const expanded = String(value || '').replace(/\s+(?=\d+[.)]\s+)/g, '\n');
-  const items = expanded.split(/\r?\n/)
-    .map(line => line.trim().replace(/^(?:[-*•]|\d+[.)])\s*/, '').trim())
-    .filter(Boolean)
-    .slice(0, expectedCount);
+  const lines = String(value || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const items = [];
+  for (const line of lines) {
+    const numbered = line.match(/^(\d+)[.)]\s*(.*)$/);
+    if (numbered && Number(numbered[1]) === items.length + 1 && items.length < expectedCount) {
+      items.push(numbered[2].trim());
+    } else if (items.length && items.length < expectedCount) {
+      items[items.length - 1] = `${items[items.length - 1]} ${line}`.trim();
+    } else if (!numbered && items.length < expectedCount) {
+      items.push(line.replace(/^[-*•]\s*/, '').trim());
+    }
+  }
   return {
     count: items.length,
     text: items.map((item, index) => {

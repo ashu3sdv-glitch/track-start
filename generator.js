@@ -655,11 +655,11 @@ RULES:
       const prompt = buildDiagnosisPrompt(sourceLyrics, brief, rewriteIntent);
       let response = await ask(prompt, 1100);
       currentDiagnosis = parseDiagnosisResponse(response);
-      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems) {
-        response = await ask(`${prompt}\n\nSTRICT RETRY: return exactly 5 numbered problems and exactly 4 numbered improvements. In the four improvements, explicitly reference every problem number 1–5. Keep every item to one short sentence.`, 1100);
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems || !currentDiagnosis.semanticConstraintsOk) {
+        response = await ask(`${prompt}\n\nSTRICT RETRY: return exactly 5 numbered problems and exactly 4 numbered improvements. In the four improvements, explicitly reference every problem number 1–5. Keep every item to one short sentence. Do not change or criticize the author's emotional palette merely to match the genre. Do not question correctly recognized section labels.`, 1100);
         currentDiagnosis = parseDiagnosisResponse(response);
       }
-      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems) {
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems || !currentDiagnosis.semanticConstraintsOk) {
         throw new Error('диагностика получилась неполной');
       }
       diagnosisFingerprint = getDiagnosisFingerprint(sourceLyrics);
