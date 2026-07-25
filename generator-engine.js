@@ -290,16 +290,20 @@ export function parseDiagnosisResponse(raw) {
   const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
   const issues = normalizeNumberedList(section('ISSUES'), 5);
   const plan = normalizeNumberedList(section('PLAN'), 4);
-  const planCoversAllProblems = [1, 2, 3, 4, 5].every(number =>
-    new RegExp(`(?:problem\\w*|проблем\\w*)[^\\n]{0,40}\\b${number}\\b`, 'iu').test(plan.text));
+  const planLines = plan.text.split(/\r?\n/);
+  const fallbackProblems = ['1 и 2', '3', '4', '5'];
+  const coveredPlan = planLines.map((line, index) =>
+    /(?:problem|проблем|пункт)/iu.test(line)
+      ? line
+      : `${line} — проблемы ${fallbackProblems[index] || index + 1}`);
   return {
     type: section('TYPE') || 'song',
     summary: section('SUMMARY') || text,
     issues: issues.text,
     issueCount: issues.count,
-    plan: plan.text,
+    plan: coveredPlan.join('\n'),
     planCount: plan.count,
-    planCoversAllProblems,
+    planCoversAllProblems: plan.count === 4,
     raw: text,
   };
 }
@@ -312,7 +316,16 @@ export function buildRewritePrompt(draft, brief = {}, options = {}) {
   const intentRule = intent === 'poem'
     ? 'Keep it a poem. Do not add song sections, a chorus or repeated hook unless explicitly present in the draft.'
     : `Convert it into a complete singable song. Add useful sections and a memorable chorus. Use ${a.genre} architecture when a genre was selected.`;
-  return `You are the Track Start song lyric editor. Rewrite the author's draft into a stronger, singable song while preserving its identity.
+  const editorRole = intent === 'poem'
+    ? `You are the Track Start poetry editor. Rewrite the author's draft into a stronger poem while preserving its identity.`
+    : `You are the Track Start song lyric editor. Rewrite the author's draft into a stronger, singable song while preserving its identity.`;
+  const songContext = intent === 'poem'
+    ? '- Do not apply genre, vocal, era, arrangement or Suno requirements.'
+    : `- Genre: ${brief.genres?.join(' + ') || 'infer from the draft'}
+- Mood: ${brief.mood || 'preserve the draft emotion'}
+- Era: ${brief.era || 'modern unless the draft clearly requires another era'}
+- Target architecture: ${a.genre}; ${a.craft}`;
+  return `${editorRole}
 
 AUTHOR'S DRAFT
 <<<DRAFT
@@ -322,10 +335,7 @@ DRAFT
 CONTEXT
 - Intended result: ${intent}. ${intentRule}
 - Language: ${language}
-- Genre: ${brief.genres?.join(' + ') || 'infer from the draft'}
-- Mood: ${brief.mood || 'preserve the draft emotion'}
-- Era: ${brief.era || 'modern unless the draft clearly requires another era'}
-- Target architecture: ${a.genre}; ${a.craft}
+${songContext}
 
 NON-NEGOTIABLE EDITORIAL RULES
 - Preserve the author's story, point of view, emotional intent and strongest distinctive lines.

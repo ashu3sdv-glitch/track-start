@@ -90,6 +90,8 @@
 .diagnosis-section strong { display:block; margin-bottom:5px; font-size:12px; }
 .diagnosis-section div { white-space:pre-line; color:var(--muted); font-size:12px; line-height:1.5; }
 .approve-rewrite { width:100%; margin-top:14px; }
+.song-setting.is-hidden,
+#suno-panel.is-hidden { display:none; }
 </style>
 </head>
 <body>
@@ -186,7 +188,7 @@
           </div>
 
           <!-- Жанр -->
-          <div>
+          <div class="song-setting">
             <label class="gen-label"><span data-i18n="gen.genre">Жанр</span> <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.genre_optional">(необязательно, макс. 3)</span></label>
             <p class="gen-hint" data-i18n="gen.genre_hint">Не знаешь? Оставь пустым — AI выберет сам</p>
             <div class="chip-group" style="margin-top:8px;" data-field="genre">
@@ -206,7 +208,7 @@
           </div>
 
           <!-- Настроение -->
-          <div>
+          <div class="song-setting">
             <label class="gen-label" data-i18n="gen.mood">Mood <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <div class="chip-group" data-field="mood">
               <button class="chip-btn" data-v="Nostalgic">Nostalgic</button>
@@ -223,7 +225,7 @@
           </div>
 
           <!-- Голос -->
-          <div>
+          <div class="song-setting">
             <label class="gen-label" data-i18n="gen.vocal">Voice <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <div class="chip-group" data-field="vocal">
               <button class="chip-btn" data-v="Male vocal">Male vocal</button>
@@ -237,14 +239,14 @@
           </div>
 
           <!-- Тембр голоса: показывается после выбора мужского или женского вокала -->
-          <div id="timbre-field" style="display:none;">
+          <div class="song-setting" id="timbre-field" style="display:none;">
             <label class="gen-label" data-i18n="gen.timbre">Voice timbre</label>
             <p class="gen-hint" data-i18n="gen.timbre_hint">Название передаётся генератору на английском</p>
             <div class="chip-group" id="timbre-options" style="margin-top:8px;"></div>
           </div>
 
           <!-- Эпоха -->
-          <div>
+          <div class="song-setting">
             <label class="gen-label" data-i18n="gen.era">Эпоха <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <div class="chip-group" data-field="era">
               <button class="chip-btn" data-v="60s">60s</button>
@@ -256,7 +258,7 @@
           </div>
 
           <!-- Инструменты -->
-          <div>
+          <div class="song-setting">
             <label class="gen-label" data-i18n="gen.instruments">Instruments <span style="color:var(--muted-2);text-transform:none;letter-spacing:0;" data-i18n="gen.optional_short">(необязательно)</span></label>
             <input type="text" id="instruments" class="idea-field" style="height:44px; min-height:unset; resize:none;"
               data-i18n-attr="placeholder:gen.instruments_ph"
@@ -291,7 +293,7 @@
 
           <div class="step-head">
             <div class="step-num" id="step1-num">1</div>
-            <div class="step-title" data-i18n="gen.step1">Текст песни</div>
+            <div class="step-title" id="step1-title" data-i18n="gen.step1">Текст песни</div>
           </div>
 
           <!-- Пустое состояние -->

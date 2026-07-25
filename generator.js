@@ -219,6 +219,14 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
         ? 'Вставьте черновик и сначала проведите диагностику'
         : 'Заполните бриф слева и нажмите «Создать текст песни»';
       document.getElementById('editor-notes').style.display = 'none';
+      renderIntent();
+    }
+
+    function renderIntent() {
+      const poemMode = editorMode === 'rewrite' && rewriteIntent === 'poem';
+      document.querySelectorAll('.song-setting').forEach(field => field.classList.toggle('is-hidden', poemMode));
+      document.getElementById('suno-panel').classList.toggle('is-hidden', poemMode);
+      document.getElementById('step1-title').textContent = poemMode ? 'Стихотворение' : 'Текст песни';
     }
 
     buttons.forEach(button => button.addEventListener('click', () => {
@@ -232,6 +240,7 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
       document.querySelectorAll('[data-intent]').forEach(item =>
         item.classList.toggle('active', item.getAttribute('data-intent') === rewriteIntent));
       invalidateDiagnosis();
+      renderIntent();
     }));
 
     document.getElementById('source-lyrics').addEventListener('input', invalidateDiagnosis);
@@ -641,6 +650,7 @@ RULES:
     document.getElementById('diagnosis-summary').textContent = diagnosis.summary;
     document.getElementById('diagnosis-issues').textContent = diagnosis.issues || 'Критических проблем не обнаружено.';
     document.getElementById('diagnosis-plan').textContent = diagnosis.plan || 'Выполнить выбранные улучшения, сохранив авторский замысел.';
+    document.getElementById('approve-rewrite').style.display = '';
     document.getElementById('diagnosis-card').classList.add('visible');
   }
 
@@ -650,6 +660,7 @@ RULES:
     button.disabled = true;
     label.textContent = 'Диагностирую текст…';
     document.getElementById('diagnosis-card').classList.remove('visible');
+    document.getElementById('approve-rewrite').style.display = '';
     try {
       const prompt = buildDiagnosisPrompt(sourceLyrics, brief, rewriteIntent);
       let response = await ask(prompt, 1100);
@@ -667,7 +678,12 @@ RULES:
     } catch (error) {
       currentDiagnosis = null;
       diagnosisFingerprint = '';
-      alert('Не удалось провести диагностику: ' + (error.message || 'попробуйте ещё раз'));
+      document.getElementById('diagnosis-title').textContent = 'Диагностика не завершена';
+      document.getElementById('diagnosis-summary').textContent = error.message || 'Попробуйте ещё раз.';
+      document.getElementById('diagnosis-issues').textContent = '';
+      document.getElementById('diagnosis-plan').textContent = '';
+      document.getElementById('approve-rewrite').style.display = 'none';
+      document.getElementById('diagnosis-card').classList.add('visible');
       label.textContent = 'Провести диагностику';
     } finally {
       button.disabled = false;
@@ -690,15 +706,16 @@ RULES:
     }
 
     const draftAnchor = sourceLyrics.split(/\r?\n/).map(line => line.trim()).find(line => line && !line.startsWith('[')) || 'Авторский черновик';
+    const poemRewrite = isRewrite && rewriteIntent === 'poem';
     const brief = {
       idea: isRewrite ? draftAnchor.slice(0, 180) : idea,
-      genres: selectedGenres,
-      mood: selectedMood,
-      vocal: selectedVocal,
-      timbre: selectedTimbre,
-      era: selectedEra,
+      genres: poemRewrite ? [] : selectedGenres,
+      mood: poemRewrite ? '' : selectedMood,
+      vocal: poemRewrite ? '' : selectedVocal,
+      timbre: poemRewrite ? '' : selectedTimbre,
+      era: poemRewrite ? '' : selectedEra,
       lang: selectedLang,
-      instruments,
+      instruments: poemRewrite ? '' : instruments,
       mode: isRewrite ? 'rewrite' : 'create',
     };
 
@@ -817,10 +834,12 @@ RULES:
 
       currentBrief = brief;
       // Шаг 2 становится доступен после проверки и редактирования текста
-      document.getElementById('suno-panel').style.opacity = '1';
-      document.getElementById('suno-empty').style.display = 'none';
-      document.getElementById('style-action').style.display = '';
-      document.getElementById('step2-num').className = 'step-num';
+      if (!(isRewrite && rewriteIntent === 'poem')) {
+        document.getElementById('suno-panel').style.opacity = '1';
+        document.getElementById('suno-empty').style.display = 'none';
+        document.getElementById('style-action').style.display = '';
+        document.getElementById('step2-num').className = 'step-num';
+      }
 
     } catch (err) {
       showError(err.message || 'Что-то пошло не так. Попробуй ещё раз.');

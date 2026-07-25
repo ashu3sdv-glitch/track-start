@@ -130,6 +130,18 @@ test('poem diagnosis does not force song structure', () => {
   assert.match(prompt, /Do not rewrite a single line/i);
 });
 
+test('poem rewrite ignores song, vocal and Suno settings', () => {
+  const prompt = buildRewritePrompt('Снег лежит на крыше', {
+    lang: 'ru',
+    genres: ['Hip-Hop'],
+    vocal: 'Male vocal',
+    era: '90s',
+  }, { intent: 'poem' });
+  assert.match(prompt, /poetry editor/i);
+  assert.match(prompt, /Do not apply genre, vocal, era, arrangement or Suno requirements/i);
+  assert.doesNotMatch(prompt, /Target architecture:/i);
+});
+
 test('song diagnosis uses a selected genre only as context', () => {
   const prompt = buildDiagnosisPrompt('Черновик песни', { lang: 'ru', genres: ['Hip-Hop'] }, 'song');
   assert.match(prompt, /use Hip-Hop as context/i);
@@ -164,6 +176,31 @@ PLAN`);
   assert.equal(diagnosis.planCoversAllProblems, true);
   assert.match(diagnosis.issues, /^1\. Нет хука/);
   assert.match(diagnosis.plan, /Создать припев/);
+});
+
+test('diagnosis parser adds visible problem links when the model omits them', () => {
+  const diagnosis = parseDiagnosisResponse(`<<<TYPE
+poem
+TYPE
+<<<SUMMARY
+Нужна редактура.
+SUMMARY
+<<<ISSUES
+1. Первая проблема
+2. Вторая проблема
+3. Третья проблема
+4. Четвёртая проблема
+5. Пятая проблема
+ISSUES
+<<<PLAN
+1. Первый шаг
+2. Второй шаг
+3. Третий шаг
+4. Четвёртый шаг
+PLAN`);
+  assert.equal(diagnosis.planCoversAllProblems, true);
+  assert.match(diagnosis.plan, /проблемы 1 и 2/);
+  assert.match(diagnosis.plan, /проблемы 5/);
 });
 
 test('rewrite prompt follows the approved result and diagnosis', () => {
