@@ -564,7 +564,7 @@ body.density-cozy .svc-card { padding: 28px; }
 .calendar-footer strong { color: #fff; }
 
 .articles-section { border-bottom: 1px solid var(--line); }
-.articles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.articles-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
 .article-card { display: flex; min-height: 280px; flex-direction: column; padding: 26px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .article-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .article-card > span { margin-bottom: 34px; color: var(--accent-ink); font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
