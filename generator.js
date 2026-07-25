@@ -5,6 +5,7 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
 (function () {
 
   const FREE_TOTAL = 5; // всего на пробу, без ежедневного сброса
+  const isTestPreview = /^track-start-git-agent-focus-[a-z0-9-]+-aleksandrs-projects-a3365b25\.vercel\.app$/i.test(window.location.hostname);
   let ownerAccess = false;
   function getUsed() {
     // миграция со старого суточного счётчика
@@ -29,7 +30,7 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
     } catch (e) {}
     return '';
   }
-  function hasUnlimited() { return getPlan() === 'pro' || !!getKey(); }
+  function hasUnlimited() { return isTestPreview || getPlan() === 'pro' || !!getKey(); }
 
   async function loadOwnerAccess() {
     try {
@@ -49,7 +50,12 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
     const btn   = document.getElementById('generate');
     if (!badge) return;
     const plan = getPlan();
-    if (plan === 'pro') {
+    if (isTestPreview) {
+      badge.className = 'free-badge pro-active';
+      text.textContent = '✓ Тестовый доступ — попытки не списываются';
+      dots.innerHTML = '';
+      btn.className = 'gen-btn pro';
+    } else if (plan === 'pro') {
       badge.className = 'free-badge pro-active';
       text.textContent = ownerAccess ? '✓ Режим владельца — все функции Pro' : '✓ Pro — безлимитная генерация';
       dots.innerHTML = '';
