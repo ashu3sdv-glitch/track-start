@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, resolveTimbre, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, resolveTimbre, validateLyrics, validateRewritePreservation } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -189,7 +189,22 @@ test('rewrite difference ignores section labels and detects cosmetic edits', () 
 
 test('repair prompt explicitly rejects a cosmetic rewrite', () => {
   const prompt = buildRewriteRepairPrompt('Исходник', 'Почти исходник', {}, { summary: 'Слабый припев' }, 0.18);
-  assert.match(prompt, /too cosmetic/i);
+  assert.match(prompt, /failed quality control/i);
   assert.match(prompt, /18%/);
   assert.match(prompt, /Слабый припев/);
+});
+
+test('rewrite preservation detects a narrator gender change', () => {
+  const original = '[Verse 1]\nЯ иду по городу один';
+  const changed = '[Verse 1]\nЯ иду по городу одна';
+  const inconsistent = '[Verse 1]\nЯ иду по городу один\n[Verse 2]\nЯ осталась здесь одна';
+  assert.deepEqual(validateRewritePreservation(original, changed).issues, ['narrator-gender-changed']);
+  assert.ok(validateRewritePreservation(original, inconsistent).issues.includes('narrator-gender-inconsistent'));
+  assert.equal(validateRewritePreservation(original, '[Verse 1]\nЯ иду по городу один').ok, true);
+});
+
+test('repair prompt locks narrator identity after a preservation failure', () => {
+  const prompt = buildRewriteRepairPrompt('Я иду один', 'Я иду одна', {}, {}, 0.18, ['narrator-gender-changed']);
+  assert.match(prompt, /narrator-gender-changed/);
+  assert.match(prompt, /Never switch between masculine and feminine/i);
 });

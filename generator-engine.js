@@ -412,8 +412,35 @@ export function measureRewriteDifference(original, revised) {
   return { beforeLines: before.length, afterLines: after.length, unchanged, changedRatio };
 }
 
-export function buildRewriteRepairPrompt(original, revision, brief = {}, diagnosis = {}, minimumRatio = 0.2) {
-  return `The revision is too cosmetic: fewer than ${Math.round(minimumRatio * 100)}% of meaningful lines changed. Perform a stronger second editorial pass.
+function narratorGenderMarkers(text) {
+  const firstPerson = new Set(['я', 'мне', 'меня', 'мой', 'моя']);
+  const lines = String(text || '').toLowerCase().split(/\r?\n/).filter(line => {
+    const words = line.match(/\p{L}+/gu) || [];
+    return words.some(word => firstPerson.has(word));
+  });
+  const words = lines.join(' ').match(/\p{L}+/gu) || [];
+  const masculineWords = new Set(['один', 'сам', 'был', 'ушёл', 'пришёл', 'нашёл', 'устал', 'готов', 'виноват']);
+  const feminineWords = new Set(['одна', 'сама', 'была', 'ушла', 'пришла', 'нашла', 'устала', 'готова', 'виновата']);
+  const masculine = words.filter(word => masculineWords.has(word)).length;
+  const feminine = words.filter(word => feminineWords.has(word)).length;
+  return { masculine, feminine };
+}
+
+export function validateRewritePreservation(original, revised) {
+  const source = narratorGenderMarkers(original);
+  const result = narratorGenderMarkers(revised);
+  const issues = [];
+  if (source.masculine > 0 && source.feminine === 0 && result.feminine > 0) issues.push('narrator-gender-changed');
+  if (source.feminine > 0 && source.masculine === 0 && result.masculine > 0) issues.push('narrator-gender-changed');
+  if ((source.masculine > 0 || source.feminine > 0) && result.masculine > 0 && result.feminine > 0) issues.push('narrator-gender-inconsistent');
+  return { ok: issues.length === 0, issues };
+}
+
+export function buildRewriteRepairPrompt(original, revision, brief = {}, diagnosis = {}, minimumRatio = 0.2, qualityIssues = []) {
+  const issueText = qualityIssues.length
+    ? qualityIssues.join(', ')
+    : `fewer than ${Math.round(minimumRatio * 100)}% of meaningful lines changed`;
+  return `The revision failed quality control: ${issueText}. Perform a corrective editorial pass.
 
 ORIGINAL
 ${String(original || '').trim()}
@@ -426,6 +453,7 @@ ${diagnosis.raw || diagnosis.summary || ''}
 
 REQUIREMENTS
 - Preserve the original story, point of view and strongest distinctive images.
+- Preserve the narrator's person and gender consistently. Never switch between masculine and feminine forms unless the original explicitly contains multiple narrators.
 - Substantially rewrite the weak lines identified in the diagnosis.
 - Do not count section labels as meaningful changes.
 - Improve hook, rhythm, natural stress, rhyme and concrete imagery where the diagnosis requests it.

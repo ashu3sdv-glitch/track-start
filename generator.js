@@ -1,4 +1,4 @@
-import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, validateLyrics } from './generator-engine.js';
+import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, validateLyrics, validateRewritePreservation } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -776,16 +776,29 @@ RULES:
         editorNotes = rewriteResult.notes;
         const minimumDifference = rewriteIntensity === 'gentle' ? 0.08 : rewriteIntensity === 'deep' ? 0.28 : 0.18;
         let difference = measureRewriteDifference(sourceLyrics, lyrics);
-        if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
+        let preservation = validateRewritePreservation(sourceLyrics, lyrics);
+        const tooCosmetic = difference.afterLines >= 4 && difference.changedRatio < minimumDifference;
+        if (tooCosmetic || !preservation.ok) {
           rewriteResult = parseRewriteResponse(await ask(
-            buildRewriteRepairPrompt(sourceLyrics, lyrics, brief, currentDiagnosis, minimumDifference),
+            buildRewriteRepairPrompt(
+              sourceLyrics,
+              lyrics,
+              brief,
+              currentDiagnosis,
+              minimumDifference,
+              preservation.issues,
+            ),
             2800,
           ));
           lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
           editorNotes = rewriteResult.notes;
           difference = measureRewriteDifference(sourceLyrics, lyrics);
+          preservation = validateRewritePreservation(sourceLyrics, lyrics);
         }
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
+        if (!preservation.ok) {
+          throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');
+        }
         if (rewriteIntensity !== 'gentle' && difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
           throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');
         }
