@@ -269,6 +269,7 @@ DIAGNOSTIC METHOD
 - Describe each problem in one short sentence, maximum 18 words. No essays, scores, compliments or repeated explanations.
 - Propose exactly four concrete editing actions, maximum 14 words each.
 - Put covered problem numbers at the START of every action, for example: "[1,2] Выровнять длину строк и ударения."
+- Describe the editing outcome, not a ready-made replacement word. Never prescribe an isolated synonym without checking the whole stanza.
 - Across the four actions, reference every problem number from 1 through 5 at least once.
 
 OUTPUT FORMAT — use these delimiters exactly and write values in the author's language:
@@ -355,6 +356,9 @@ NON-NEGOTIABLE EDITORIAL RULES
 - Rebuild weak material by complete stanzas, not by replacing isolated lines independently.
 - Infer the intended rhyme scheme stanza by stanza (such as ABAB, AABB or intentional free verse) and make line endings work together.
 - Silently consider several natural endings for each rhyming pair. Never use filler, broken grammar or a meaningless image for rhyme.
+- Read every new line literally: subject, verb and image must form a plausible statement, not merely a rhyme.
+- Do not introduce a new addressee, relationship, object or event unless it clearly develops the original story.
+- If a weak image spans two lines, repair the complete image and its logic; never replace one verb mechanically.
 - Keep neighboring lines rhythmically compatible; natural stress and meaning are more important than exact syllable equality.
 - Give each verse a clear job, make the chorus simpler and more memorable, and ensure the second verse develops the story.
 - For Russian output, use Cyrillic only inside lyric lines. English is allowed only in section labels such as [Verse 1] and [Chorus].
@@ -443,7 +447,7 @@ export function parseRewriteAudit(raw, lang = 'ru', original = '', revision = ''
   const checks = normalizeNumberedList(section('CHECKS'), 5, 180);
   const status = section('STATUS').toUpperCase();
   const wrongLanguage = lang === 'ru'
-    ? checks.text.split(/\r?\n/).some(line => /\b(?:FIXED|REMAINS|problem|line|verse)\b/i.test(line))
+    ? checks.text.split(/\r?\n/).some(line => /^\d+\.\s*(?:FIXED|REMAINS)\b/i.test(line))
     : /[А-Яа-яЁё]/.test(checks.text);
   const sourceText = `${original}\n${revision}`.toLowerCase();
   const quoted = [...checks.text.matchAll(/[«"]([^»"]+)[»"]/g)].map(match => match[1].trim().toLowerCase());
@@ -542,6 +546,9 @@ REQUIREMENTS
 - Do not count section labels as meaningful changes.
 - Improve hook, rhythm, natural stress, rhyme and concrete imagery where the diagnosis requests it.
 - Repair whole stanzas so rhyme, rhythm and meaning work together; do not patch isolated line endings.
+- Read every revised line literally and reject implausible subject-verb pairs or images created only for rhyme.
+- Do not introduce a new addressee, relationship, object or event unless the original story supports it.
+- Keep good lines from CURRENT REVISION; change only what failed the independent audit.
 - Never invent a word or mix alphabets. For Russian lyrics, Latin letters are allowed only in English section labels.
 - Correct every problem listed in the approved diagnosis.
 - Return the complete revised text only. Do not evaluate your own work.

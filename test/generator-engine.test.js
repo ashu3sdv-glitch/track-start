@@ -271,6 +271,20 @@ CHECKS`, 'ru');
   assert.equal(audit.languageOk, false);
 });
 
+test('audit allows English section labels inside a Russian report', () => {
+  const audit = parseRewriteAudit(`<<<STATUS
+FAIL
+STATUS
+<<<CHECKS
+1. ИСПРАВЛЕНО — ритм Verse 1 стал ровнее
+2. ОСТАЛОСЬ — рифма Pre-Chorus неточна
+3. ИСПРАВЛЕНО — припев выделен
+4. ИСПРАВЛЕНО — образ конкретнее
+5. ИСПРАВЛЕНО — Bridge стал короче
+CHECKS`, 'ru');
+  assert.equal(audit.languageOk, true);
+});
+
 test('audit rejects a quoted source line that never existed', () => {
   const audit = parseRewriteAudit(`<<<STATUS
 PASS
