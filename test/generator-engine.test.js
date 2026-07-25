@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, resolveTimbre, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildLyricsPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, resolveTimbre, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -89,4 +89,23 @@ test('style finalizer replaces a model tail with exactly one selected signature'
   const style = finalizeStyle('pop, 100 BPM | raw energy no overproduce | unwanted duplicate words', { vocal: 'Female vocal', mood: 'Dreamy', genres: ['Cinematic'] });
   assert.equal((style.match(/no clean digital polish/g) || []).length, 1);
   assert.doesNotMatch(style, /raw energy no overproduce/);
+});
+
+test('Russian generation prompt forbids English words and demands rhyme connections', () => {
+  const prompt = buildLyricsPrompt({ idea: 'ночной город', lang: 'ru', genres: ['Pop'] });
+  assert.match(prompt, /use no English words at all/i);
+  assert.match(prompt, /at least two audible rhyme or assonance connections/i);
+  assert.match(prompt, /reject broken syntax/i);
+});
+
+test('Russian lyrics with English words fail quality control', () => {
+  const lyrics = `${song}\n${'Я еду home сквозь ночные огни\n'.repeat(20)}`;
+  assert.ok(validateLyrics(lyrics, { lang: 'ru' }).issues.includes('english-words-in-russian-song'));
+});
+
+test('mixed lyrics allow no more than two English lines and never splice languages', () => {
+  const lyrics = `${song}\nI am still awake\nThe city knows my name\nЯ еду home сквозь ночные огни\nOne more English line\n${'Город ведёт меня дальше по свету\n'.repeat(15)}`;
+  const issues = validateLyrics(lyrics, { lang: 'mix' }).issues;
+  assert.ok(issues.includes('excessive-code-switching'));
+  assert.ok(issues.includes('mixed-language-inside-line'));
 });
