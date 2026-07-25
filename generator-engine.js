@@ -258,6 +258,8 @@ DIAGNOSTIC METHOD
 - When converting to a song, also check whether a memorable chorus/hook and section development are missing.
 - Describe each problem in one short sentence. No essays, scores, compliments or repeated explanations.
 - Propose exactly four concrete editing actions, each in one short sentence.
+- Every action must name the problem numbers it solves, for example: "1. Выровнять длину строк и ударения — проблемы 1 и 2."
+- Across the four actions, reference every problem number from 1 through 5 at least once.
 
 OUTPUT FORMAT — use these delimiters exactly and write values in the author's language:
 <<<TYPE
@@ -274,10 +276,10 @@ SUMMARY
 5. problem
 ISSUES
 <<<PLAN
-1. improvement
-2. improvement
-3. improvement
-4. improvement
+1. improvement — problems 1 and 2
+2. improvement — problem 3
+3. improvement — problem 4
+4. improvement — problem 5
 PLAN
 
 Do not output any other text.`;
@@ -288,6 +290,8 @@ export function parseDiagnosisResponse(raw) {
   const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
   const issues = normalizeNumberedList(section('ISSUES'), 5);
   const plan = normalizeNumberedList(section('PLAN'), 4);
+  const planCoversAllProblems = [1, 2, 3, 4, 5].every(number =>
+    new RegExp(`(?:problem\\w*|проблем\\w*)[^\\n]{0,40}\\b${number}\\b`, 'iu').test(plan.text));
   return {
     type: section('TYPE') || 'song',
     summary: section('SUMMARY') || text,
@@ -295,6 +299,7 @@ export function parseDiagnosisResponse(raw) {
     issueCount: issues.count,
     plan: plan.text,
     planCount: plan.count,
+    planCoversAllProblems,
     raw: text,
   };
 }
@@ -345,10 +350,11 @@ OUTPUT FORMAT — use these delimiters exactly:
 complete revised lyrics
 REVISED
 <<<NOTES
-1. completed improvement, maximum 12 words
-2. completed improvement, maximum 12 words
-3. completed improvement, maximum 12 words
-4. completed improvement, maximum 12 words
+1. how diagnosed problem 1 was corrected, maximum 14 words
+2. how diagnosed problem 2 was corrected, maximum 14 words
+3. how diagnosed problem 3 was corrected, maximum 14 words
+4. how diagnosed problem 4 was corrected, maximum 14 words
+5. how diagnosed problem 5 was corrected, maximum 14 words
 NOTES
 
 Silently verify that the revision still feels like the author's song rather than a replacement.`;
@@ -483,17 +489,18 @@ REQUIREMENTS
 - Do not count section labels as meaningful changes.
 - Improve hook, rhythm, natural stress, rhyme and concrete imagery where the diagnosis requests it.
 - Correct every problem listed in the approved diagnosis.
-- Return the complete revised text and exactly four short numbered notes.
+- Return the complete revised text and exactly five short numbered notes: one confirmed correction for each diagnosed problem.
 
 OUTPUT FORMAT
 <<<REVISED
 complete revised text
 REVISED
 <<<NOTES
-1. completed improvement
-2. completed improvement
-3. completed improvement
-4. completed improvement
+1. correction of diagnosed problem 1
+2. correction of diagnosed problem 2
+3. correction of diagnosed problem 3
+4. correction of diagnosed problem 4
+5. correction of diagnosed problem 5
 NOTES`;
 }
 

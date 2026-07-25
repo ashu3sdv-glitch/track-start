@@ -91,7 +91,7 @@ test('style finalizer replaces a model tail with exactly one selected signature'
   assert.doesNotMatch(style, /raw energy no overproduce/);
 });
 
-test('rewrite prompt preserves author intent and requires four short result notes', () => {
+test('rewrite prompt preserves author intent and requires five problem-linked result notes', () => {
   const prompt = buildRewritePrompt(
     '[Куплет]\nЯ оставил ключи на столе\n[Припев]\nНе выключай свет',
     { genres: ['Pop'], mood: 'Melancholic', lang: 'ru' },
@@ -99,7 +99,7 @@ test('rewrite prompt preserves author intent and requires four short result note
   );
   assert.match(prompt, /Preserve the author's story, point of view, emotional intent/);
   assert.match(prompt, /Correct all five diagnosed problems/);
-  assert.match(prompt, /4\. completed improvement/);
+  assert.match(prompt, /5\. how diagnosed problem 5 was corrected/);
   assert.match(prompt, /Я оставил ключи на столе/);
 });
 
@@ -135,6 +135,7 @@ test('song diagnosis uses a selected genre only as context', () => {
   assert.match(prompt, /use Hip-Hop as context/i);
   assert.match(prompt, /exactly five/i);
   assert.match(prompt, /exactly four/i);
+  assert.match(prompt, /reference every problem number from 1 through 5/i);
 });
 
 test('diagnosis parser returns exactly five problems and four improvements', () => {
@@ -152,14 +153,15 @@ SUMMARY
 5. Нет развития
 ISSUES
 <<<PLAN
-1. Выровнять строки
-2. Создать припев
-3. Усилить рифмы
-4. Добавить развитие
+1. Выровнять строки — проблемы 1 и 2
+2. Создать припев — проблема 3
+3. Усилить рифмы — проблема 4
+4. Добавить развитие — проблема 5
 PLAN`);
   assert.equal(diagnosis.type, 'song');
   assert.equal(diagnosis.issueCount, 5);
   assert.equal(diagnosis.planCount, 4);
+  assert.equal(diagnosis.planCoversAllProblems, true);
   assert.match(diagnosis.issues, /^1\. Нет хука/);
   assert.match(diagnosis.plan, /Создать припев/);
 });
@@ -174,10 +176,10 @@ test('rewrite prompt follows the approved result and diagnosis', () => {
   assert.match(prompt, /Припев не отличается/);
 });
 
-test('numbered list normalizer keeps four concise result items', () => {
-  const result = normalizeNumberedList('1. Первое изменение\n2. Второе\n3. Третье\n4. Четвёртое\n5. Лишнее', 4);
-  assert.equal(result.count, 4);
-  assert.equal(result.text.split('\n').length, 4);
+test('numbered list normalizer keeps five concise result items', () => {
+  const result = normalizeNumberedList('1. Первое исправление\n2. Второе\n3. Третье\n4. Четвёртое\n5. Пятое\n6. Лишнее', 5);
+  assert.equal(result.count, 5);
+  assert.equal(result.text.split('\n').length, 5);
   assert.doesNotMatch(result.text, /Лишнее/);
 });
 

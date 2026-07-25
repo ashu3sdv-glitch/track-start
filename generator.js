@@ -654,11 +654,11 @@ RULES:
       const prompt = buildDiagnosisPrompt(sourceLyrics, brief, rewriteIntent);
       let response = await ask(prompt, 1100);
       currentDiagnosis = parseDiagnosisResponse(response);
-      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4) {
-        response = await ask(`${prompt}\n\nSTRICT RETRY: return exactly 5 numbered problems and exactly 4 numbered improvements. Keep every item to one short sentence.`, 1100);
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems) {
+        response = await ask(`${prompt}\n\nSTRICT RETRY: return exactly 5 numbered problems and exactly 4 numbered improvements. In the four improvements, explicitly reference every problem number 1–5. Keep every item to one short sentence.`, 1100);
         currentDiagnosis = parseDiagnosisResponse(response);
       }
-      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4) {
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems) {
         throw new Error('диагностика получилась неполной');
       }
       diagnosisFingerprint = getDiagnosisFingerprint(sourceLyrics);
@@ -740,7 +740,7 @@ RULES:
           }), 2800)
         );
         lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
-        let normalizedNotes = normalizeNumberedList(rewriteResult.notes, 4);
+        let normalizedNotes = normalizeNumberedList(rewriteResult.notes, 5);
         editorNotes = normalizedNotes.text;
         const minimumDifference = rewriteIntent === 'poem' ? 0.12 : 0.2;
         let difference = measureRewriteDifference(sourceLyrics, lyrics);
@@ -750,10 +750,10 @@ RULES:
           700,
         ));
         const tooCosmetic = difference.afterLines >= 4 && difference.changedRatio < minimumDifference;
-        if (tooCosmetic || !preservation.ok || normalizedNotes.count !== 4 || !verification.ok) {
+        if (tooCosmetic || !preservation.ok || normalizedNotes.count !== 5 || !verification.ok) {
           const qualityIssues = [
             ...preservation.issues,
-            ...(normalizedNotes.count !== 4 ? ['editor-notes-not-four'] : []),
+            ...(normalizedNotes.count !== 5 ? ['editor-notes-not-five'] : []),
             ...(verification.remaining ? [`remaining-errors: ${verification.remaining}`] : []),
           ];
           rewriteResult = parseRewriteResponse(await ask(
@@ -768,7 +768,7 @@ RULES:
             2800,
           ));
           lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
-          normalizedNotes = normalizeNumberedList(rewriteResult.notes, 4);
+          normalizedNotes = normalizeNumberedList(rewriteResult.notes, 5);
           editorNotes = normalizedNotes.text;
           difference = measureRewriteDifference(sourceLyrics, lyrics);
           preservation = validateRewritePreservation(sourceLyrics, lyrics);
@@ -781,8 +781,8 @@ RULES:
         if (!preservation.ok) {
           throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');
         }
-        if (normalizedNotes.count !== 4) {
-          throw new Error('Редактор не смог кратко перечислить выполненные улучшения. Попытка не списана — запустите улучшение снова.');
+        if (normalizedNotes.count !== 5) {
+          throw new Error('Редактор не смог подтвердить исправление всех пяти проблем. Попытка не списана — запустите улучшение снова.');
         }
         if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
           throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');
@@ -810,7 +810,7 @@ RULES:
       document.getElementById('lyric-meta').textContent =
         [isRewrite ? 'Редактор' : 'Новый текст', selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
       if (isRewrite) {
-        document.getElementById('editor-notes-text').textContent = editorNotes || 'Сохранён исходный смысл, а строки доработаны по выбранным задачам.';
+        document.getElementById('editor-notes-text').textContent = editorNotes || 'Исправлены все пять проблем из диагностики.';
         document.getElementById('editor-notes').style.display = 'block';
       }
       updateBadge();
