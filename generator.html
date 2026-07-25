@@ -134,8 +134,8 @@
 
     <div class="app-title" style="margin-bottom:28px;">
       <div>
-        <h1 style="font-size:32px;">Генератор и редактор текстов песен</h1>
-        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Создайте песню с нуля или превратите свой черновик в готовый песенный текст.</p>
+        <h1 style="font-size:32px;">Генератор текстов песен</h1>
+        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Опишите идею — Track Start создаст готовый текст, который можно сразу отредактировать.</p>
       </div>
     </div>
 
@@ -144,11 +144,6 @@
       <!-- ── ФОРМА ── -->
       <aside>
         <div class="gen-form">
-
-          <div class="mode-switch" aria-label="Режим работы">
-            <button class="mode-btn active" type="button" data-mode="create">Создать с нуля</button>
-            <button class="mode-btn" type="button" data-mode="rewrite">Улучшить свой текст</button>
-          </div>
 
           <!-- Счётчик -->
           <div class="free-badge" id="free-badge">
@@ -164,9 +159,10 @@
             <textarea id="idea" class="idea-field" rows="4"
               data-i18n-attr="placeholder:gen.idea_ph"
               placeholder="Опиши идею своими словами…"></textarea>
+            <p class="gen-hint">После генерации текст можно изменить прямо в поле результата.</p>
           </div>
 
-          <div class="rewrite-panel" id="rewrite-panel">
+          <div class="rewrite-panel" id="rewrite-panel" hidden aria-hidden="true">
             <label class="gen-label" for="source-lyrics">Черновик текста песни</label>
             <textarea id="source-lyrics" class="idea-field" rows="11" maxlength="12000"
               placeholder="Вставьте стихотворение, набросок или текст с куплетами — Track Start подготовит песню."></textarea>

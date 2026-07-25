@@ -205,7 +205,7 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
     const createPanel = document.getElementById('create-panel');
     const rewritePanel = document.getElementById('rewrite-panel');
     const generateLabel = document.getElementById('generate-label');
-    if (new URLSearchParams(window.location.search).get('mode') === 'rewrite') editorMode = 'rewrite';
+    editorMode = 'create';
 
     function invalidateDiagnosis() {
       currentDiagnosis = null;
@@ -226,12 +226,6 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
         : 'Заполните бриф слева и нажмите «Создать текст песни»';
       document.getElementById('editor-notes').style.display = 'none';
     }
-
-    buttons.forEach(button => button.addEventListener('click', () => {
-      editorMode = button.getAttribute('data-mode') === 'rewrite' ? 'rewrite' : 'create';
-      invalidateDiagnosis();
-      renderMode();
-    }));
 
     document.getElementById('source-lyrics').addEventListener('input', invalidateDiagnosis);
     document.getElementById('approve-rewrite').addEventListener('click', () => runGenerate(true));
