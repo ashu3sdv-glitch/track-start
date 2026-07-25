@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Track Start — Генератор песни</title>
+<meta name="description" content="Создайте текст песни под нужный жанр, настроение, эпоху и вокал. Отредактируйте результат и при желании подготовьте его для Suno." />
+<link rel="canonical" href="https://www.trackstart.art/generator.html" />
+<title>Генератор текстов песен — Track Start</title>
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="styles-app.css" />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -65,6 +67,21 @@
 .fix-row { display:flex; gap:8px; align-items:flex-start; }
 .fix-row textarea { flex:1; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px; font:inherit; font-size:13px; color:var(--ink); outline:none; resize:none; line-height:1.5; transition:border-color .15s; }
 .fix-row textarea:focus { border-color:var(--accent); }
+.legacy-cta { display:none !important; }
+.mode-switch { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:5px; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); }
+.mode-btn { min-height:42px; padding:8px 12px; border:0; border-radius:10px; background:transparent; color:var(--muted); font:500 13px/1.25 var(--font-sans); cursor:pointer; transition:all .15s var(--ease); }
+.mode-btn:hover { color:var(--ink); }
+.mode-btn.active { background:var(--surface); color:var(--ink); box-shadow:var(--shadow-sm); }
+.rewrite-panel { display:none; }
+.rewrite-panel.active { display:block; }
+.create-panel.is-hidden { display:none; }
+.rewrite-goals { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:8px; }
+.goal-btn { padding:9px 10px; border:1px solid var(--line); border-radius:10px; background:var(--bg-2); color:var(--ink-2); font-size:12px; text-align:left; cursor:pointer; transition:all .15s var(--ease); }
+.goal-btn:hover { border-color:var(--accent); }
+.goal-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink); }
+.editor-notes { display:none; margin:14px 0 0; padding:14px 16px; border:1px solid #c4b5fd; border-radius:var(--radius); background:#f5f3ff; color:var(--ink-2); font-size:13px; line-height:1.55; white-space:pre-line; }
+.editor-notes strong { display:block; margin-bottom:6px; color:var(--accent-ink); }
+@media (max-width:560px) { .rewrite-goals { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -79,9 +96,9 @@
       <div class="nav-links">
         <a class="nav-link" href="index.html" data-i18n="nav.home">Главная</a>
         <a class="nav-link active" href="generator.html" data-i18n="nav.generator">Генератор</a>
-        <a class="nav-link" href="vocal.html">Исполнение</a>
-        <a class="nav-link" href="promotion.html">Продвижение</a>
-        <a class="nav-link" href="guide.html" data-i18n="nav.guide">Гид по релизу</a>
+        <a class="nav-link" href="index.html#genres">Жанры</a>
+        <a class="nav-link" href="index.html#articles">Статьи</a>
+        <a class="nav-link" href="index.html#pricing">Тарифы</a>
       </div>
       <div class="row" style="gap:10px;">
         <div class="lang-switch" data-lang-switch>
@@ -109,8 +126,8 @@
 
     <div class="app-title" style="margin-bottom:28px;">
       <div>
-        <h1 style="font-size:32px;" data-i18n="gen.title">Генератор песни</h1>
-        <p style="margin-top:6px; color:var(--muted); font-size:14px;" data-i18n="gen.lede">Опиши идею — получи текст и готовый промпт для Suno</p>
+        <h1 style="font-size:32px;">Генератор текстов песен</h1>
+        <p style="margin-top:6px; color:var(--muted); font-size:14px;">Опиши идею — получи редактируемый текст. Настройки для Suno можно добавить после.</p>
       </div>
     </div>
 
@@ -119,6 +136,11 @@
       <!-- ── ФОРМА ── -->
       <aside>
         <div class="gen-form">
+
+          <div class="mode-switch" aria-label="Режим работы">
+            <button class="mode-btn active" type="button" data-mode="create">Создать с нуля</button>
+            <button class="mode-btn" type="button" data-mode="rewrite">Улучшить свой текст</button>
+          </div>
 
           <!-- Счётчик -->
           <div class="free-badge" id="free-badge">
@@ -129,11 +151,27 @@
           </div>
 
           <!-- Идея -->
-          <div>
+          <div class="create-panel" id="create-panel">
             <label class="gen-label" data-i18n="gen.idea_label">О чём песня</label>
             <textarea id="idea" class="idea-field" rows="4"
               data-i18n-attr="placeholder:gen.idea_ph"
               placeholder="Опиши идею своими словами…"></textarea>
+          </div>
+
+          <div class="rewrite-panel" id="rewrite-panel">
+            <label class="gen-label" for="source-lyrics">Ваш черновик</label>
+            <textarea id="source-lyrics" class="idea-field" rows="11" maxlength="12000"
+              placeholder="Вставьте текст целиком. Можно с названиями секций: [Куплет], [Припев], [Бридж]…"></textarea>
+            <p class="gen-hint">Смысл, история и лучшие строки будут сохранены.</p>
+            <label class="gen-label" style="margin-top:16px;">Что улучшить</label>
+            <div class="rewrite-goals" id="rewrite-goals">
+              <button class="goal-btn active" type="button" data-goal="rhythm">Ритм и певучесть</button>
+              <button class="goal-btn active" type="button" data-goal="rhyme">Рифмы</button>
+              <button class="goal-btn active" type="button" data-goal="chorus">Припев и хук</button>
+              <button class="goal-btn" type="button" data-goal="imagery">Образы</button>
+              <button class="goal-btn active" type="button" data-goal="emotion">Эмоция</button>
+              <button class="goal-btn" type="button" data-goal="structure">Структура</button>
+            </div>
           </div>
 
           <!-- Жанр -->
@@ -228,7 +266,7 @@
           <!-- Кнопка -->
           <button class="gen-btn" id="generate">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span data-i18n="gen.go">Создать песню</span>
+            <span id="generate-label">Создать текст песни</span>
           </button>
 
         </div>
@@ -266,6 +304,7 @@
               <button class="tool-btn" id="regen-btn" data-i18n="gen.regenerate">↻ Заново</button>
             </div>
             <textarea id="lyrics-text" class="lyrics-textarea" rows="18" spellcheck="false"></textarea>
+            <div class="editor-notes" id="editor-notes"><strong>Что улучшено</strong><span id="editor-notes-text"></span></div>
 
             <!-- Fix row -->
             <div style="margin-top:14px;">
@@ -280,8 +319,8 @@
 
             <!-- Кнопка копирования -->
             <button class="btn btn-secondary" id="copy-lyrics" style="width:100%; height:44px; margin-top:12px; font-size:14px;" data-i18n="gen.copy_lyrics">Скопировать текст</button>
-            <button class="btn btn-primary" id="vocal-cta" style="display:none; width:100%; height:46px; margin-top:10px; font-size:14px;">Как исполнить эту песню →</button>
-            <button class="btn btn-accent" id="promotion-cta" style="display:none; width:100%; height:46px; margin-top:10px; font-size:14px;">Подготовить продвижение →</button>
+            <button class="btn btn-primary legacy-cta" id="vocal-cta" style="display:none; width:100%; height:46px; margin-top:10px; font-size:14px;">Как исполнить эту песню →</button>
+            <button class="btn btn-accent legacy-cta" id="promotion-cta" style="display:none; width:100%; height:46px; margin-top:10px; font-size:14px;">Подготовить продвижение →</button>
           </div>
         </div>
 

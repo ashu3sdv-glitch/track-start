@@ -231,6 +231,70 @@ ${profile.instrumental ? '- Replace lyric lines with concise musical scene direc
 Silently verify vocal identity, sections, hook, development, natural stress and ending.`;
 }
 
+const REWRITE_GOALS = {
+  rhythm: 'smooth line lengths, breath groups and natural word stress without making the language mechanical',
+  rhyme: 'replace forced or predictable rhymes with natural rhyme, slant rhyme, assonance or internal rhyme',
+  chorus: 'make the chorus simpler, more memorable and emotionally stronger; preserve a strong existing hook if present',
+  imagery: 'replace generic abstractions with concrete objects, actions, places and sensory details',
+  emotion: 'clarify the central emotional situation and intensify it without melodrama',
+  structure: 'give each section a distinct job and make Verse 2 or the bridge add a real turn',
+};
+
+export function buildRewritePrompt(draft, brief = {}, goals = []) {
+  const a = getGenreArchitecture(brief);
+  const language = { ru: 'Russian', en: 'English', mix: 'mostly Russian with a few natural English phrases' }[brief.lang] || 'the draft language';
+  const selectedGoals = goals.length ? goals : Object.keys(REWRITE_GOALS);
+  const goalLines = selectedGoals.map(goal => `- ${REWRITE_GOALS[goal] || goal}`).join('\n');
+  return `You are the Track Start song lyric editor. Rewrite the author's draft into a stronger, singable song while preserving its identity.
+
+AUTHOR'S DRAFT
+<<<DRAFT
+${String(draft || '').trim()}
+DRAFT
+
+CONTEXT
+- Language: ${language}
+- Genre: ${brief.genres?.join(' + ') || 'infer from the draft'}
+- Mood: ${brief.mood || 'preserve the draft emotion'}
+- Era: ${brief.era || 'modern unless the draft clearly requires another era'}
+- Target architecture: ${a.genre}; ${a.craft}
+
+NON-NEGOTIABLE EDITORIAL RULES
+- Preserve the author's story, point of view, emotional intent and strongest distinctive lines.
+- Do not invent a different plot, narrator, relationship or ending.
+- Never imitate or quote an existing song or named artist.
+- Use natural modern language and speakable syntax. For Russian, avoid stress collisions, dense consonant clusters and literary inversions made for rhyme.
+- Keep existing section labels and section order when they work. If labels are missing, add only the minimum useful English labels such as [Verse 1], [Chorus], [Verse 2], [Bridge].
+- Do not add vocal settings, performance notes, a title, markdown fences or a Suno style prompt.
+- Return the complete revised lyric, not fragments.
+
+SELECTED IMPROVEMENTS
+${goalLines}
+
+OUTPUT FORMAT — use these delimiters exactly:
+<<<REVISED
+complete revised lyrics
+REVISED
+<<<NOTES
+- 3 to 5 short, concrete notes in the author's language explaining the most important changes
+NOTES
+
+Silently verify that the revision still feels like the author's song rather than a replacement.`;
+}
+
+export function parseRewriteResponse(raw) {
+  const text = cleanModelText(raw);
+  const revisedMatch = text.match(/<<<REVISED\s*([\s\S]*?)\s*REVISED(?:\s|$)/i);
+  const notesMatch = text.match(/<<<NOTES\s*([\s\S]*?)\s*NOTES(?:\s|$)/i);
+  if (revisedMatch) {
+    return {
+      lyrics: revisedMatch[1].trim(),
+      notes: (notesMatch?.[1] || '').trim(),
+    };
+  }
+  return { lyrics: text.replace(/<<<NOTES[\s\S]*$/i, '').trim(), notes: '' };
+}
+
 export function buildStylePrompt(lyrics, brief) {
   const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief); const tail = getSignatureTail(brief);
   return `Create one compact AI music style string. Genre: ${brief.genres?.join(' x ') || a.genre}. Mood: ${brief.mood || 'coherent'}. Era: ${brief.era || 'modern'}. Instruments: ${brief.instruments || 'choose 2-4'}. Genre craft: ${a.craft}. Lyrics:\n${lyrics.slice(0, 5000)}\nLocked voice: ${profile.style}. Final chorus uses full vocal stack and choir backing. Do not add another vocal identity. Return only genre blend, BPM, arrangement, production and dynamic arc. Keep the part before the signature tail under 190 characters. End with exactly: | ${tail}. No artists, model versions, catchy, viral, TikTok or radio-ready.`;

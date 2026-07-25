@@ -3,15 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Track Start помогает создать песню, подготовить релиз и получить календарный план продвижения." />
-  <title>Track Start — создать, выпустить и продвинуть песню</title>
+  <meta name="description" content="Track Start — генератор текстов песен разных жанров. Создайте выразительный текст, настройте настроение и получите готовую версию для исполнения или Suno." />
+  <meta name="keywords" content="генератор текстов песен, написать песню, текст для Suno, генератор песен на русском, AI тексты песен" />
+  <meta property="og:title" content="Track Start — генератор текстов песен" />
+  <meta property="og:description" content="Создайте текст песни под нужный жанр, настроение и вокал. При желании подготовьте его для Suno." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.trackstart.art/" />
+  <link rel="canonical" href="https://www.trackstart.art/" />
+  <title>Генератор текстов песен на русском — Track Start</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="styles-home.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 </head>
-<body class="home-redesign">
+<body class="home-redesign lyrics-home">
 <header class="site-header">
   <div class="container">
     <nav class="nav" aria-label="Основная навигация">
@@ -20,15 +26,13 @@
         <span class="brand-name">Track <em>Start</em></span>
       </a>
       <div class="nav-links" id="main-menu">
-        <a class="nav-link" href="#route">Возможности</a>
         <a class="nav-link" href="generator.html">Генератор</a>
-        <a class="nav-link" href="vocal.html">Исполнение</a>
-        <a class="nav-link" href="ru/academy/">Академия</a>
-        <a class="nav-link" href="promotion.html">Продвижение</a>
+        <a class="nav-link" href="#genres">Жанры</a>
+        <a class="nav-link" href="#articles">Статьи</a>
         <a class="nav-link" href="#pricing">Тарифы</a>
       </div>
       <div class="nav-actions">
-        <a href="generator.html" class="btn btn-primary btn-sm nav-start">Начать</a>
+        <a href="generator.html" class="btn btn-primary btn-sm nav-start">Создать текст</a>
         <button class="menu-toggle" type="button" aria-controls="main-menu" aria-expanded="false" aria-label="Открыть меню"><span></span><span></span><span></span></button>
       </div>
     </nav>
@@ -39,72 +43,108 @@
   <section class="home-hero">
     <div class="container home-hero-grid">
       <div class="home-hero-copy reveal">
-        <div class="eyebrow"><span class="dot"></span><span>Помощник независимого артиста</span></div>
-        <h1>Песня — это начало.<br><span class="accent">Доведи её до слушателя.</span></h1>
-        <p class="lede">Track Start помогает пройти весь путь без хаоса: создать текст и промпт для Suno, подготовить релиз и получить план продвижения по дням.</p>
+        <div class="eyebrow"><span class="dot"></span><span>AI-студия песенных текстов</span></div>
+        <h1>Создай текст,<br><span class="accent">который хочется спеть.</span></h1>
+        <p class="lede">Опиши идею, выбери жанр и настроение. Track Start создаст структурированный текст песни, поможет его доработать и при желании подготовит настройки для Suno.</p>
         <div class="hero-ctas">
-          <a href="generator.html" class="btn btn-primary btn-lg">Создать песню</a>
-          <a href="promotion.html" class="btn btn-secondary btn-lg">Составить план продвижения</a>
+          <a href="generator.html" class="btn btn-primary btn-lg">Создать текст песни</a>
+          <a href="generator.html?mode=rewrite" class="btn btn-secondary btn-lg">Улучшить свой текст</a>
         </div>
-        <p class="trial-note">Без регистрации · 5 генераций песни · 1 пробный план продвижения</p>
+        <p class="trial-note">Без регистрации · 5 бесплатных генераций · результат можно редактировать</p>
       </div>
-      <div class="route-preview reveal" aria-label="Маршрут работы в Track Start">
-        <div class="preview-top"><span>Твой маршрут</span><span>01—03</span></div>
-        <div class="preview-step is-active"><span class="preview-num">01</span><div><strong>Создать</strong><p>Текст песни и готовый промпт для Suno</p></div><span class="preview-status">Начать</span></div>
-        <div class="preview-step"><span class="preview-num">02</span><div><strong>Выпустить</strong><p>Права, обложка, метаданные и площадки</p></div><span class="preview-arrow">→</span></div>
-        <div class="preview-step"><span class="preview-num">03</span><div><strong>Продвигать</strong><p>Конкретные задачи до и после даты релиза</p></div><span class="preview-arrow">→</span></div>
-        <div class="preview-result"><span class="pulse"></span><span>На выходе — понятный план действий, а не ещё одна статья</span></div>
+      <div class="route-preview lyrics-preview-card reveal" aria-label="Как создаётся текст песни">
+        <div class="preview-top"><span>Одна идея — готовый текст</span><span>01—03</span></div>
+        <div class="preview-step is-active"><span class="preview-num">01</span><div><strong>Расскажи идею</strong><p>Тема, история или одна эмоциональная сцена</p></div><span class="preview-status">Старт</span></div>
+        <div class="preview-step"><span class="preview-num">02</span><div><strong>Настрой звучание</strong><p>Жанр, настроение, эпоха, вокал и инструменты</p></div><span class="preview-arrow">→</span></div>
+        <div class="preview-step"><span class="preview-num">03</span><div><strong>Получи песню</strong><p>Куплеты, припев, бридж и редактируемый текст</p></div><span class="preview-arrow">→</span></div>
+        <div class="preview-result"><span class="pulse"></span><span>Suno — дополнительный формат, а не обязательное условие</span></div>
       </div>
     </div>
   </section>
 
-  <section class="section route-section" id="route">
+  <section class="section route-section" id="features">
     <div class="container">
-      <div class="section-head reveal"><div class="eyebrow"><span class="dot"></span><span>Один маршрут</span></div><h2>Всё нужное для релиза — в трёх шагах</h2><p class="lede">Можно пройти весь путь или открыть только тот инструмент, который нужен сейчас.</p></div>
-      <div class="product-grid">
-        <article class="product-card reveal"><span class="product-index">01</span><div class="product-icon">Aa</div><div><h3>Создать песню</h3><p>Опиши тему, жанр и настроение. Получи структурированный текст и настройки для генерации музыки.</p></div><ul><li>Куплеты, припев и бридж</li><li>Стиль, BPM и инструменты</li><li>Редактируемый результат</li></ul><a href="generator.html" class="text-link">Открыть генератор <span>→</span></a></article>
-        <article class="product-card reveal"><span class="product-index">02</span><div class="product-icon">✓</div><div><h3>Подготовить релиз</h3><p>Разберись, что оформить и куда загрузить трек. Только практические шаги простым языком.</p></div><ul><li>Права и документы</li><li>Обложка и метаданные</li><li>Выбор дистрибьютора</li></ul><a href="guide.html" class="text-link">Открыть гид <span>→</span></a></article>
-        <article class="product-card reveal"><span class="product-index">03</span><div class="product-icon">♪</div><div><h3>Подготовить исполнение</h3><p>Получи карту подачи, динамики и эмоций для своей песни.</p></div><ul><li>Разбор каждой секции</li><li>Акценты внутри текста</li><li>Советы перед записью</li></ul><a href="vocal.html" class="text-link">Открыть Vocal Producer <span>→</span></a></article>
-        <article class="product-card product-card--accent reveal"><span class="product-index">04</span><div class="product-icon">↗</div><div><h3>Продвинуть релиз</h3><p>Укажи дату и данные о треке. Получи персональный календарь контента до и после релиза.</p></div><ul><li>Задачи по конкретным дням</li><li>Темы для коротких видео</li><li>План можно скачать</li></ul><a href="promotion.html" class="text-link">Создать план <span>→</span></a></article>
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot"></span><span>Сосредоточено на тексте</span></div>
+        <h2>От идеи до строк, которые звучат как песня</h2>
+        <p class="lede">Без календарей продвижения и лишних инструментов. Всё внимание — смыслу, структуре и эмоциональной подаче текста.</p>
+      </div>
+      <div class="product-grid lyric-product-grid">
+        <article class="product-card reveal"><span class="product-index">01</span><div class="product-icon">Aa</div><div><h3>Текст с нуля</h3><p>Расскажите, о чём должна быть песня. Генератор соберёт историю в полноценную музыкальную структуру.</p></div><ul><li>Куплеты, припев и бридж</li><li>Запоминающийся эмоциональный центр</li><li>Редактируемый результат</li></ul><a href="generator.html" class="text-link">Начать с идеи <span>→</span></a></article>
+        <article class="product-card reveal"><span class="product-index">02</span><div class="product-icon">◇</div><div><h3>Улучшить черновик</h3><p>Вставьте собственный текст и выберите, что усилить. История, авторский смысл и лучшие строки будут сохранены.</p></div><ul><li>Ритм, певучесть и рифмы</li><li>Припев, образы и эмоция</li><li>Короткое объяснение изменений</li></ul><a href="generator.html?mode=rewrite" class="text-link">Открыть редактор <span>→</span></a></article>
+        <article class="product-card product-card--accent reveal"><span class="product-index">03</span><div class="product-icon">♪</div><div><h3>Готово для Suno</h3><p>Если вы создаёте музыку в Suno, Track Start дополнит текст секциями, настройками исполнения и строкой Style.</p></div><ul><li>Структурные теги</li><li>Вокал, темп и инструменты</li><li>Согласованность текста и музыки</li></ul><a href="generator.html" class="text-link">Создать для Suno <span>→</span></a></article>
       </div>
     </div>
   </section>
 
-  <section class="section output-section">
+  <section class="section output-section" id="example">
     <div class="container output-grid">
-      <div class="output-copy reveal"><div class="eyebrow"><span class="dot"></span><span>Не теория, а результат</span></div><h2>Открыл — и сразу понятно, что делать</h2><p class="lede">План продвижения превращает общие советы в календарь под твой релиз. Его можно скачать и использовать как рабочую шпаргалку.</p><a href="promotion.html" class="btn btn-secondary">Попробовать бесплатно</a></div>
-      <div class="calendar-card reveal">
-        <div class="calendar-head"><div><span class="calendar-kicker">Пример задачи</span><strong>До релиза 7 дней</strong></div><span class="chip chip-accent">Контент</span></div>
-        <div class="calendar-task"><span class="task-check">1</span><div><strong>Покажи историю трека</strong><p>Сними короткое видео: с какой строчки или события началась песня.</p></div></div>
-        <div class="calendar-task"><span class="task-check">2</span><div><strong>Добавь фрагмент припева</strong><p>Используй самый запоминающийся момент и один понятный призыв.</p></div></div>
-        <div class="calendar-footer"><span>Следующая задача</span><strong>Через 2 дня →</strong></div>
+      <div class="output-copy reveal">
+        <div class="eyebrow"><span class="dot"></span><span>Не случайный набор фраз</span></div>
+        <h2>Текст строится вокруг вашей истории</h2>
+        <p class="lede">Чем конкретнее исходная сцена, тем живее результат. Задайте героя, событие и главную эмоцию — жанровые настройки помогут превратить их в песню.</p>
+        <a href="generator.html" class="btn btn-secondary">Создать свой текст</a>
+      </div>
+      <div class="lyric-sample reveal">
+        <div class="lyric-sample-head"><span>Пример результата</span><span class="chip chip-accent">Synth-pop · Nostalgic</span></div>
+        <div class="lyric-section"><span>[Куплет]</span><p>Последний троллейбус считает мосты,<br>В окне проплывают чужие мечты.<br>Твой голос остался в кармане пальто —<br>Я город проехал, но вышел не там.</p></div>
+        <div class="lyric-section is-chorus"><span>[Припев]</span><p>Не выключай этот свет вдалеке,<br>Пока я держу нашу ночь на руке.</p></div>
+        <div class="lyric-sample-foot">Текст можно редактировать и уточнять отдельным запросом</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section genre-section" id="genres">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot"></span><span>Разные музыкальные языки</span></div>
+        <h2>Одна история — разные жанры</h2>
+        <p class="lede">Выберите до трёх направлений или оставьте решение генератору.</p>
+      </div>
+      <div class="genre-cloud reveal" aria-label="Доступные жанры">
+        <a href="generator.html">Pop</a><a href="generator.html">Synth-pop</a><a href="generator.html">Indie Rock</a><a href="generator.html">Hip-Hop</a><a href="generator.html">R&amp;B</a><a href="generator.html">Folk</a><a href="generator.html">Soul</a><a href="generator.html">Chanson</a><a href="generator.html">Electronic</a><a href="generator.html">Lo-fi</a><a href="generator.html">Cinematic</a><a href="generator.html">Dark Phonk</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section articles-section" id="articles">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot"></span><span>Полезные статьи</span></div>
+        <h2>Как создавать музыку с AI осознанно</h2>
+        <p class="lede">Короткие практические материалы дополняют генератор, но не отвлекают от него.</p>
+      </div>
+      <div class="article-grid">
+        <a class="article-card reveal" href="ru/academy/vocals/baritone-in-suno/"><span>Suno и вокал</span><h3>Как сделать баритон в Suno</h3><p>Формула тембра и короткий промпт для тёплого мужского голоса.</p><strong>Читать →</strong></a>
+        <a class="article-card reveal" href="articles/prava-na-ai-muzyku.html"><span>Права</span><h3>Права на AI-музыку</h3><p>Что проверить перед публикацией песни, созданной с помощью нейросети.</p><strong>Читать →</strong></a>
+        <a class="article-card reveal" href="articles/isrc-i-metadannye-treka.html"><span>Практика</span><h3>ISRC и метаданные трека</h3><p>Какие сведения потребуются, если вы решите выпустить готовую песню.</p><strong>Читать →</strong></a>
       </div>
     </div>
   </section>
 
   <section class="section pricing-section" id="pricing">
     <div class="container">
-      <div class="section-head reveal"><div class="eyebrow"><span class="dot"></span><span>Тарифы</span></div><h2>Начни бесплатно</h2><p class="lede">Для знакомства достаточно Free. Pro нужен, когда ты регулярно создаёшь и продвигаешь релизы.</p></div>
+      <div class="section-head reveal"><div class="eyebrow"><span class="dot"></span><span>Тарифы</span></div><h2>Попробуйте бесплатно</h2><p class="lede">Платный доступ нужен только тогда, когда вы хотите создавать тексты регулярно.</p></div>
       <div class="pricing-grid">
-        <div class="pricing-card reveal"><div class="pricing-top"><div class="pricing-name">Free</div><div class="pricing-price"><span class="pricing-amount">0 ₽</span></div><p class="pricing-desc">Чтобы спокойно всё попробовать</p></div><ul class="pricing-features"><li>✓ 5 генераций песни</li><li>✓ 1 карта исполнения</li><li>✓ 1 план продвижения</li><li>✓ Гид по релизу</li><li class="muted-feat">— Новые карты и планы после пробных</li></ul><a href="generator.html" class="btn btn-secondary pricing-btn">Попробовать</a></div>
-        <div class="pricing-card reveal"><div class="pricing-top"><div class="pricing-name">Lite</div><div class="pricing-price"><span class="pricing-amount">450 ₽</span><span class="pricing-period">/ 31 день</span></div><p class="pricing-desc">Если у тебя есть API-ключ Claude</p></div><ul class="pricing-features"><li>✓ Безлимитные генерации</li><li>✓ Свой API-ключ Claude</li><li>✓ Гид по релизу</li><li class="muted-feat">— Новые планы после пробного</li></ul><a href="#" data-buy="lite" class="btn btn-secondary pricing-btn">Выбрать Lite</a></div>
-        <div class="pricing-card pricing-card--featured reveal"><div class="pricing-badge">Всё включено</div><div class="pricing-top"><div class="pricing-name">Pro</div><div class="pricing-price"><span class="pricing-amount">900 ₽</span><span class="pricing-period">/ 31 день</span></div><p class="pricing-desc">Для регулярной работы над релизами</p></div><ul class="pricing-features"><li>✓ Безлимитные генерации</li><li>✓ API-ключ уже включён</li><li>✓ Новые карты исполнения</li><li>✓ Новые планы продвижения</li><li>✓ Гид и полная книга</li></ul><a href="#" data-buy="pro" class="btn btn-primary pricing-btn">Выбрать Pro</a></div>
+        <div class="pricing-card reveal"><div class="pricing-top"><div class="pricing-name">Free</div><div class="pricing-price"><span class="pricing-amount">0 ₽</span></div><p class="pricing-desc">Чтобы оценить качество текстов</p></div><ul class="pricing-features"><li>✓ 5 генераций песни</li><li>✓ Все жанры и настроения</li><li>✓ Редактирование результата</li><li>✓ Подготовка для Suno</li></ul><a href="generator.html" class="btn btn-secondary pricing-btn">Попробовать</a></div>
+        <div class="pricing-card reveal"><div class="pricing-top"><div class="pricing-name">Lite</div><div class="pricing-price"><span class="pricing-amount">450 ₽</span><span class="pricing-period">/ 31 день</span></div><p class="pricing-desc">Для пользователей со своим API-ключом Claude</p></div><ul class="pricing-features"><li>✓ Безлимитные генерации текстов</li><li>✓ Все настройки жанра и эмоции</li><li>✓ Точечные правки текста</li><li>✓ Подготовка для Suno</li></ul><a href="#" data-buy="lite" class="btn btn-secondary pricing-btn">Выбрать Lite</a></div>
+        <div class="pricing-card pricing-card--featured reveal"><div class="pricing-badge">Без своего API-ключа</div><div class="pricing-top"><div class="pricing-name">Pro</div><div class="pricing-price"><span class="pricing-amount">900 ₽</span><span class="pricing-period">/ 31 день</span></div><p class="pricing-desc">Всё необходимое уже подключено</p></div><ul class="pricing-features"><li>✓ Безлимитные генерации текстов</li><li>✓ API-доступ включён</li><li>✓ Точечные правки текста</li><li>✓ Подготовка для Suno</li></ul><a href="#" data-buy="pro" class="btn btn-primary pricing-btn">Выбрать Pro</a></div>
       </div>
-      <p class="pricing-note">Без автопродления — оплачивается 31 день доступа. Последние результаты сохраняются только в браузере · <a href="/oferta.html">Оферта</a> · <a href="/privacy.html">Конфиденциальность</a></p>
+      <p class="pricing-note">Без автопродления — оплачивается 31 день доступа · <a href="/oferta.html">Оферта</a> · <a href="/privacy.html">Конфиденциальность</a></p>
     </div>
   </section>
 
   <section class="section faq-section" id="faq"><div class="container faq-layout"><div class="section-head reveal"><div class="eyebrow"><span class="dot"></span><span>Коротко о главном</span></div><h2>Частые вопросы</h2></div><div class="faq-list reveal">
-    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Нужна ли регистрация?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Нет. Бесплатные возможности можно попробовать без личного кабинета.</div></div></div>
-    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Чем Lite отличается от Pro?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">В Lite для песен нужен твой API-ключ Claude, а новые карты исполнения и планы продвижения после бесплатных проб недоступны. В Pro ключ включён, новые карты и планы можно создавать снова.</div></div></div>
-    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Что я получу в плане продвижения?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Календарь задач по датам: что публиковать до релиза, в день выхода и после него. Результат можно скачать.</div></div></div>
-    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Оплата продлевается автоматически?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Нет. Это разовая оплата 31 дня доступа, без автопродления и сохранения карты.</div></div></div>
+    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Track Start работает только с Suno?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Нет. Полученный текст можно использовать с музыкантом, вокалистом или в любом музыкальном сервисе. Настройки для Suno создаются дополнительно.</div></div></div>
+    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Можно ли изменить готовый текст?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Да. Текст остаётся редактируемым, а отдельным запросом можно попросить изменить слабую строку, куплет, рифму или эмоциональную подачу.</div></div></div>
+    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Какие жанры доступны?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Поп, рок, рэп, R&amp;B, фолк, соул, шансон, электронная музыка, lo-fi, cinematic и другие направления. Можно сочетать до трёх жанров.</div></div></div>
+    <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Оплата продлевается автоматически?</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Нет. Вы оплачиваете 31 день доступа без автоматического продления и сохранения банковской карты.</div></div></div>
   </div></div></section>
 
-  <section class="section"><div class="container"><div class="final-cta reveal"><h2>Начни с того этапа, на котором ты сейчас</h2><p>Создай песню бесплатно или собери первый план продвижения.</p><div class="ctas"><a href="generator.html" class="btn btn-primary btn-lg">Создать песню</a><a href="promotion.html" class="btn btn-secondary btn-lg">Продвинуть релиз</a></div></div></div></section>
+  <section class="section"><div class="container"><div class="final-cta reveal"><h2>Начните с одной идеи</h2><p>Опишите сцену, историю или чувство — Track Start поможет превратить их в текст песни.</p><div class="ctas"><a href="generator.html" class="btn btn-primary btn-lg">Создать текст бесплатно</a></div></div></div></section>
 </main>
 
-<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><a href="index.html" class="brand" style="margin-bottom:14px"><span class="brand-name">Track <em>Start</em></span></a><p class="muted" style="font-size:14px;max-width:38ch">Помощник для авторов, которые создают музыку и выпускают её на стримингах.</p></div><div class="footer-col"><h4>Инструменты</h4><a href="generator.html">Генератор песен</a><a href="guide.html">Гид по релизу</a><a href="promotion.html">Продвижение</a></div><div class="footer-col"><h4>Помощь</h4><a href="#faq">FAQ</a><a href="mailto:7002d@mail.ru">Написать нам</a></div><div class="footer-col"><h4>Документы</h4><a href="/privacy.html">Конфиденциальность</a><a href="/oferta.html">Оферта</a></div></div><div class="footer-bottom"><span>© 2026 Track Start</span><span>Сделано для независимых артистов</span></div></div></footer>
+<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><a href="index.html" class="brand" style="margin-bottom:14px"><span class="brand-name">Track <em>Start</em></span></a><p class="muted" style="font-size:14px;max-width:38ch">AI-студия создания и доработки текстов песен.</p></div><div class="footer-col"><h4>Продукт</h4><a href="generator.html">Генератор текстов</a><a href="#genres">Жанры</a><a href="#pricing">Тарифы</a></div><div class="footer-col"><h4>Материалы</h4><a href="#articles">Статьи</a><a href="#faq">Вопросы и ответы</a><a href="mailto:7002d@mail.ru">Написать нам</a></div><div class="footer-col"><h4>Документы</h4><a href="/privacy.html">Конфиденциальность</a><a href="/oferta.html">Оферта</a></div></div><div class="footer-bottom"><span>© 2026 Track Start</span><span>Тексты песен — от идеи до исполнения</span></div></div></footer>
 
 <script src="app.js"></script>
 <script type="module" src="/auth.js"></script>
@@ -127,14 +167,19 @@
       e.preventDefault();
       const user = await window.TrackStartAuth.requireUser();
       if (!user) return;
-      const original = btn.textContent; btn.textContent = 'Секунду…';
+      const original = btn.textContent;
+      btn.textContent = 'Секунду…';
       try {
         const authHeaders = await window.TrackStartAuth.headers();
         const response = await fetch('/api/pay', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders }, body: JSON.stringify({ plan: btn.getAttribute('data-buy') }) });
         const data = await response.json().catch(function () { return {}; });
         if (!response.ok || !data.url) throw new Error(data.error || 'Не удалось создать платёж');
-        localStorage.setItem('ts_pending_payment', data.paymentId); window.location.href = data.url;
-      } catch (error) { btn.textContent = original; alert('Ошибка: ' + error.message); }
+        localStorage.setItem('ts_pending_payment', data.paymentId);
+        window.location.href = data.url;
+      } catch (error) {
+        btn.textContent = original;
+        alert('Ошибка: ' + error.message);
+      }
     });
   });
 })();

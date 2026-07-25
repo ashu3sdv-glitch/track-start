@@ -1,4 +1,4 @@
-import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, validateLyrics } from './generator-engine.js';
+import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, parseRewriteResponse, validateLyrics } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -117,6 +117,8 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
   let selectedTimbre = '';
   let selectedEra    = '';
   let selectedLang   = 'ru';
+  let editorMode     = 'create';
+  let selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'emotion'];
   let currentBrief = null;
 
   function getGenreStatus(g, selected) {
@@ -188,6 +190,47 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
         selectedLang = btn.getAttribute('data-lang-pick');
       });
     });
+  }
+
+  function initEditorMode() {
+    const buttons = document.querySelectorAll('[data-mode]');
+    const createPanel = document.getElementById('create-panel');
+    const rewritePanel = document.getElementById('rewrite-panel');
+    const generateLabel = document.getElementById('generate-label');
+    if (new URLSearchParams(window.location.search).get('mode') === 'rewrite') editorMode = 'rewrite';
+
+    function renderMode() {
+      buttons.forEach(button => button.classList.toggle('active', button.getAttribute('data-mode') === editorMode));
+      createPanel.classList.toggle('is-hidden', editorMode === 'rewrite');
+      rewritePanel.classList.toggle('active', editorMode === 'rewrite');
+      generateLabel.textContent = editorMode === 'rewrite' ? 'Улучшить текст' : 'Создать текст песни';
+      const emptyTitle = document.querySelector('#empty-lyrics h4');
+      const emptyText = document.querySelector('#empty-lyrics p');
+      if (emptyTitle) emptyTitle.textContent = editorMode === 'rewrite' ? 'Здесь появится улучшенная версия' : 'Здесь появится текст';
+      if (emptyText) emptyText.textContent = editorMode === 'rewrite'
+        ? 'Вставьте черновик, выберите задачи и нажмите «Улучшить текст»'
+        : 'Заполните бриф слева и нажмите «Создать текст песни»';
+      document.getElementById('editor-notes').style.display = 'none';
+    }
+
+    buttons.forEach(button => button.addEventListener('click', () => {
+      editorMode = button.getAttribute('data-mode') === 'rewrite' ? 'rewrite' : 'create';
+      renderMode();
+    }));
+
+    document.querySelectorAll('[data-goal]').forEach(button => button.addEventListener('click', () => {
+      const goal = button.getAttribute('data-goal');
+      if (selectedRewriteGoals.includes(goal)) {
+        if (selectedRewriteGoals.length === 1) return;
+        selectedRewriteGoals = selectedRewriteGoals.filter(item => item !== goal);
+      } else {
+        selectedRewriteGoals.push(goal);
+      }
+      document.querySelectorAll('[data-goal]').forEach(item =>
+        item.classList.toggle('active', selectedRewriteGoals.includes(item.getAttribute('data-goal'))));
+    }));
+
+    renderMode();
   }
 
   const TIMBRE_OPTIONS = {
@@ -577,8 +620,11 @@ RULES:
   // ── GENERATE ───────────────────────────────────────────────────────────────
   async function runGenerate() {
     const idea = document.getElementById('idea').value.trim();
+    const sourceLyrics = document.getElementById('source-lyrics').value.trim();
     const instruments = document.getElementById('instruments').value.trim();
-    if (!idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
+    const isRewrite = editorMode === 'rewrite';
+    if (!isRewrite && !idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
+    if (isRewrite && sourceLyrics.length < 40) { alert('Вставьте черновик текста — хотя бы несколько полных строк'); return; }
 
     const unlimited = hasUnlimited();
     if (!unlimited && getFreeLeft() <= 0) {
@@ -586,7 +632,18 @@ RULES:
       return;
     }
 
-    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, timbre: selectedTimbre, era: selectedEra, lang: selectedLang, instruments };
+    const draftAnchor = sourceLyrics.split(/\r?\n/).map(line => line.trim()).find(line => line && !line.startsWith('[')) || 'Авторский черновик';
+    const brief = {
+      idea: isRewrite ? draftAnchor.slice(0, 180) : idea,
+      genres: selectedGenres,
+      mood: selectedMood,
+      vocal: selectedVocal,
+      timbre: selectedTimbre,
+      era: selectedEra,
+      lang: selectedLang,
+      instruments,
+      mode: isRewrite ? 'rewrite' : 'create',
+    };
 
     // UI — loading
     document.getElementById('empty-lyrics').style.display = 'none';
@@ -600,16 +657,28 @@ RULES:
     document.getElementById('step1-num').className = 'step-num';
     document.getElementById('step2-num').className = 'step-num dim';
     document.getElementById('generate').disabled = true;
+    document.getElementById('editor-notes').style.display = 'none';
 
     try {
       // Шаг 1 — текст
-      let lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
-      let quality = validateLyrics(lyrics, brief);
-      if (!quality.ok) {
-        lyrics = finalizeLyrics(await ask(buildRepairPrompt(lyrics, brief, quality.issues), 2600), brief);
-        quality = validateLyrics(lyrics, brief);
+      let lyrics = '';
+      let editorNotes = '';
+      if (isRewrite) {
+        const rewriteResult = parseRewriteResponse(
+          await ask(buildRewritePrompt(sourceLyrics, brief, selectedRewriteGoals), 2800)
+        );
+        lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
+        editorNotes = rewriteResult.notes;
+        if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
+      } else {
+        lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
+        let quality = validateLyrics(lyrics, brief);
+        if (!quality.ok) {
+          lyrics = finalizeLyrics(await ask(buildRepairPrompt(lyrics, brief, quality.issues), 2600), brief);
+          quality = validateLyrics(lyrics, brief);
+        }
+        if (!quality.ok) throw new Error('Песня не прошла проверку качества. Попытка не списана — запустите генерацию ещё раз.');
       }
-      if (!quality.ok) throw new Error('Песня не прошла проверку качества. Попытка не списана — запустите генерацию ещё раз.');
 
       if (!unlimited) incUsed();
 
@@ -619,7 +688,11 @@ RULES:
       document.getElementById('lyrics-ready').style.display = '';
       document.getElementById('step1-num').className = 'step-num done';
       document.getElementById('lyric-meta').textContent =
-        [selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
+        [isRewrite ? 'Редактор' : 'Новый текст', selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
+      if (isRewrite) {
+        document.getElementById('editor-notes-text').textContent = editorNotes || 'Сохранён исходный смысл, а строки доработаны по выбранным задачам.';
+        document.getElementById('editor-notes').style.display = '';
+      }
       updateBadge();
 
       currentBrief = brief;
@@ -735,6 +808,7 @@ RULES:
   document.getElementById('fix-btn').addEventListener('click', runFix);
   document.getElementById('generate-style').addEventListener('click', runStyle);
 
+  initEditorMode();
   initChips();
   initSettings();
   updateBadge();

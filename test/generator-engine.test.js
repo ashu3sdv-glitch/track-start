@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, resolveTimbre, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildRewritePrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, parseRewriteResponse, resolveTimbre, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -89,4 +89,37 @@ test('style finalizer replaces a model tail with exactly one selected signature'
   const style = finalizeStyle('pop, 100 BPM | raw energy no overproduce | unwanted duplicate words', { vocal: 'Female vocal', mood: 'Dreamy', genres: ['Cinematic'] });
   assert.equal((style.match(/no clean digital polish/g) || []).length, 1);
   assert.doesNotMatch(style, /raw energy no overproduce/);
+});
+
+test('rewrite prompt preserves author intent and scopes selected improvements', () => {
+  const prompt = buildRewritePrompt(
+    '[Куплет]\nЯ оставил ключи на столе\n[Припев]\nНе выключай свет',
+    { genres: ['Pop'], mood: 'Melancholic', lang: 'ru' },
+    ['rhythm', 'chorus'],
+  );
+  assert.match(prompt, /Preserve the author's story, point of view, emotional intent/);
+  assert.match(prompt, /smooth line lengths/);
+  assert.match(prompt, /make the chorus simpler/);
+  assert.doesNotMatch(prompt, /replace generic abstractions/);
+  assert.match(prompt, /Я оставил ключи на столе/);
+});
+
+test('rewrite response parser separates revised lyrics and editor notes', () => {
+  const parsed = parseRewriteResponse(`<<<REVISED
+[Verse 1]
+Ключи остывают на краешке стола
+REVISED
+<<<NOTES
+- Конкретизирован образ
+- Выровнен ритм
+NOTES`);
+  assert.match(parsed.lyrics, /^\[Verse 1\]/);
+  assert.match(parsed.notes, /Выровнен ритм/);
+  assert.doesNotMatch(parsed.lyrics, /Конкретизирован/);
+});
+
+test('rewrite response parser accepts plain lyrics as a safe fallback', () => {
+  const parsed = parseRewriteResponse('[Verse 1]\nКлючи остывают на столе');
+  assert.equal(parsed.lyrics, '[Verse 1]\nКлючи остывают на столе');
+  assert.equal(parsed.notes, '');
 });
