@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, buildRewritePrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, parseRewriteResponse, resolveTimbre, validateLyrics } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, resolveTimbre, validateLyrics } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -122,4 +122,74 @@ test('rewrite response parser accepts plain lyrics as a safe fallback', () => {
   const parsed = parseRewriteResponse('[Verse 1]\nКлючи остывают на столе');
   assert.equal(parsed.lyrics, '[Verse 1]\nКлючи остывают на столе');
   assert.equal(parsed.notes, '');
+});
+
+test('poem diagnosis does not force song structure', () => {
+  const prompt = buildDiagnosisPrompt('Снег лежит на старой крыше', { lang: 'ru' }, ['imagery'], 'poem');
+  assert.match(prompt, /standalone poem/i);
+  assert.match(prompt, /do not demand a chorus/i);
+  assert.match(prompt, /Do not rewrite a single line/i);
+});
+
+test('genre diagnosis includes the selected meter architecture', () => {
+  const prompt = buildDiagnosisPrompt('Черновик песни', { lang: 'ru', genres: ['Hip-Hop'] }, ['rhythm'], 'genre');
+  assert.match(prompt, /fit Hip-Hop/i);
+  assert.match(prompt, /Target syllable ranges/i);
+});
+
+test('diagnosis parser extracts scores and the approved edit plan', () => {
+  const diagnosis = parseDiagnosisResponse(`<<<TYPE
+song-draft
+TYPE
+<<<SUMMARY
+Припев пока повторяет куплет.
+SUMMARY
+<<<SCORES
+Hook: 4
+Emotion: 7
+Genre fit: N/A
+SCORES
+<<<STRENGTHS
+- Образ ключей
+STRENGTHS
+<<<ISSUES
+- Нет хука
+ISSUES
+<<<PLAN
+- Перестроить припев
+PLAN
+<<<RECOMMENDATION
+balanced
+RECOMMENDATION`);
+  assert.equal(diagnosis.type, 'song-draft');
+  assert.equal(diagnosis.scores.Hook, 4);
+  assert.equal(diagnosis.scores['Genre fit'], null);
+  assert.match(diagnosis.plan, /Перестроить/);
+  assert.equal(diagnosis.recommendation, 'balanced');
+});
+
+test('rewrite prompt follows the approved intent, intensity and diagnosis', () => {
+  const prompt = buildRewritePrompt('Старый текст', { genres: ['Pop'], lang: 'ru' }, ['chorus'], {
+    intent: 'genre',
+    intensity: 'deep',
+    diagnosis: { raw: 'Припев не отличается от куплета.' },
+  });
+  assert.match(prompt, /Intended result: genre/);
+  assert.match(prompt, /Editing intensity: deep/);
+  assert.match(prompt, /Припев не отличается/);
+});
+
+test('rewrite difference ignores section labels and detects cosmetic edits', () => {
+  const original = 'Первая строка\nВторая строка\nТретья строка\nЧетвёртая строка';
+  const cosmetic = '[Verse 1]\nПервая строка\nВторая строка\nТретья строка\nЧетвёртая новая строка';
+  const stronger = '[Verse 1]\nНовая первая\nНовая вторая\nНовая третья\nНовая четвёртая';
+  assert.ok(measureRewriteDifference(original, cosmetic).changedRatio < 0.3);
+  assert.equal(measureRewriteDifference(original, stronger).changedRatio, 1);
+});
+
+test('repair prompt explicitly rejects a cosmetic rewrite', () => {
+  const prompt = buildRewriteRepairPrompt('Исходник', 'Почти исходник', {}, { summary: 'Слабый припев' }, 0.18);
+  assert.match(prompt, /too cosmetic/i);
+  assert.match(prompt, /18%/);
+  assert.match(prompt, /Слабый припев/);
 });

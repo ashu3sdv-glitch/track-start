@@ -1,4 +1,4 @@
-import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, parseRewriteResponse, validateLyrics } from './generator-engine.js';
+import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, validateLyrics } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -118,7 +118,11 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
   let selectedEra    = '';
   let selectedLang   = 'ru';
   let editorMode     = 'create';
+  let rewriteIntent  = 'song';
+  let rewriteIntensity = 'balanced';
   let selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'emotion'];
+  let currentDiagnosis = null;
+  let diagnosisFingerprint = '';
   let currentBrief = null;
 
   function getGenreStatus(g, selected) {
@@ -199,22 +203,29 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
     const generateLabel = document.getElementById('generate-label');
     if (new URLSearchParams(window.location.search).get('mode') === 'rewrite') editorMode = 'rewrite';
 
+    function invalidateDiagnosis() {
+      currentDiagnosis = null;
+      diagnosisFingerprint = '';
+      document.getElementById('diagnosis-card').classList.remove('visible');
+    }
+
     function renderMode() {
       buttons.forEach(button => button.classList.toggle('active', button.getAttribute('data-mode') === editorMode));
       createPanel.classList.toggle('is-hidden', editorMode === 'rewrite');
       rewritePanel.classList.toggle('active', editorMode === 'rewrite');
-      generateLabel.textContent = editorMode === 'rewrite' ? 'Улучшить текст' : 'Создать текст песни';
+      generateLabel.textContent = editorMode === 'rewrite' ? 'Провести диагностику' : 'Создать текст песни';
       const emptyTitle = document.querySelector('#empty-lyrics h4');
       const emptyText = document.querySelector('#empty-lyrics p');
       if (emptyTitle) emptyTitle.textContent = editorMode === 'rewrite' ? 'Здесь появится улучшенная версия' : 'Здесь появится текст';
       if (emptyText) emptyText.textContent = editorMode === 'rewrite'
-        ? 'Вставьте черновик, выберите задачи и нажмите «Улучшить текст»'
+        ? 'Вставьте черновик и сначала проведите диагностику'
         : 'Заполните бриф слева и нажмите «Создать текст песни»';
       document.getElementById('editor-notes').style.display = 'none';
     }
 
     buttons.forEach(button => button.addEventListener('click', () => {
       editorMode = button.getAttribute('data-mode') === 'rewrite' ? 'rewrite' : 'create';
+      invalidateDiagnosis();
       renderMode();
     }));
 
@@ -228,7 +239,29 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
       }
       document.querySelectorAll('[data-goal]').forEach(item =>
         item.classList.toggle('active', selectedRewriteGoals.includes(item.getAttribute('data-goal'))));
+      invalidateDiagnosis();
     }));
+
+    document.querySelectorAll('[data-intent]').forEach(button => button.addEventListener('click', () => {
+      rewriteIntent = button.getAttribute('data-intent') || 'song';
+      if (rewriteIntent === 'poem') selectedRewriteGoals = ['rhythm', 'rhyme', 'imagery', 'emotion'];
+      if (rewriteIntent === 'song') selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'emotion'];
+      if (rewriteIntent === 'genre') selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'structure'];
+      document.querySelectorAll('[data-intent]').forEach(item =>
+        item.classList.toggle('active', item.getAttribute('data-intent') === rewriteIntent));
+      document.querySelectorAll('[data-goal]').forEach(item =>
+        item.classList.toggle('active', selectedRewriteGoals.includes(item.getAttribute('data-goal'))));
+      invalidateDiagnosis();
+    }));
+
+    document.querySelectorAll('[data-intensity]').forEach(button => button.addEventListener('click', () => {
+      rewriteIntensity = button.getAttribute('data-intensity') || 'balanced';
+      document.querySelectorAll('[data-intensity]').forEach(item =>
+        item.classList.toggle('active', item.getAttribute('data-intensity') === rewriteIntensity));
+    }));
+
+    document.getElementById('source-lyrics').addEventListener('input', invalidateDiagnosis);
+    document.getElementById('approve-rewrite').addEventListener('click', () => runGenerate(true));
 
     renderMode();
   }
@@ -617,14 +650,70 @@ RULES:
       </div>`;
   }
 
+  function getDiagnosisFingerprint(sourceLyrics) {
+    return JSON.stringify({
+      sourceLyrics,
+      intent: rewriteIntent,
+      goals: [...selectedRewriteGoals].sort(),
+      genres: selectedGenres,
+      mood: selectedMood,
+      era: selectedEra,
+      lang: selectedLang,
+    });
+  }
+
+  function renderDiagnosis(diagnosis) {
+    const typeLabels = { poem: 'Стихотворение', 'song-draft': 'Песенный черновик', 'genre-lyrics': 'Текст под жанр' };
+    document.getElementById('diagnosis-title').textContent = `Диагностика · ${typeLabels[diagnosis.type] || diagnosis.type}`;
+    document.getElementById('diagnosis-summary').textContent = diagnosis.summary;
+    document.getElementById('diagnosis-strengths').textContent = diagnosis.strengths || 'Сильные стороны будут сохранены при редактировании.';
+    document.getElementById('diagnosis-issues').textContent = diagnosis.issues || 'Критических проблем не обнаружено.';
+    document.getElementById('diagnosis-plan').textContent = diagnosis.plan || 'Выполнить выбранные улучшения, сохранив авторский замысел.';
+    document.getElementById('diagnosis-scores').innerHTML = Object.entries(diagnosis.scores).map(([label, value]) =>
+      `<span class="diagnosis-score">${label}: ${value == null ? '—' : `${value}/10`}</span>`
+    ).join('');
+    rewriteIntensity = ['gentle', 'balanced', 'deep'].includes(diagnosis.recommendation)
+      ? diagnosis.recommendation
+      : 'balanced';
+    document.querySelectorAll('[data-intensity]').forEach(item =>
+      item.classList.toggle('active', item.getAttribute('data-intensity') === rewriteIntensity));
+    document.getElementById('diagnosis-card').classList.add('visible');
+  }
+
+  async function runDiagnosis(sourceLyrics, brief) {
+    const button = document.getElementById('generate');
+    const label = document.getElementById('generate-label');
+    button.disabled = true;
+    label.textContent = 'Диагностирую текст…';
+    document.getElementById('diagnosis-card').classList.remove('visible');
+    try {
+      const response = await ask(buildDiagnosisPrompt(sourceLyrics, brief, selectedRewriteGoals, rewriteIntent), 1800);
+      currentDiagnosis = parseDiagnosisResponse(response);
+      diagnosisFingerprint = getDiagnosisFingerprint(sourceLyrics);
+      renderDiagnosis(currentDiagnosis);
+      label.textContent = 'Провести диагностику заново';
+    } catch (error) {
+      currentDiagnosis = null;
+      diagnosisFingerprint = '';
+      alert('Не удалось провести диагностику: ' + (error.message || 'попробуйте ещё раз'));
+      label.textContent = 'Провести диагностику';
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   // ── GENERATE ───────────────────────────────────────────────────────────────
-  async function runGenerate() {
+  async function runGenerate(approvedRewrite = false) {
     const idea = document.getElementById('idea').value.trim();
     const sourceLyrics = document.getElementById('source-lyrics').value.trim();
     const instruments = document.getElementById('instruments').value.trim();
     const isRewrite = editorMode === 'rewrite';
     if (!isRewrite && !idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
     if (isRewrite && sourceLyrics.length < 40) { alert('Вставьте черновик текста — хотя бы несколько полных строк'); return; }
+    if (isRewrite && rewriteIntent === 'genre' && selectedGenres.length === 0) {
+      alert('Выберите хотя бы один жанр, под который нужно адаптировать текст.');
+      return;
+    }
 
     const unlimited = hasUnlimited();
     if (!unlimited && getFreeLeft() <= 0) {
@@ -645,6 +734,18 @@ RULES:
       mode: isRewrite ? 'rewrite' : 'create',
     };
 
+    if (isRewrite && !approvedRewrite) {
+      await runDiagnosis(sourceLyrics, brief);
+      return;
+    }
+    if (isRewrite && (!currentDiagnosis || diagnosisFingerprint !== getDiagnosisFingerprint(sourceLyrics))) {
+      alert('Текст или настройки изменились. Сначала проведите диагностику заново.');
+      document.getElementById('diagnosis-card').classList.remove('visible');
+      currentDiagnosis = null;
+      diagnosisFingerprint = '';
+      return;
+    }
+
     // UI — loading
     document.getElementById('empty-lyrics').style.display = 'none';
     document.getElementById('lyrics-ready').style.display = 'none';
@@ -664,12 +765,30 @@ RULES:
       let lyrics = '';
       let editorNotes = '';
       if (isRewrite) {
-        const rewriteResult = parseRewriteResponse(
-          await ask(buildRewritePrompt(sourceLyrics, brief, selectedRewriteGoals), 2800)
+        let rewriteResult = parseRewriteResponse(
+          await ask(buildRewritePrompt(sourceLyrics, brief, selectedRewriteGoals, {
+            intent: rewriteIntent,
+            intensity: rewriteIntensity,
+            diagnosis: currentDiagnosis,
+          }), 2800)
         );
         lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
         editorNotes = rewriteResult.notes;
+        const minimumDifference = rewriteIntensity === 'gentle' ? 0.08 : rewriteIntensity === 'deep' ? 0.28 : 0.18;
+        let difference = measureRewriteDifference(sourceLyrics, lyrics);
+        if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
+          rewriteResult = parseRewriteResponse(await ask(
+            buildRewriteRepairPrompt(sourceLyrics, lyrics, brief, currentDiagnosis, minimumDifference),
+            2800,
+          ));
+          lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
+          editorNotes = rewriteResult.notes;
+          difference = measureRewriteDifference(sourceLyrics, lyrics);
+        }
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
+        if (rewriteIntensity !== 'gentle' && difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
+          throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');
+        }
       } else {
         lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
         let quality = validateLyrics(lyrics, brief);
@@ -803,8 +922,8 @@ RULES:
   });
 
   // ── INIT ───────────────────────────────────────────────────────────────────
-  document.getElementById('generate').addEventListener('click', runGenerate);
-  document.getElementById('regen-btn').addEventListener('click', runGenerate);
+  document.getElementById('generate').addEventListener('click', () => runGenerate(false));
+  document.getElementById('regen-btn').addEventListener('click', () => runGenerate(false));
   document.getElementById('fix-btn').addEventListener('click', runFix);
   document.getElementById('generate-style').addEventListener('click', runStyle);
 

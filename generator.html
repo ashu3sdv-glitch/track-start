@@ -81,6 +81,24 @@
 .goal-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink); }
 .editor-notes { display:none; margin:14px 0 0; padding:14px 16px; border:1px solid #c4b5fd; border-radius:var(--radius); background:#f5f3ff; color:var(--ink-2); font-size:13px; line-height:1.55; white-space:pre-line; }
 .editor-notes strong { display:block; margin-bottom:6px; color:var(--accent-ink); }
+.intent-options { display:grid; gap:7px; margin-top:8px; }
+.intent-btn { padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg-2); color:var(--ink-2); text-align:left; cursor:pointer; transition:all .15s var(--ease); }
+.intent-btn strong { display:block; margin-bottom:2px; font-size:13px; }
+.intent-btn span { display:block; color:var(--muted); font-size:11px; line-height:1.35; }
+.intent-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink); }
+.diagnosis-card { display:none; padding:16px; border:1px solid #c4b5fd; border-radius:var(--radius); background:#f8f7ff; }
+.diagnosis-card.visible { display:block; }
+.diagnosis-card h3 { margin-bottom:6px; font-size:16px; }
+.diagnosis-summary { color:var(--ink-2); font-size:13px; line-height:1.55; }
+.diagnosis-scores { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+.diagnosis-score { padding:5px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--line); font:11px var(--font-mono); color:var(--ink-2); }
+.diagnosis-section { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+.diagnosis-section strong { display:block; margin-bottom:5px; font-size:12px; }
+.diagnosis-section div { white-space:pre-line; color:var(--muted); font-size:12px; line-height:1.5; }
+.intensity-row { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+.intensity-btn { padding:8px 5px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--muted); font-size:11px; cursor:pointer; }
+.intensity-btn.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink); }
+.approve-rewrite { width:100%; margin-top:14px; }
 @media (max-width:560px) { .rewrite-goals { grid-template-columns:1fr; } }
 </style>
 </head>
@@ -163,6 +181,12 @@
             <textarea id="source-lyrics" class="idea-field" rows="11" maxlength="12000"
               placeholder="Вставьте текст целиком. Можно с названиями секций: [Куплет], [Припев], [Бридж]…"></textarea>
             <p class="gen-hint">Смысл, история и лучшие строки будут сохранены.</p>
+            <label class="gen-label" style="margin-top:16px;">Что вы хотите получить</label>
+            <div class="intent-options" id="rewrite-intent">
+              <button class="intent-btn" type="button" data-intent="poem"><strong>Улучшить стихотворение</strong><span>Сохранить поэтическую форму, не добавлять обязательный припев</span></button>
+              <button class="intent-btn active" type="button" data-intent="song"><strong>Сделать песенный текст</strong><span>Проверить хук, секции, певучесть и развитие истории</span></button>
+              <button class="intent-btn" type="button" data-intent="genre"><strong>Подогнать под выбранный жанр</strong><span>Учитывать ритмическую плотность, структуру и язык жанра</span></button>
+            </div>
             <label class="gen-label" style="margin-top:16px;">Что улучшить</label>
             <div class="rewrite-goals" id="rewrite-goals">
               <button class="goal-btn active" type="button" data-goal="rhythm">Ритм и певучесть</button>
@@ -171,6 +195,23 @@
               <button class="goal-btn" type="button" data-goal="imagery">Образы</button>
               <button class="goal-btn active" type="button" data-goal="emotion">Эмоция</button>
               <button class="goal-btn" type="button" data-goal="structure">Структура</button>
+            </div>
+            <div class="diagnosis-card" id="diagnosis-card" style="margin-top:16px;">
+              <h3 id="diagnosis-title">Диагностика текста</h3>
+              <div class="diagnosis-summary" id="diagnosis-summary"></div>
+              <div class="diagnosis-scores" id="diagnosis-scores"></div>
+              <div class="diagnosis-section"><strong>Что уже работает</strong><div id="diagnosis-strengths"></div></div>
+              <div class="diagnosis-section"><strong>Что мешает тексту</strong><div id="diagnosis-issues"></div></div>
+              <div class="diagnosis-section"><strong>Предлагаемый план</strong><div id="diagnosis-plan"></div></div>
+              <div class="diagnosis-section">
+                <strong>Глубина изменений</strong>
+                <div class="intensity-row">
+                  <button class="intensity-btn" type="button" data-intensity="gentle">Бережно</button>
+                  <button class="intensity-btn active" type="button" data-intensity="balanced">Заметно</button>
+                  <button class="intensity-btn" type="button" data-intensity="deep">Глубоко</button>
+                </div>
+              </div>
+              <button class="btn btn-primary approve-rewrite" type="button" id="approve-rewrite">Согласен — улучшить текст</button>
             </div>
           </div>
 

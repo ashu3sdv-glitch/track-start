@@ -240,11 +240,108 @@ const REWRITE_GOALS = {
   structure: 'give each section a distinct job and make Verse 2 or the bridge add a real turn',
 };
 
-export function buildRewritePrompt(draft, brief = {}, goals = []) {
+export function buildDiagnosisPrompt(draft, brief = {}, goals = [], intent = 'song') {
+  const a = getGenreArchitecture(brief);
+  const language = { ru: 'Russian', en: 'English', mix: 'mostly Russian with some English phrases' }[brief.lang] || 'the draft language';
+  const intentRules = {
+    poem: 'Evaluate it as a standalone poem. Do not demand a chorus, hook, repeated sections or genre meter unless the text already uses song form.',
+    song: 'Evaluate it as a general song lyric. Diagnose section function, hook, repetition, breath groups and singability without forcing one specific genre.',
+    genre: `Evaluate it as lyrics that must fit ${a.genre}. Apply this genre architecture: ${a.craft}; target syllable ranges: ${rangeText(a)}.`,
+  };
+  const selectedGoals = goals.length ? goals : Object.keys(REWRITE_GOALS);
+  return `You are the Track Start senior lyric diagnostician. Analyze the author's text before any rewriting. Do not rewrite a single line.
+
+AUTHOR'S TEXT
+<<<DRAFT
+${String(draft || '').trim()}
+DRAFT
+
+TASK
+- Intended result: ${intent}
+- Language: ${language}
+- Selected genre: ${brief.genres?.join(' + ') || 'not selected'}
+- Mood: ${brief.mood || 'not selected'}
+- Requested focus: ${selectedGoals.join(', ')}
+- ${intentRules[intent] || intentRules.song}
+
+DIAGNOSTIC METHOD
+- First distinguish a poem from a song draft and from genre-targeted lyrics.
+- For poems, respect poetic freedom and do not penalize the lack of a chorus.
+- For songs, inspect hook, emotional clarity, section jobs, singability, rhyme, imagery and development.
+- For genre adaptation, compare line length and rhythmic density with the selected genre. Syllable targets are guides, not mechanical laws; natural stress and phrasing win.
+- Identify 2-4 lines or images worth preserving, without quoting more than a short fragment.
+- Name concrete problems, not generic advice.
+- Propose the scope of changes, but do not perform them.
+
+OUTPUT FORMAT — use these delimiters exactly and write values in the author's language:
+<<<TYPE
+poem | song-draft | genre-lyrics
+TYPE
+<<<SUMMARY
+2-4 sentence diagnosis
+SUMMARY
+<<<SCORES
+Hook: 1-10 or N/A
+Emotion: 1-10
+Structure: 1-10
+Singability: 1-10 or N/A
+Rhyme: 1-10
+Imagery: 1-10
+Genre fit: 1-10 or N/A
+SCORES
+<<<STRENGTHS
+- 2-4 specific strengths or lines/images to preserve
+STRENGTHS
+<<<ISSUES
+- 3-6 specific issues in priority order
+ISSUES
+<<<PLAN
+- 3-6 exact editing actions
+PLAN
+<<<RECOMMENDATION
+gentle | balanced | deep
+RECOMMENDATION`;
+}
+
+export function parseDiagnosisResponse(raw) {
+  const text = cleanModelText(raw);
+  const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
+  const scoresText = section('SCORES');
+  const scores = {};
+  for (const line of scoresText.split(/\r?\n/)) {
+    const match = line.match(/^\s*([^:]+):\s*(N\/A|\d{1,2})/i);
+    if (match) scores[match[1].trim()] = /^N\/A$/i.test(match[2]) ? null : Math.min(10, Number(match[2]));
+  }
+  return {
+    type: section('TYPE') || 'song-draft',
+    summary: section('SUMMARY') || text,
+    scores,
+    strengths: section('STRENGTHS'),
+    issues: section('ISSUES'),
+    plan: section('PLAN'),
+    recommendation: section('RECOMMENDATION') || 'balanced',
+    raw: text,
+  };
+}
+
+export function buildRewritePrompt(draft, brief = {}, goals = [], options = {}) {
   const a = getGenreArchitecture(brief);
   const language = { ru: 'Russian', en: 'English', mix: 'mostly Russian with a few natural English phrases' }[brief.lang] || 'the draft language';
   const selectedGoals = goals.length ? goals : Object.keys(REWRITE_GOALS);
   const goalLines = selectedGoals.map(goal => `- ${REWRITE_GOALS[goal] || goal}`).join('\n');
+  const intent = options.intent || 'song';
+  const intensity = options.intensity || options.diagnosis?.recommendation || 'balanced';
+  const diagnosis = options.diagnosis?.raw || options.diagnosis?.summary || 'No separate diagnosis supplied.';
+  const intentRule = intent === 'poem'
+    ? 'Keep it a poem. Do not add song sections, a chorus or repeated hook unless explicitly present in the draft.'
+    : intent === 'genre'
+      ? `Shape it for ${a.genre}. Use the genre meter and section architecture where they improve performance.`
+      : 'Shape it as a singable general song lyric without forcing a specific genre convention.';
+  const intensityRule = {
+    gentle: 'Make only essential corrections. Preserve most lines and structure.',
+    balanced: 'Freely rewrite weak lines and the chorus while preserving the story, voice and strongest distinctive material.',
+    deep: 'Rebuild weak sections substantially. Preserve the core story, point of view and best images, but do not preserve weak wording merely because it is original.',
+  }[intensity] || 'Freely rewrite weak lines while preserving the author identity.';
   return `You are the Track Start song lyric editor. Rewrite the author's draft into a stronger, singable song while preserving its identity.
 
 AUTHOR'S DRAFT
@@ -253,6 +350,8 @@ ${String(draft || '').trim()}
 DRAFT
 
 CONTEXT
+- Intended result: ${intent}. ${intentRule}
+- Editing intensity: ${intensity}. ${intensityRule}
 - Language: ${language}
 - Genre: ${brief.genres?.join(' + ') || 'infer from the draft'}
 - Mood: ${brief.mood || 'preserve the draft emotion'}
@@ -270,6 +369,9 @@ NON-NEGOTIABLE EDITORIAL RULES
 
 SELECTED IMPROVEMENTS
 ${goalLines}
+
+APPROVED DIAGNOSIS AND EDIT PLAN
+${diagnosis}
 
 OUTPUT FORMAT — use these delimiters exactly:
 <<<REVISED
@@ -293,6 +395,49 @@ export function parseRewriteResponse(raw) {
     };
   }
   return { lyrics: text.replace(/<<<NOTES[\s\S]*$/i, '').trim(), notes: '' };
+}
+
+function meaningfulLines(text) {
+  return String(text || '').split(/\r?\n/)
+    .map(line => line.trim().toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' '))
+    .filter(line => line && !/^(verse|chorus|bridge|куплет|припев|бридж|outro|intro)(\s+\d+)?$/i.test(line));
+}
+
+export function measureRewriteDifference(original, revised) {
+  const before = meaningfulLines(original);
+  const after = meaningfulLines(revised);
+  const beforeSet = new Set(before);
+  const unchanged = after.filter(line => beforeSet.has(line)).length;
+  const changedRatio = after.length ? 1 - unchanged / after.length : 0;
+  return { beforeLines: before.length, afterLines: after.length, unchanged, changedRatio };
+}
+
+export function buildRewriteRepairPrompt(original, revision, brief = {}, diagnosis = {}, minimumRatio = 0.2) {
+  return `The revision is too cosmetic: fewer than ${Math.round(minimumRatio * 100)}% of meaningful lines changed. Perform a stronger second editorial pass.
+
+ORIGINAL
+${String(original || '').trim()}
+
+CURRENT REVISION
+${String(revision || '').trim()}
+
+APPROVED DIAGNOSIS
+${diagnosis.raw || diagnosis.summary || ''}
+
+REQUIREMENTS
+- Preserve the original story, point of view and strongest distinctive images.
+- Substantially rewrite the weak lines identified in the diagnosis.
+- Do not count section labels as meaningful changes.
+- Improve hook, rhythm, natural stress, rhyme and concrete imagery where the diagnosis requests it.
+- Return the complete revised text and 3-5 concrete notes.
+
+OUTPUT FORMAT
+<<<REVISED
+complete revised text
+REVISED
+<<<NOTES
+- concrete changes
+NOTES`;
 }
 
 export function buildStylePrompt(lyrics, brief) {
