@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, resolveTimbre, validateLyrics, validateRewritePreservation } from '../generator-engine.js';
+import { analyzeSyllables, applyPerformanceSettings, buildDiagnosisPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, countSyllables, finalizeLyrics, finalizeStyle, getDeliveryPlan, getGenreArchitecture, getSignatureTail, getVocalPlan, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, resolveTimbre, validateLyrics, validateRewritePreservation } from '../generator-engine.js';
 
 const song = `[Verse 1 — intimate]\nОкно дрожит от позднего трамвая\n${'строка\n'.repeat(20)}[Chorus — powerful]\nДержи мой свет\n[Verse 2 — conversational]\nДругой поворот\n[Bridge — stripped]\nЯ выбираю путь\n[Final Chorus — full]\nДержи мой свет`;
 
@@ -91,16 +91,15 @@ test('style finalizer replaces a model tail with exactly one selected signature'
   assert.doesNotMatch(style, /raw energy no overproduce/);
 });
 
-test('rewrite prompt preserves author intent and scopes selected improvements', () => {
+test('rewrite prompt preserves author intent and requires four short result notes', () => {
   const prompt = buildRewritePrompt(
     '[Куплет]\nЯ оставил ключи на столе\n[Припев]\nНе выключай свет',
     { genres: ['Pop'], mood: 'Melancholic', lang: 'ru' },
-    ['rhythm', 'chorus'],
+    { intent: 'song', diagnosis: { raw: '1. Нет хука\n2. Строки разной длины' } },
   );
   assert.match(prompt, /Preserve the author's story, point of view, emotional intent/);
-  assert.match(prompt, /smooth line lengths/);
-  assert.match(prompt, /make the chorus simpler/);
-  assert.doesNotMatch(prompt, /replace generic abstractions/);
+  assert.match(prompt, /Correct all five diagnosed problems/);
+  assert.match(prompt, /4\. completed improvement/);
   assert.match(prompt, /Я оставил ключи на столе/);
 });
 
@@ -125,58 +124,71 @@ test('rewrite response parser accepts plain lyrics as a safe fallback', () => {
 });
 
 test('poem diagnosis does not force song structure', () => {
-  const prompt = buildDiagnosisPrompt('Снег лежит на старой крыше', { lang: 'ru' }, ['imagery'], 'poem');
+  const prompt = buildDiagnosisPrompt('Снег лежит на старой крыше', { lang: 'ru' }, 'poem');
   assert.match(prompt, /standalone poem/i);
   assert.match(prompt, /do not demand a chorus/i);
   assert.match(prompt, /Do not rewrite a single line/i);
 });
 
-test('genre diagnosis includes the selected meter architecture', () => {
-  const prompt = buildDiagnosisPrompt('Черновик песни', { lang: 'ru', genres: ['Hip-Hop'] }, ['rhythm'], 'genre');
-  assert.match(prompt, /fit Hip-Hop/i);
-  assert.match(prompt, /Target syllable ranges/i);
+test('song diagnosis uses a selected genre only as context', () => {
+  const prompt = buildDiagnosisPrompt('Черновик песни', { lang: 'ru', genres: ['Hip-Hop'] }, 'song');
+  assert.match(prompt, /use Hip-Hop as context/i);
+  assert.match(prompt, /exactly five/i);
+  assert.match(prompt, /exactly four/i);
 });
 
-test('diagnosis parser extracts scores and the approved edit plan', () => {
+test('diagnosis parser returns exactly five problems and four improvements', () => {
   const diagnosis = parseDiagnosisResponse(`<<<TYPE
-song-draft
+song
 TYPE
 <<<SUMMARY
 Припев пока повторяет куплет.
 SUMMARY
-<<<SCORES
-Hook: 4
-Emotion: 7
-Genre fit: N/A
-SCORES
-<<<STRENGTHS
-- Образ ключей
-STRENGTHS
 <<<ISSUES
-- Нет хука
+1. Нет хука
+2. Строки разной длины
+3. Рифма непоследовательна
+4. Образы абстрактны
+5. Нет развития
 ISSUES
 <<<PLAN
-- Перестроить припев
-PLAN
-<<<RECOMMENDATION
-balanced
-RECOMMENDATION`);
-  assert.equal(diagnosis.type, 'song-draft');
-  assert.equal(diagnosis.scores.Hook, 4);
-  assert.equal(diagnosis.scores['Genre fit'], null);
-  assert.match(diagnosis.plan, /Перестроить/);
-  assert.equal(diagnosis.recommendation, 'balanced');
+1. Выровнять строки
+2. Создать припев
+3. Усилить рифмы
+4. Добавить развитие
+PLAN`);
+  assert.equal(diagnosis.type, 'song');
+  assert.equal(diagnosis.issueCount, 5);
+  assert.equal(diagnosis.planCount, 4);
+  assert.match(diagnosis.issues, /^1\. Нет хука/);
+  assert.match(diagnosis.plan, /Создать припев/);
 });
 
-test('rewrite prompt follows the approved intent, intensity and diagnosis', () => {
-  const prompt = buildRewritePrompt('Старый текст', { genres: ['Pop'], lang: 'ru' }, ['chorus'], {
-    intent: 'genre',
-    intensity: 'deep',
+test('rewrite prompt follows the approved result and diagnosis', () => {
+  const prompt = buildRewritePrompt('Старый текст', { genres: ['Pop'], lang: 'ru' }, {
+    intent: 'song',
     diagnosis: { raw: 'Припев не отличается от куплета.' },
   });
-  assert.match(prompt, /Intended result: genre/);
-  assert.match(prompt, /Editing intensity: deep/);
+  assert.match(prompt, /Intended result: song/);
+  assert.match(prompt, /Convert it into a complete singable song/);
   assert.match(prompt, /Припев не отличается/);
+});
+
+test('numbered list normalizer keeps four concise result items', () => {
+  const result = normalizeNumberedList('1. Первое изменение\n2. Второе\n3. Третье\n4. Четвёртое\n5. Лишнее', 4);
+  assert.equal(result.count, 4);
+  assert.equal(result.text.split('\n').length, 4);
+  assert.doesNotMatch(result.text, /Лишнее/);
+});
+
+test('rewrite verifier checks every diagnosed problem after editing', () => {
+  const prompt = buildRewriteVerificationPrompt('Исходник', 'Новая версия', { raw: '1. Нет рифмы' }, 'poem');
+  assert.match(prompt, /all five diagnosed problems/i);
+  assert.match(prompt, /For a poem, do not require song sections/i);
+  assert.equal(parseRewriteVerification('<<<STATUS\nPASS\nSTATUS\n<<<REMAINING\n\nREMAINING').ok, true);
+  const failed = parseRewriteVerification('<<<STATUS\nFAIL\nSTATUS\n<<<REMAINING\n1. Осталась сбитая строка\nREMAINING');
+  assert.equal(failed.ok, false);
+  assert.equal(failed.remainingCount, 1);
 });
 
 test('rewrite difference ignores section labels and detects cosmetic edits', () => {

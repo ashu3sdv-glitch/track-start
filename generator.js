@@ -1,4 +1,4 @@
-import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, parseDiagnosisResponse, parseRewriteResponse, validateLyrics, validateRewritePreservation } from './generator-engine.js';
+import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildRewriteVerificationPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, normalizeNumberedList, parseDiagnosisResponse, parseRewriteResponse, parseRewriteVerification, validateLyrics, validateRewritePreservation } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
@@ -119,8 +119,6 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
   let selectedLang   = 'ru';
   let editorMode     = 'create';
   let rewriteIntent  = 'song';
-  let rewriteIntensity = 'balanced';
-  let selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'emotion'];
   let currentDiagnosis = null;
   let diagnosisFingerprint = '';
   let currentBrief = null;
@@ -229,35 +227,11 @@ import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as bu
       renderMode();
     }));
 
-    document.querySelectorAll('[data-goal]').forEach(button => button.addEventListener('click', () => {
-      const goal = button.getAttribute('data-goal');
-      if (selectedRewriteGoals.includes(goal)) {
-        if (selectedRewriteGoals.length === 1) return;
-        selectedRewriteGoals = selectedRewriteGoals.filter(item => item !== goal);
-      } else {
-        selectedRewriteGoals.push(goal);
-      }
-      document.querySelectorAll('[data-goal]').forEach(item =>
-        item.classList.toggle('active', selectedRewriteGoals.includes(item.getAttribute('data-goal'))));
-      invalidateDiagnosis();
-    }));
-
     document.querySelectorAll('[data-intent]').forEach(button => button.addEventListener('click', () => {
       rewriteIntent = button.getAttribute('data-intent') || 'song';
-      if (rewriteIntent === 'poem') selectedRewriteGoals = ['rhythm', 'rhyme', 'imagery', 'emotion'];
-      if (rewriteIntent === 'song') selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'emotion'];
-      if (rewriteIntent === 'genre') selectedRewriteGoals = ['rhythm', 'rhyme', 'chorus', 'structure'];
       document.querySelectorAll('[data-intent]').forEach(item =>
         item.classList.toggle('active', item.getAttribute('data-intent') === rewriteIntent));
-      document.querySelectorAll('[data-goal]').forEach(item =>
-        item.classList.toggle('active', selectedRewriteGoals.includes(item.getAttribute('data-goal'))));
       invalidateDiagnosis();
-    }));
-
-    document.querySelectorAll('[data-intensity]').forEach(button => button.addEventListener('click', () => {
-      rewriteIntensity = button.getAttribute('data-intensity') || 'balanced';
-      document.querySelectorAll('[data-intensity]').forEach(item =>
-        item.classList.toggle('active', item.getAttribute('data-intensity') === rewriteIntensity));
     }));
 
     document.getElementById('source-lyrics').addEventListener('input', invalidateDiagnosis);
@@ -654,7 +628,6 @@ RULES:
     return JSON.stringify({
       sourceLyrics,
       intent: rewriteIntent,
-      goals: [...selectedRewriteGoals].sort(),
       genres: selectedGenres,
       mood: selectedMood,
       era: selectedEra,
@@ -663,20 +636,11 @@ RULES:
   }
 
   function renderDiagnosis(diagnosis) {
-    const typeLabels = { poem: 'Стихотворение', 'song-draft': 'Песенный черновик', 'genre-lyrics': 'Текст под жанр' };
+    const typeLabels = { poem: 'Улучшение стихотворения', song: 'Преобразование в песню' };
     document.getElementById('diagnosis-title').textContent = `Диагностика · ${typeLabels[diagnosis.type] || diagnosis.type}`;
     document.getElementById('diagnosis-summary').textContent = diagnosis.summary;
-    document.getElementById('diagnosis-strengths').textContent = diagnosis.strengths || 'Сильные стороны будут сохранены при редактировании.';
     document.getElementById('diagnosis-issues').textContent = diagnosis.issues || 'Критических проблем не обнаружено.';
     document.getElementById('diagnosis-plan').textContent = diagnosis.plan || 'Выполнить выбранные улучшения, сохранив авторский замысел.';
-    document.getElementById('diagnosis-scores').innerHTML = Object.entries(diagnosis.scores).map(([label, value]) =>
-      `<span class="diagnosis-score">${label}: ${value == null ? '—' : `${value}/10`}</span>`
-    ).join('');
-    rewriteIntensity = ['gentle', 'balanced', 'deep'].includes(diagnosis.recommendation)
-      ? diagnosis.recommendation
-      : 'balanced';
-    document.querySelectorAll('[data-intensity]').forEach(item =>
-      item.classList.toggle('active', item.getAttribute('data-intensity') === rewriteIntensity));
     document.getElementById('diagnosis-card').classList.add('visible');
   }
 
@@ -687,8 +651,16 @@ RULES:
     label.textContent = 'Диагностирую текст…';
     document.getElementById('diagnosis-card').classList.remove('visible');
     try {
-      const response = await ask(buildDiagnosisPrompt(sourceLyrics, brief, selectedRewriteGoals, rewriteIntent), 1800);
+      const prompt = buildDiagnosisPrompt(sourceLyrics, brief, rewriteIntent);
+      let response = await ask(prompt, 1100);
       currentDiagnosis = parseDiagnosisResponse(response);
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4) {
+        response = await ask(`${prompt}\n\nSTRICT RETRY: return exactly 5 numbered problems and exactly 4 numbered improvements. Keep every item to one short sentence.`, 1100);
+        currentDiagnosis = parseDiagnosisResponse(response);
+      }
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4) {
+        throw new Error('диагностика получилась неполной');
+      }
       diagnosisFingerprint = getDiagnosisFingerprint(sourceLyrics);
       renderDiagnosis(currentDiagnosis);
       label.textContent = 'Провести диагностику заново';
@@ -710,10 +682,6 @@ RULES:
     const isRewrite = editorMode === 'rewrite';
     if (!isRewrite && !idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
     if (isRewrite && sourceLyrics.length < 40) { alert('Вставьте черновик текста — хотя бы несколько полных строк'); return; }
-    if (isRewrite && rewriteIntent === 'genre' && selectedGenres.length === 0) {
-      alert('Выберите хотя бы один жанр, под который нужно адаптировать текст.');
-      return;
-    }
 
     const unlimited = hasUnlimited();
     if (!unlimited && getFreeLeft() <= 0) {
@@ -766,19 +734,28 @@ RULES:
       let editorNotes = '';
       if (isRewrite) {
         let rewriteResult = parseRewriteResponse(
-          await ask(buildRewritePrompt(sourceLyrics, brief, selectedRewriteGoals, {
+          await ask(buildRewritePrompt(sourceLyrics, brief, {
             intent: rewriteIntent,
-            intensity: rewriteIntensity,
             diagnosis: currentDiagnosis,
           }), 2800)
         );
         lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
-        editorNotes = rewriteResult.notes;
-        const minimumDifference = rewriteIntensity === 'gentle' ? 0.08 : rewriteIntensity === 'deep' ? 0.28 : 0.18;
+        let normalizedNotes = normalizeNumberedList(rewriteResult.notes, 4);
+        editorNotes = normalizedNotes.text;
+        const minimumDifference = rewriteIntent === 'poem' ? 0.12 : 0.2;
         let difference = measureRewriteDifference(sourceLyrics, lyrics);
         let preservation = validateRewritePreservation(sourceLyrics, lyrics);
+        let verification = parseRewriteVerification(await ask(
+          buildRewriteVerificationPrompt(sourceLyrics, lyrics, currentDiagnosis, rewriteIntent),
+          700,
+        ));
         const tooCosmetic = difference.afterLines >= 4 && difference.changedRatio < minimumDifference;
-        if (tooCosmetic || !preservation.ok) {
+        if (tooCosmetic || !preservation.ok || normalizedNotes.count !== 4 || !verification.ok) {
+          const qualityIssues = [
+            ...preservation.issues,
+            ...(normalizedNotes.count !== 4 ? ['editor-notes-not-four'] : []),
+            ...(verification.remaining ? [`remaining-errors: ${verification.remaining}`] : []),
+          ];
           rewriteResult = parseRewriteResponse(await ask(
             buildRewriteRepairPrompt(
               sourceLyrics,
@@ -786,21 +763,32 @@ RULES:
               brief,
               currentDiagnosis,
               minimumDifference,
-              preservation.issues,
+              qualityIssues,
             ),
             2800,
           ));
           lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
-          editorNotes = rewriteResult.notes;
+          normalizedNotes = normalizeNumberedList(rewriteResult.notes, 4);
+          editorNotes = normalizedNotes.text;
           difference = measureRewriteDifference(sourceLyrics, lyrics);
           preservation = validateRewritePreservation(sourceLyrics, lyrics);
+          verification = parseRewriteVerification(await ask(
+            buildRewriteVerificationPrompt(sourceLyrics, lyrics, currentDiagnosis, rewriteIntent),
+            700,
+          ));
         }
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
         if (!preservation.ok) {
           throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');
         }
-        if (rewriteIntensity !== 'gentle' && difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
+        if (normalizedNotes.count !== 4) {
+          throw new Error('Редактор не смог кратко перечислить выполненные улучшения. Попытка не списана — запустите улучшение снова.');
+        }
+        if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
           throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');
+        }
+        if (!verification.ok) {
+          throw new Error('После повторной проверки в тексте остались замечания. Попытка не списана — запустите улучшение ещё раз.');
         }
       } else {
         lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
