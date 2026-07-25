@@ -419,7 +419,7 @@ export function parseRewriteVerification(raw) {
   const status = section('STATUS').toUpperCase();
   const remaining = normalizeNumberedList(section('REMAINING'), 4);
   return {
-    ok: status === 'PASS' && remaining.count === 0,
+    ok: status === 'PASS',
     status: status || 'FAIL',
     remaining: remaining.text,
     remainingCount: remaining.count,

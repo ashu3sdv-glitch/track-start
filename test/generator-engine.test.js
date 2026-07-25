@@ -225,6 +225,7 @@ test('rewrite verifier checks every diagnosed problem after editing', () => {
   assert.match(prompt, /all five diagnosed problems/i);
   assert.match(prompt, /For a poem, do not require song sections/i);
   assert.equal(parseRewriteVerification('<<<STATUS\nPASS\nSTATUS\n<<<REMAINING\n\nREMAINING').ok, true);
+  assert.equal(parseRewriteVerification('<<<STATUS\nPASS\nSTATUS\n<<<REMAINING\nНет замечаний.\nREMAINING').ok, true);
   const failed = parseRewriteVerification('<<<STATUS\nFAIL\nSTATUS\n<<<REMAINING\n1. Осталась сбитая строка\nREMAINING');
   assert.equal(failed.ok, false);
   assert.equal(failed.remainingCount, 1);

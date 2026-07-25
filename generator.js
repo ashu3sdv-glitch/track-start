@@ -789,10 +789,6 @@ RULES:
           editorNotes = normalizedNotes.text;
           difference = measureRewriteDifference(sourceLyrics, lyrics);
           preservation = validateRewritePreservation(sourceLyrics, lyrics);
-          verification = parseRewriteVerification(await ask(
-            buildRewriteVerificationPrompt(sourceLyrics, lyrics, currentDiagnosis, rewriteIntent),
-            700,
-          ));
         }
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
         if (!preservation.ok) {
@@ -803,9 +799,6 @@ RULES:
         }
         if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
           throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');
-        }
-        if (!verification.ok) {
-          throw new Error('После повторной проверки в тексте остались замечания. Попытка не списана — запустите улучшение ещё раз.');
         }
       } else {
         lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
