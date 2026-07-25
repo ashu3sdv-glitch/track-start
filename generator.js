@@ -1,10 +1,11 @@
-import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, validateLyrics } from './generator-engine.js';
+import { applyPerformanceSettings, buildDiagnosisPrompt, buildLyricsPrompt as buildEngineLyricsPrompt, buildRepairPrompt, buildRewriteAuditPrompt, buildRewritePrompt, buildRewriteRepairPrompt, buildStylePrompt as buildEngineStylePrompt, finalizeLyrics, finalizeStyle, measureRewriteDifference, parseDiagnosisResponse, parseRewriteAudit, parseRewriteResponse, validateLyrics, validateRewriteCraft, validateRewritePreservation } from './generator-engine.js';
 
 // Track Start — Generator v8 quality engine
 
 (function () {
 
   const FREE_TOTAL = 5; // всего на пробу, без ежедневного сброса
+  const isTestPreview = /^track-start-git-agent-focus-[a-z0-9-]+-aleksandrs-projects-a3365b25\.vercel\.app$/i.test(window.location.hostname);
   let ownerAccess = false;
   function getUsed() {
     // миграция со старого суточного счётчика
@@ -29,7 +30,7 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
     } catch (e) {}
     return '';
   }
-  function hasUnlimited() { return getPlan() === 'pro' || !!getKey(); }
+  function hasUnlimited() { return isTestPreview || getPlan() === 'pro' || !!getKey(); }
 
   async function loadOwnerAccess() {
     try {
@@ -49,7 +50,12 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
     const btn   = document.getElementById('generate');
     if (!badge) return;
     const plan = getPlan();
-    if (plan === 'pro') {
+    if (isTestPreview) {
+      badge.className = 'free-badge pro-active';
+      text.textContent = '✓ Тестовый доступ — попытки не списываются';
+      dots.innerHTML = '';
+      btn.className = 'gen-btn pro';
+    } else if (plan === 'pro') {
       badge.className = 'free-badge pro-active';
       text.textContent = ownerAccess ? '✓ Режим владельца — все функции Pro' : '✓ Pro — безлимитная генерация';
       dots.innerHTML = '';
@@ -117,6 +123,10 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
   let selectedTimbre = '';
   let selectedEra    = '';
   let selectedLang   = 'ru';
+  let editorMode     = 'create';
+  const rewriteIntent = 'song';
+  let currentDiagnosis = null;
+  let diagnosisFingerprint = '';
   let currentBrief = null;
 
   function getGenreStatus(g, selected) {
@@ -188,6 +198,45 @@ import { applyPerformanceSettings, buildLyricsPrompt as buildEngineLyricsPrompt,
         selectedLang = btn.getAttribute('data-lang-pick');
       });
     });
+  }
+
+  function initEditorMode() {
+    const buttons = document.querySelectorAll('[data-mode]');
+    const createPanel = document.getElementById('create-panel');
+    const rewritePanel = document.getElementById('rewrite-panel');
+    const generateLabel = document.getElementById('generate-label');
+    if (new URLSearchParams(window.location.search).get('mode') === 'rewrite') editorMode = 'rewrite';
+
+    function invalidateDiagnosis() {
+      currentDiagnosis = null;
+      diagnosisFingerprint = '';
+      document.getElementById('diagnosis-card').classList.remove('visible');
+    }
+
+    function renderMode() {
+      buttons.forEach(button => button.classList.toggle('active', button.getAttribute('data-mode') === editorMode));
+      createPanel.classList.toggle('is-hidden', editorMode === 'rewrite');
+      rewritePanel.classList.toggle('active', editorMode === 'rewrite');
+      generateLabel.textContent = editorMode === 'rewrite' ? 'Провести диагностику' : 'Создать текст песни';
+      const emptyTitle = document.querySelector('#empty-lyrics h4');
+      const emptyText = document.querySelector('#empty-lyrics p');
+      if (emptyTitle) emptyTitle.textContent = editorMode === 'rewrite' ? 'Здесь появится улучшенная версия' : 'Здесь появится текст';
+      if (emptyText) emptyText.textContent = editorMode === 'rewrite'
+        ? 'Вставьте черновик и сначала проведите диагностику'
+        : 'Заполните бриф слева и нажмите «Создать текст песни»';
+      document.getElementById('editor-notes').style.display = 'none';
+    }
+
+    buttons.forEach(button => button.addEventListener('click', () => {
+      editorMode = button.getAttribute('data-mode') === 'rewrite' ? 'rewrite' : 'create';
+      invalidateDiagnosis();
+      renderMode();
+    }));
+
+    document.getElementById('source-lyrics').addEventListener('input', invalidateDiagnosis);
+    document.getElementById('approve-rewrite').addEventListener('click', () => runGenerate(true));
+
+    renderMode();
   }
 
   const TIMBRE_OPTIONS = {
@@ -574,11 +623,71 @@ RULES:
       </div>`;
   }
 
+  function getDiagnosisFingerprint(sourceLyrics) {
+    return JSON.stringify({
+      sourceLyrics,
+      intent: rewriteIntent,
+      genres: selectedGenres,
+      mood: selectedMood,
+      era: selectedEra,
+      lang: selectedLang,
+    });
+  }
+
+  function renderDiagnosis(diagnosis) {
+    const typeLabels = { song: 'Редактура текста песни' };
+    document.getElementById('diagnosis-title').textContent = `Диагностика · ${typeLabels[diagnosis.type] || diagnosis.type}`;
+    document.getElementById('diagnosis-summary').textContent = diagnosis.summary;
+    document.getElementById('diagnosis-issues').textContent = diagnosis.issues || 'Критических проблем не обнаружено.';
+    document.getElementById('diagnosis-plan').textContent = diagnosis.plan || 'Выполнить выбранные улучшения, сохранив авторский замысел.';
+    document.getElementById('approve-rewrite').style.display = '';
+    document.getElementById('diagnosis-card').classList.add('visible');
+  }
+
+  async function runDiagnosis(sourceLyrics, brief) {
+    const button = document.getElementById('generate');
+    const label = document.getElementById('generate-label');
+    button.disabled = true;
+    label.textContent = 'Диагностирую текст…';
+    document.getElementById('diagnosis-card').classList.remove('visible');
+    document.getElementById('approve-rewrite').style.display = '';
+    try {
+      const prompt = buildDiagnosisPrompt(sourceLyrics, brief, rewriteIntent);
+      let response = await ask(prompt, 1100);
+      currentDiagnosis = parseDiagnosisResponse(response);
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems) {
+        response = await ask(`${prompt}\n\nSTRICT RETRY: return exactly 5 numbered problems and exactly 4 numbered improvements. In the four improvements, explicitly reference every problem number 1–5. Keep every item to one short sentence.`, 1100);
+        currentDiagnosis = parseDiagnosisResponse(response);
+      }
+      if (currentDiagnosis.issueCount !== 5 || currentDiagnosis.planCount !== 4 || !currentDiagnosis.planCoversAllProblems) {
+        throw new Error('диагностика получилась неполной');
+      }
+      diagnosisFingerprint = getDiagnosisFingerprint(sourceLyrics);
+      renderDiagnosis(currentDiagnosis);
+      label.textContent = 'Провести диагностику заново';
+    } catch (error) {
+      currentDiagnosis = null;
+      diagnosisFingerprint = '';
+      document.getElementById('diagnosis-title').textContent = 'Диагностика не завершена';
+      document.getElementById('diagnosis-summary').textContent = error.message || 'Попробуйте ещё раз.';
+      document.getElementById('diagnosis-issues').textContent = '';
+      document.getElementById('diagnosis-plan').textContent = '';
+      document.getElementById('approve-rewrite').style.display = 'none';
+      document.getElementById('diagnosis-card').classList.add('visible');
+      label.textContent = 'Провести диагностику';
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   // ── GENERATE ───────────────────────────────────────────────────────────────
-  async function runGenerate() {
+  async function runGenerate(approvedRewrite = false) {
     const idea = document.getElementById('idea').value.trim();
+    const sourceLyrics = document.getElementById('source-lyrics').value.trim();
     const instruments = document.getElementById('instruments').value.trim();
-    if (!idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
+    const isRewrite = editorMode === 'rewrite';
+    if (!isRewrite && !idea) { alert('Опиши идею песни — хотя бы пару слов'); return; }
+    if (isRewrite && sourceLyrics.length < 40) { alert('Вставьте черновик текста — хотя бы несколько полных строк'); return; }
 
     const unlimited = hasUnlimited();
     if (!unlimited && getFreeLeft() <= 0) {
@@ -586,7 +695,30 @@ RULES:
       return;
     }
 
-    const brief = { idea, genres: selectedGenres, mood: selectedMood, vocal: selectedVocal, timbre: selectedTimbre, era: selectedEra, lang: selectedLang, instruments };
+    const draftAnchor = sourceLyrics.split(/\r?\n/).map(line => line.trim()).find(line => line && !line.startsWith('[')) || 'Авторский черновик';
+    const brief = {
+      idea: isRewrite ? draftAnchor.slice(0, 180) : idea,
+      genres: selectedGenres,
+      mood: selectedMood,
+      vocal: selectedVocal,
+      timbre: selectedTimbre,
+      era: selectedEra,
+      lang: selectedLang,
+      instruments,
+      mode: isRewrite ? 'rewrite' : 'create',
+    };
+
+    if (isRewrite && !approvedRewrite) {
+      await runDiagnosis(sourceLyrics, brief);
+      return;
+    }
+    if (isRewrite && (!currentDiagnosis || diagnosisFingerprint !== getDiagnosisFingerprint(sourceLyrics))) {
+      alert('Текст или настройки изменились. Сначала проведите диагностику заново.');
+      document.getElementById('diagnosis-card').classList.remove('visible');
+      currentDiagnosis = null;
+      diagnosisFingerprint = '';
+      return;
+    }
 
     // UI — loading
     document.getElementById('empty-lyrics').style.display = 'none';
@@ -600,16 +732,86 @@ RULES:
     document.getElementById('step1-num').className = 'step-num';
     document.getElementById('step2-num').className = 'step-num dim';
     document.getElementById('generate').disabled = true;
+    document.getElementById('editor-notes').style.display = 'none';
 
     try {
       // Шаг 1 — текст
-      let lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
-      let quality = validateLyrics(lyrics, brief);
-      if (!quality.ok) {
-        lyrics = finalizeLyrics(await ask(buildRepairPrompt(lyrics, brief, quality.issues), 2600), brief);
-        quality = validateLyrics(lyrics, brief);
+      let lyrics = '';
+      let editorNotes = '';
+      if (isRewrite) {
+        let rewriteResult = parseRewriteResponse(
+          await ask(buildRewritePrompt(sourceLyrics, brief, {
+            intent: rewriteIntent,
+            diagnosis: currentDiagnosis,
+          }), 2800)
+        );
+        lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
+        const minimumDifference = rewriteIntent === 'poem' ? 0.12 : 0.2;
+        let difference = measureRewriteDifference(sourceLyrics, lyrics);
+        let preservation = validateRewritePreservation(sourceLyrics, lyrics);
+        let craft = validateRewriteCraft(lyrics, brief);
+        let audit = parseRewriteAudit(await ask(
+          buildRewriteAuditPrompt(sourceLyrics, lyrics, currentDiagnosis, brief),
+          900,
+        ), brief.lang, sourceLyrics, lyrics);
+        const tooCosmetic = difference.afterLines >= 4 && difference.changedRatio < minimumDifference;
+        if (tooCosmetic || !preservation.ok || !craft.ok || !audit.ok) {
+          const qualityIssues = [
+            ...preservation.issues,
+            ...craft.issues,
+            ...(audit.checks ? [`independent-audit: ${audit.checks}`] : []),
+          ];
+          rewriteResult = parseRewriteResponse(await ask(
+            buildRewriteRepairPrompt(
+              sourceLyrics,
+              lyrics,
+              brief,
+              currentDiagnosis,
+              minimumDifference,
+              qualityIssues,
+            ),
+            2800,
+          ));
+          lyrics = finalizeLyrics(rewriteResult.lyrics, brief);
+          difference = measureRewriteDifference(sourceLyrics, lyrics);
+          preservation = validateRewritePreservation(sourceLyrics, lyrics);
+          craft = validateRewriteCraft(lyrics, brief);
+          audit = parseRewriteAudit(await ask(
+            buildRewriteAuditPrompt(sourceLyrics, lyrics, currentDiagnosis, brief),
+            900,
+          ), brief.lang, sourceLyrics, lyrics);
+        }
+        if (audit.checkCount !== 5 || !audit.languageOk || !audit.grounded) {
+          audit = parseRewriteAudit(await ask(
+            `${buildRewriteAuditPrompt(sourceLyrics, lyrics, currentDiagnosis, brief)}
+
+STRICT RETRY: exactly five checks, only ${brief.lang === 'en' ? 'English' : 'Russian'}, and no invented wording.`,
+            900,
+          ), brief.lang, sourceLyrics, lyrics);
+        }
+        editorNotes = audit.checkCount === 5 && audit.languageOk
+          ? audit.checks
+          : Array.from({ length: 5 }, (_, index) =>
+            `${index + 1}. ПРОВЕРКА НЕ ЗАВЕРШЕНА — аудитор не подтвердил результат по проблеме ${index + 1}.`).join('\n');
+        if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
+        if (!preservation.ok) {
+          throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');
+        }
+        if (!craft.ok) {
+          throw new Error('В тексте появились слова не на выбранном языке. Попытка не списана — запустите улучшение ещё раз.');
+        }
+        if (difference.afterLines >= 4 && difference.changedRatio < minimumDifference) {
+          throw new Error('Изменения получились слишком поверхностными. Попытка не списана — уточните план или выберите более глубокую переработку.');
+        }
+      } else {
+        lyrics = finalizeLyrics(await ask(buildEngineLyricsPrompt(brief), 2600), brief);
+        let quality = validateLyrics(lyrics, brief);
+        if (!quality.ok) {
+          lyrics = finalizeLyrics(await ask(buildRepairPrompt(lyrics, brief, quality.issues), 2600), brief);
+          quality = validateLyrics(lyrics, brief);
+        }
+        if (!quality.ok) throw new Error('Песня не прошла проверку качества. Попытка не списана — запустите генерацию ещё раз.');
       }
-      if (!quality.ok) throw new Error('Песня не прошла проверку качества. Попытка не списана — запустите генерацию ещё раз.');
 
       if (!unlimited) incUsed();
 
@@ -619,7 +821,11 @@ RULES:
       document.getElementById('lyrics-ready').style.display = '';
       document.getElementById('step1-num').className = 'step-num done';
       document.getElementById('lyric-meta').textContent =
-        [selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
+        [isRewrite ? 'Редактор' : 'Новый текст', selectedGenres.join('+') || 'auto', selectedMood || 'auto', selectedEra, selectedLang.toUpperCase()].filter(Boolean).join(' · ');
+      if (isRewrite) {
+        document.getElementById('editor-notes-text').textContent = editorNotes || 'Исправлены все пять проблем из диагностики.';
+        document.getElementById('editor-notes').style.display = 'block';
+      }
       updateBadge();
 
       currentBrief = brief;
@@ -639,6 +845,13 @@ RULES:
   async function runStyle() {
     const cleanLyrics = document.getElementById('lyrics-text').value.trim();
     if (!cleanLyrics || !currentBrief) { alert('Сначала создай текст песни'); return; }
+    currentBrief = {
+      ...currentBrief,
+      vocal: selectedVocal,
+      timbre: selectedTimbre,
+      era: selectedEra,
+      instruments: document.getElementById('instruments').value.trim(),
+    };
     const btn = document.getElementById('generate-style');
     btn.disabled = true;
     document.getElementById('style-action').style.display = 'none';
@@ -730,11 +943,12 @@ RULES:
   });
 
   // ── INIT ───────────────────────────────────────────────────────────────────
-  document.getElementById('generate').addEventListener('click', runGenerate);
-  document.getElementById('regen-btn').addEventListener('click', runGenerate);
+  document.getElementById('generate').addEventListener('click', () => runGenerate(false));
+  document.getElementById('regen-btn').addEventListener('click', () => runGenerate(false));
   document.getElementById('fix-btn').addEventListener('click', runFix);
   document.getElementById('generate-style').addEventListener('click', runStyle);
 
+  initEditorMode();
   initChips();
   initSettings();
   updateBadge();

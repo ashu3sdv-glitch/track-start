@@ -536,6 +536,8 @@ body.density-cozy .svc-card { padding: 28px; }
 
 .route-section { background: var(--bg-2); }
 .product-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+.lyric-product-grid { grid-template-columns: repeat(3,1fr); }
+.lyric-product-grid .product-card { min-height: 410px; }
 .product-card { display: flex; flex-direction: column; min-height: 420px; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .product-card--accent { border-color: rgba(139,92,246,.35); background: linear-gradient(160deg,#fff 58%,var(--accent-soft)); }
@@ -562,6 +564,71 @@ body.density-cozy .svc-card { padding: 28px; }
 .calendar-footer { display: flex; justify-content: space-between; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.5); font-size: 12px; }
 .calendar-footer strong { color: #fff; }
 
+.lyrics-preview-card { transform: rotate(-1deg); }
+.lyric-sample {
+  padding: 30px;
+  border-radius: 24px;
+  background: var(--ink);
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+}
+.lyric-sample-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  color: rgba(255,255,255,.58);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.lyric-section { padding: 20px 0; border-top: 1px solid rgba(255,255,255,.12); }
+.lyric-section span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--accent-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+.lyric-section p { color: rgba(255,255,255,.82); font-size: 16px; line-height: 1.75; }
+.lyric-section.is-chorus p { color: #fff; font-family: var(--font-serif); font-size: 23px; font-style: italic; line-height: 1.45; }
+.lyric-sample-foot { padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.48); font-size: 12px; }
+
+.genre-section { background: var(--bg-2); }
+.genre-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
+.genre-cloud a {
+  padding: 11px 17px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  transition: transform .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+}
+.genre-cloud a:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent-ink); }
+
+.articles-section { border-bottom: 1px solid var(--line); }
+.article-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.article-card {
+  min-height: 260px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease);
+}
+.article-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--line-strong); }
+.article-card > span { color: var(--accent-ink); font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.article-card h3 { margin: 28px 0 10px; font-size: 22px; }
+.article-card p { color: var(--muted); font-size: 14px; }
+.article-card strong { margin-top: auto; padding-top: 24px; font-size: 14px; }
+
 .pricing-section { background: var(--bg-2); }
 .pricing-features li { line-height: 1.45; }
 .faq-section { padding-bottom: 44px; }
@@ -573,7 +640,7 @@ body.density-cozy .svc-card { padding: 28px; }
 @media (max-width: 900px) {
   .home-hero-grid, .output-grid { grid-template-columns: 1fr; }
   .route-preview { transform: none; }
-  .product-grid { grid-template-columns: 1fr; }
+  .product-grid, .lyric-product-grid, .article-grid { grid-template-columns: 1fr; }
   .product-card { min-height: 0; }
   .faq-layout { grid-template-columns: 1fr; gap: 8px; }
   .faq-layout .section-head { position: static; }
