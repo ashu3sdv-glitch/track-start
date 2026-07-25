@@ -536,6 +536,7 @@ body.density-cozy .svc-card { padding: 28px; }
 
 .route-section { background: var(--bg-2); }
 .product-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+.product-grid--single { grid-template-columns: minmax(0, 680px); justify-content: center; }
 .product-card { display: flex; flex-direction: column; min-height: 420px; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .product-card--accent { border-color: rgba(139,92,246,.35); background: linear-gradient(160deg,#fff 58%,var(--accent-soft)); }
@@ -562,6 +563,15 @@ body.density-cozy .svc-card { padding: 28px; }
 .calendar-footer { display: flex; justify-content: space-between; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.5); font-size: 12px; }
 .calendar-footer strong { color: #fff; }
 
+.articles-section { border-bottom: 1px solid var(--line); }
+.articles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.article-card { display: flex; min-height: 280px; flex-direction: column; padding: 26px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
+.article-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.article-card > span { margin-bottom: 34px; color: var(--accent-ink); font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.article-card h3 { margin-bottom: 12px; font-size: 22px; }
+.article-card p { color: var(--muted); font-size: 14px; }
+.article-card strong { margin-top: auto; padding-top: 22px; color: var(--ink); font-size: 13px; }
+
 .pricing-section { background: var(--bg-2); }
 .pricing-features li { line-height: 1.45; }
 .faq-section { padding-bottom: 44px; }
@@ -573,7 +583,7 @@ body.density-cozy .svc-card { padding: 28px; }
 @media (max-width: 900px) {
   .home-hero-grid, .output-grid { grid-template-columns: 1fr; }
   .route-preview { transform: none; }
-  .product-grid { grid-template-columns: 1fr; }
+  .product-grid, .articles-grid { grid-template-columns: 1fr; }
   .product-card { min-height: 0; }
   .faq-layout { grid-template-columns: 1fr; gap: 8px; }
   .faq-layout .section-head { position: static; }

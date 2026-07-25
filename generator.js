@@ -669,8 +669,6 @@ RULES:
           mood: currentBrief.mood, vocalType: currentBrief.vocal, language: currentBrief.lang,
           createdAt: new Date().toISOString()
         }));
-        document.getElementById('vocal-cta').style.display = 'flex';
-        document.getElementById('promotion-cta').style.display = 'flex';
       } catch (err) {
         document.getElementById('suno-status').style.display = 'none';
         document.getElementById('style-action').style.display = '';
@@ -720,13 +718,6 @@ RULES:
 
   document.getElementById('copy-suno').addEventListener('click', e => {
     copyText(document.getElementById('suno-prompt').innerText, e.currentTarget);
-  });
-
-  document.getElementById('promotion-cta').addEventListener('click', () => {
-    window.location.href = 'promotion.html?source=generator';
-  });
-  document.getElementById('vocal-cta').addEventListener('click', () => {
-    window.location.href = 'vocal.html?source=generator';
   });
 
   // ── INIT ───────────────────────────────────────────────────────────────────

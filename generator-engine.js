@@ -218,6 +218,10 @@ SONGCRAFT
 - Verse 1 establishes a concrete scene; Verse 2 adds an event or angle; Bridge reveals a turn or decision.
 - Prefer physical details, gestures, places and active verbs over abstract labels and clichés.
 - Use natural rhyme, slant rhyme, assonance and internal rhyme. Never distort grammar for rhyme.
+- In every four-line verse block, create at least two audible rhyme or assonance connections. Do not count repeated grammatical endings as craft.
+- Read every line literally: reject broken syntax, meaningless code-switching and phrases written only to reach a rhyme.
+- If Language is Russian, use no English words at all. English section tags are the only exception.
+- If Language is mixed, use at most two short, complete, idiomatic English phrases in the whole song. Keep each lyric line in one language; never splice English fragments into Russian grammar or use English merely as a rhyme ending.
 - At no more than one emotional peak, you may write a short singable vowel extension with hyphens, such as О-о-о or А-а-а. For R&B or Soul, one natural word melisma such as Лю-ю-ю-блю is allowed. Never stretch consonants.
 ${a.rhythmic ? '- Do not use vowel extensions or melisma in rhythmic verses; keep every syllable precise.' : '- Vocal extensions are optional: omit them unless they strengthen a real emotional peak.'}
 - Do not copy existing songs or imitate a named living artist.
@@ -277,6 +281,11 @@ export function validateLyrics(lyrics, brief) {
     for (const section of ['Verse 1', 'Chorus', 'Verse 2', 'Bridge', 'Final Chorus']) if (!new RegExp(`\\[${section}(?:\\s|—|\\])`, 'i').test(lyrics)) issues.push(`missing-${section.toLowerCase().replaceAll(' ', '-')}`);
     if (profile.forbidden?.test(lyrics)) issues.push('conflicting-vocal');
     const meter = analyzeSyllables(lyrics, brief); if (meter.total >= 8 && meter.ratio > 0.45) issues.push('syllable-balance');
+    const lyricLines = String(lyrics).split(/\r?\n/).map(line => line.trim()).filter(line => line && !/^\[[^\]]+\]$/.test(line));
+    const latinLines = lyricLines.filter(line => /[A-Za-z]/.test(line));
+    if (brief.lang === 'ru' && latinLines.length) issues.push('english-words-in-russian-song');
+    if (brief.lang === 'mix' && latinLines.length > 2) issues.push('excessive-code-switching');
+    if (brief.lang === 'mix' && latinLines.some(line => /[А-Яа-яЁё].*[A-Za-z]|[A-Za-z].*[А-Яа-яЁё]/.test(line))) issues.push('mixed-language-inside-line');
   }
   if (lyrics.length < 500) issues.push('too-short');
   return { ok: issues.length === 0, issues };
@@ -284,7 +293,7 @@ export function validateLyrics(lyrics, brief) {
 
 export function buildRepairPrompt(lyrics, brief, issues) {
   const profile = getVocalPlan(brief); const a = getGenreArchitecture(brief); const meter = analyzeSyllables(lyrics, brief);
-  return `Repair this song because it failed: ${issues.join(', ')}. Return only clean corrected lyrics, without vocal settings or performance notes. Keep the idea, language and ${a.genre} architecture. Target ranges: ${rangeText(a)}; natural grammar wins. Current meter has ${meter.outside}/${meter.total} strongly outlying lines. Use simple English tags [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Final Chorus], [Outro]. Preserve good lines.\n\n${lyrics}`;
+  return `Repair this song because it failed: ${issues.join(', ')}. Return only clean corrected lyrics, without vocal settings or performance notes. Keep the idea, language and ${a.genre} architecture. Target ranges: ${rangeText(a)}; natural grammar wins. Current meter has ${meter.outside}/${meter.total} strongly outlying lines. Use simple English tags [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Final Chorus], [Outro]. Preserve good lines. Strengthen audible rhyme or assonance across each stanza without distorting meaning or syntax. Read every line literally and remove phrases written only for rhyme. For Russian, remove every English word. For mixed language, keep no more than two complete idiomatic English lines in the whole song; never mix Russian and English inside one lyric line.\n\n${lyrics}`;
 }
 
 export function applyPerformanceSettings(lyrics, brief = {}) {
