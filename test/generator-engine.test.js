@@ -150,6 +150,19 @@ test('song diagnosis uses a selected genre only as context', () => {
   assert.match(prompt, /reference every problem number from 1 through 5/i);
   assert.match(prompt, /MEASURED METER FACTS/);
   assert.match(prompt, /Never call an allowed line outside the allowed range/i);
+  assert.match(prompt, /Genre controls cadence, rhyme density, section energy and delivery/i);
+  assert.match(prompt, /Never call bright, tender or humorous imagery incompatible with a dark genre/i);
+});
+
+test('Prechorus spelling is recognized as a pre-chorus section', () => {
+  const meter = analyzeSyllables(`[Verse]
+Солнце бьёт в окно
+[Prechorus]
+Моё сердце громко стучит
+[Chorus]
+Весна опять пришла`, { lang: 'ru', genres: ['Dark Phonk'] });
+  assert.deepEqual(meter.lines.map(line => line.section), ['verse', 'pre-chorus', 'chorus']);
+  assert.deepEqual(meter.lines[1].range, [8, 14]);
 });
 
 test('diagnosis parser returns exactly five problems and four improvements', () => {
@@ -215,6 +228,8 @@ test('rewrite prompt follows the approved result and diagnosis', () => {
   assert.match(prompt, /Припев не отличается/);
   assert.match(prompt, /complete stanzas/i);
   assert.match(prompt, /intended rhyme scheme/i);
+  assert.match(prompt, /Genre changes cadence, rhyme density, section energy and delivery/i);
+  assert.match(prompt, /Keep bright spring imagery bright even in Dark Phonk/i);
 });
 
 test('rewrite craft validator rejects accidental Latin words in Russian lyrics', () => {
@@ -297,6 +312,19 @@ STATUS
 5. ИСПРАВЛЕНО — бридж короче
 CHECKS`, 'ru', 'Я вижу дорогу', 'Я вижу свет');
   assert.equal(audit.grounded, false);
+  assert.match(audit.checks, /цитата аудитора не найдена/);
+});
+
+test('finalizer normalizes common section label variants', () => {
+  const result = finalizeLyrics('[Verse]\nСтрока одна\n[Prechorus]\nСтрока два', { lang: 'ru' });
+  assert.match(result, /^\[Verse 1\]/);
+  assert.match(result, /\[Pre-Chorus\]/);
+});
+
+test('numbered list truncation ends cleanly instead of leaving a dangling comma', () => {
+  const result = normalizeNumberedList(`1. ${'Очень длинная формулировка проблемы, '.repeat(10)}`, 1, 90);
+  assert.match(result.text, /…$/);
+  assert.doesNotMatch(result.text, /,\s*…$/);
 });
 
 test('rewrite difference ignores section labels and detects cosmetic edits', () => {

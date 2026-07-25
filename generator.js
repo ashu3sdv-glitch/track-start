@@ -789,10 +789,10 @@ STRICT RETRY: exactly five checks, only ${brief.lang === 'en' ? 'English' : 'Rus
             900,
           ), brief.lang, sourceLyrics, lyrics);
         }
-        editorNotes = audit.checkCount === 5 && audit.languageOk && audit.grounded
+        editorNotes = audit.checkCount === 5 && audit.languageOk
           ? audit.checks
-          : currentDiagnosis.issues.split(/\r?\n/).slice(0, 5).map((line, index) =>
-            `${index + 1}. ТРЕБУЕТ ПРОВЕРКИ — ${line.replace(/^\d+\.\s*/, '')}`).join('\n');
+          : Array.from({ length: 5 }, (_, index) =>
+            `${index + 1}. ПРОВЕРКА НЕ ЗАВЕРШЕНА — аудитор не подтвердил результат по проблеме ${index + 1}.`).join('\n');
         if (lyrics.length < 80) throw new Error('Редактор вернул слишком короткий результат. Попытка не списана — запустите улучшение ещё раз.');
         if (!preservation.ok) {
           throw new Error('Редактор изменил или смешал точку зрения рассказчика. Попытка не списана — уточните героя текста и запустите улучшение снова.');

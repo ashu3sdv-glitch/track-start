@@ -234,6 +234,11 @@ Silently verify vocal identity, sections, hook, development, natural stress and 
 export function buildDiagnosisPrompt(draft, brief = {}, intent = 'song') {
   const a = getGenreArchitecture(brief);
   const meter = analyzeSyllables(draft, brief);
+  const sectionFacts = String(draft || '').split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => /^\[[^\]]+\]$/.test(line))
+    .map(tag => `${tag} → ${SECTION_KEYS[sectionIndex(tag)]}`)
+    .join(', ') || 'section labels are absent';
   const meterFacts = meter.lines.slice(0, 80)
     .map((item, index) => `${index + 1}. [${item.section}] ${item.count} слогов; цель ${item.range[0]}–${item.range[1]}; допустимо ${Math.max(1, item.range[0] - 2)}–${item.range[1] + 2}; ${item.outside ? 'вне допустимого диапазона' : 'допустимо'} — ${item.line}`)
     .join('\n') || 'Нет строк, пригодных для автоматического подсчёта.';
@@ -259,12 +264,16 @@ TASK
 MEASURED METER FACTS — these numbers were calculated by the program and are authoritative:
 ${meterFacts}
 TOTAL: ${meter.total}; OUTSIDE TARGET: ${meter.outside}.
+RECOGNIZED SOURCE SECTIONS: ${sectionFacts}.
 
 DIAGNOSTIC METHOD
 - Find exactly five most important, concrete problems.
 - Always check line lengths/syllable spread, rhythm/stress, rhyme pattern, clarity/imagery and form appropriate to the chosen result.
 - Any claim about syllable counts or ranges must match MEASURED METER FACTS exactly. Never call an allowed line outside the allowed range.
 - If few or no lines are outside the target, do not invent a meter violation; describe a real stress or phrasing problem instead.
+- Trust RECOGNIZED SOURCE SECTIONS. Do not claim that correctly recognized verse, pre-chorus or chorus labels are swapped.
+- Genre controls cadence, rhyme density, section energy and delivery—not the story's emotional meaning or image palette.
+- Never call bright, tender or humorous imagery incompatible with a dark genre. Change emotional tone only when Mood explicitly requests it.
 - When converting to a song, also check whether a memorable chorus/hook and section development are missing.
 - Describe each problem in one short sentence, maximum 18 words. No essays, scores, compliments or repeated explanations.
 - Propose exactly four concrete editing actions, maximum 14 words each.
@@ -299,8 +308,8 @@ Do not output any other text.`;
 export function parseDiagnosisResponse(raw) {
   const text = cleanModelText(raw);
   const section = name => (text.match(new RegExp(`<<<${name}\\s*([\\s\\S]*?)\\s*${name}(?:\\s|$)`, 'i'))?.[1] || '').trim();
-  const issues = normalizeNumberedList(section('ISSUES'), 5);
-  const plan = normalizeNumberedList(section('PLAN'), 4);
+  const issues = normalizeNumberedList(section('ISSUES'), 5, 200);
+  const plan = normalizeNumberedList(section('PLAN'), 4, 180);
   const fallbackProblems = ['1,2', '3', '4', '5'];
   const coveredPlan = plan.text.split(/\r?\n/).map((line, index) => {
     const item = line.replace(/^\d+\.\s*/, '');
@@ -353,6 +362,9 @@ NON-NEGOTIABLE EDITORIAL RULES
 - Do not invent a different plot, narrator, relationship or ending.
 - Never imitate or quote an existing song or named artist.
 - Use natural modern language and speakable syntax. For Russian, avoid stress collisions, dense consonant clusters and literary inversions made for rhyme.
+- For Russian, verify grammatical case, verb government and agreement in every line; never sacrifice them for meter or rhyme.
+- Genre changes cadence, rhyme density, section energy and delivery—not the author's emotional meaning or image palette.
+- Keep bright spring imagery bright even in Dark Phonk unless the user explicitly selected a dark mood.
 - Rebuild weak material by complete stanzas, not by replacing isolated lines independently.
 - Infer the intended rhyme scheme stanza by stanza (such as ABAB, AABB or intentional free verse) and make line endings work together.
 - Silently consider several natural endings for each rhyming pair. Never use filler, broken grammar or a meaningless image for rhyme.
@@ -425,6 +437,8 @@ AUDIT RULES
 - Put any exact wording you reference in «quotes»; every quoted fragment must occur verbatim in ORIGINAL or REVISION.
 - Never invent a previous version. Base meter claims only on PROGRAM-MEASURED METER.
 - Mark a problem FIXED only when the revision itself proves it. Otherwise mark it REMAINS.
+- If any revised line has broken grammar, wrong case or verb government, attach it to the closest check and mark REMAINS.
+- If a phrase is technically grammatical but unnatural or meaningless in context, mark the closest check REMAINS.
 
 OUTPUT FORMAT
 <<<STATUS
@@ -449,13 +463,20 @@ export function parseRewriteAudit(raw, lang = 'ru', original = '', revision = ''
   const wrongLanguage = lang === 'ru'
     ? checks.text.split(/\r?\n/).some(line => /^\d+\.\s*(?:FIXED|REMAINS)\b/i.test(line))
     : /[А-Яа-яЁё]/.test(checks.text);
-  const sourceText = `${original}\n${revision}`.toLowerCase();
-  const quoted = [...checks.text.matchAll(/[«"]([^»"]+)[»"]/g)].map(match => match[1].trim().toLowerCase());
-  const grounded = quoted.every(fragment => sourceText.includes(fragment));
+  const comparable = value => String(value || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/\s+/g, ' ');
+  const sourceText = comparable(`${original}\n${revision}`);
+  let grounded = true;
+  const safeChecks = checks.text.split(/\r?\n/).map((line, index) => {
+    const quoted = [...line.matchAll(/[«"]([^»"]+)[»"]/g)].map(match => comparable(match[1]));
+    if (quoted.every(fragment => fragment && sourceText.includes(fragment))) return line;
+    grounded = false;
+    const status = lang === 'en' ? 'REMAINS — quoted evidence was not found in either text' : 'ОСТАЛОСЬ — цитата аудитора не найдена ни в исходнике, ни в результате';
+    return `${index + 1}. ${status}`;
+  }).join('\n');
   return {
     ok: status === 'PASS',
     status: status || 'FAIL',
-    checks: checks.text,
+    checks: safeChecks,
     checkCount: checks.count,
     languageOk: !wrongLanguage,
     grounded,
@@ -470,7 +491,11 @@ export function normalizeNumberedList(value, expectedCount, maxChars = 140) {
     .slice(0, expectedCount);
   return {
     count: items.length,
-    text: items.map((item, index) => `${index + 1}. ${item.slice(0, maxChars)}`).join('\n'),
+    text: items.map((item, index) => {
+      if (item.length <= maxChars) return `${index + 1}. ${item}`;
+      const clipped = item.slice(0, maxChars - 1).replace(/\s+\S*$/, '').replace(/[\s,:;—-]+$/, '');
+      return `${index + 1}. ${clipped}…`;
+    }).join('\n'),
   };
 }
 
@@ -547,7 +572,9 @@ REQUIREMENTS
 - Improve hook, rhythm, natural stress, rhyme and concrete imagery where the diagnosis requests it.
 - Repair whole stanzas so rhyme, rhythm and meaning work together; do not patch isolated line endings.
 - Read every revised line literally and reject implausible subject-verb pairs or images created only for rhyme.
+- For Russian, correct grammatical case, verb government and agreement before checking rhyme.
 - Do not introduce a new addressee, relationship, object or event unless the original story supports it.
+- Genre may change cadence and delivery, but must not darken or reverse the original emotion unless Mood explicitly requests it.
 - Keep good lines from CURRENT REVISION; change only what failed the independent audit.
 - Never invent a word or mix alphabets. For Russian lyrics, Latin letters are allowed only in English section labels.
 - Correct every problem listed in the approved diagnosis.
@@ -577,7 +604,7 @@ export function countSyllables(line, lang = '') {
 }
 
 function sectionIndex(tag) {
-  if (/pre-chorus/i.test(tag)) return 1; if (/final chorus|chorus/i.test(tag)) return 2;
+  if (/pre[\s-]?chorus/i.test(tag)) return 1; if (/final[\s-]?chorus|chorus/i.test(tag)) return 2;
   if (/bridge/i.test(tag)) return 3; if (/outro/i.test(tag)) return 4; return 0;
 }
 
@@ -597,7 +624,10 @@ export function analyzeSyllables(lyrics, brief = {}) {
 export function finalizeLyrics(raw, brief) {
   let text = cleanModelText(raw); const lines = text.split(/\r?\n/);
   if (/^\[(?:Male Vocal|Female Vocal|Duet|Choir|Children's Choir|Harmony Vocals|Lead Vocal|Instrumental)/i.test(lines[0] || '')) lines.shift();
-  return lines.join('\n').trim().replace(/^\[(Verse 1|Verse 2|Pre-Chorus|Chorus|Bridge|Final Chorus|Outro)\s*[—-][^\]]*\]/gim, '[$1]');
+  return lines.join('\n').trim()
+    .replace(/^\[Pre[\s-]?Chorus\]$/gim, '[Pre-Chorus]')
+    .replace(/^\[Verse\]$/gim, '[Verse 1]')
+    .replace(/^\[(Verse 1|Verse 2|Pre-Chorus|Chorus|Bridge|Final Chorus|Outro)\s*[—-][^\]]*\]/gim, '[$1]');
 }
 
 export function validateLyrics(lyrics, brief) {
