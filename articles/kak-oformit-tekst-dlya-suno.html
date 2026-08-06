@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Как оформить текст для Suno: секции и теги | Track Start</title>
+  <meta name="description" content="Как оформить текст для Suno: основные теги секций, пошаговая инструкция, примеры «слабо — лучше» и чистый шаблон песни для вставки.">
+  <link rel="canonical" href="https://www.trackstart.art/articles/kak-oformit-tekst-dlya-suno.html">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles-home.css">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Article",
+    "headline":"Как правильно оформить текст песни для Suno: секции, теги и чистый пример",
+    "description":"Практическая инструкция по оформлению текста песни для Suno: структура, теги секций и готовый пример.",
+    "datePublished":"2026-08-06",
+    "dateModified":"2026-08-06",
+    "inLanguage":"ru",
+    "author":{"@type":"Organization","name":"Track Start","url":"https://www.trackstart.art/"},
+    "publisher":{"@type":"Organization","name":"Track Start","url":"https://www.trackstart.art/"},
+    "mainEntityOfPage":"https://www.trackstart.art/articles/kak-oformit-tekst-dlya-suno.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"BreadcrumbList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://www.trackstart.art/"},
+      {"@type":"ListItem","position":2,"name":"Статьи","item":"https://www.trackstart.art/#articles"},
+      {"@type":"ListItem","position":3,"name":"Как оформить текст для Suno","item":"https://www.trackstart.art/articles/kak-oformit-tekst-dlya-suno.html"}
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {"@type":"Question","name":"Можно ли писать названия секций на русском?","acceptedAnswer":{"@type":"Answer","text":"Лучше использовать распространённые английские обозначения: [Verse], [Chorus] и [Bridge]. Они однозначнее и рекомендуются Suno."}},
+      {"@type":"Question","name":"Нужно ли добавлять [Intro] и [Outro]?","acceptedAnswer":{"@type":"Answer","text":"Нет. Используйте их, только если вступление или завершение действительно нужны композиции."}},
+      {"@type":"Question","name":"Нужно ли повторно вставлять припев?","acceptedAnswer":{"@type":"Answer","text":"Да. Если припев должен прозвучать снова, вставьте его строки полностью в нужной позиции."}},
+      {"@type":"Question","name":"Почему Suno иногда игнорирует тег?","acceptedAnswer":{"@type":"Answer","text":"Структурные обозначения направляют генерацию, но не являются жёсткими программными командами. Результат также зависит от текста, стиля и выбранной генерации."}}
+    ]
+  }
+  </script>
+  <style>
+    .article-wrap{max-width:780px;margin:0 auto;padding:46px 20px 72px}
+    .breadcrumbs{margin-bottom:22px;color:var(--muted);font-size:12px}
+    .breadcrumbs a{color:inherit}
+    .article-wrap h1{margin-bottom:14px;font-size:clamp(34px,5vw,50px);line-height:1.08}
+    .article-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px;color:var(--muted);font-family:var(--font-mono);font-size:12px}
+    .article-wrap h2{margin:38px 0 14px;font-size:27px;line-height:1.2}
+    .article-wrap h3{margin:25px 0 10px;font-size:20px}
+    .article-wrap p,.article-wrap li{color:var(--ink-2);font-size:16px;line-height:1.72}
+    .article-wrap p{margin-bottom:15px}
+    .article-wrap ul,.article-wrap ol{display:grid;gap:7px;margin:12px 0 20px;padding-left:24px}
+    .example{margin:18px 0;padding:20px 22px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface)}
+    .example strong{display:block;margin-bottom:8px;font-size:13px}
+    .example p{margin:0;white-space:pre-line}
+    .example.bad{border-left:4px solid #f59e0b}
+    .example.good{border-left:4px solid var(--ok)}
+    .code-block{overflow-x:auto;margin:18px 0;padding:20px 22px;border-radius:var(--radius-lg);background:var(--ink);color:#fff;font-family:var(--font-mono);font-size:13px;line-height:1.65;white-space:pre-wrap}
+    .faq-item{padding:19px 0;border-top:1px solid var(--line)}
+    .faq-item h3{margin:0 0 7px;font-size:18px}
+    .faq-item p{margin:0}
+    .article-cta{margin-top:42px;padding:28px;border-radius:var(--radius-lg);background:var(--accent-soft)}
+    .article-cta h2{margin-top:0}
+    .article-cta .btn{margin-top:8px;text-decoration:none}
+    .article-wrap a:not(.btn){color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="/index.html" class="brand" aria-label="Track Start — главная">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="8" fill="var(--ink)"/><path d="M8 18V10h6v8m0-4h6v4m0-4v-4" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="brand-name">Track <em>Start</em></span>
+        </a>
+        <div class="nav-links">
+          <a class="nav-link" href="/index.html">Главная</a>
+          <a class="nav-link" href="/generator.html">Генератор</a>
+          <a class="nav-link" href="/index.html#articles">Статьи</a>
+          <a class="nav-link" href="/index.html#pricing">Тарифы</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="article-wrap">
+    <article>
+      <div class="breadcrumbs"><a href="/">Главная</a> → <a href="/#articles">Статьи</a> → Как оформить текст для Suno</div>
+      <h1>Как правильно оформить текст песни для Suno</h1>
+      <div class="article-meta"><span>6 августа 2026</span><span>Track Start</span><span>Suno</span></div>
+
+      <p><strong>Чтобы правильно оформить текст для Suno, разделите песню на понятные секции и обозначьте их английскими тегами в квадратных скобках: <code>[Verse]</code>, <code>[Chorus]</code>, <code>[Bridge]</code>, <code>[Outro]</code>.</strong> Каждую вокальную фразу пишите с новой строки, между секциями оставляйте пустую строку, а стиль, темп и тип вокала указывайте отдельно от слов песни.</p>
+      <p>Не перегружайте текст техническими командами. Suno лучше понимает простую структуру, короткие певучие строки и полностью записанный повторяющийся припев. Платформа сама рекомендует структурные обозначения <code>[Verse]</code>, <code>[Chorus]</code> и <code>[Bridge]</code> в <a href="https://suno.com/hub/how-to-make-a-song" rel="noopener noreferrer">официальном руководстве</a>.</p>
+
+      <h2>Основные теги для текста песни</h2>
+      <ul>
+        <li><code>[Intro]</code> — вступление;</li>
+        <li><code>[Verse 1]</code> — первый куплет;</li>
+        <li><code>[Pre-Chorus]</code> — переход к припеву;</li>
+        <li><code>[Chorus]</code> — припев с центральной мыслью или хуком;</li>
+        <li><code>[Verse 2]</code> — второй куплет;</li>
+        <li><code>[Bridge]</code> — контрастная часть перед финалом;</li>
+        <li><code>[Outro]</code> — завершение.</li>
+      </ul>
+      <p>Назначение этих секций описано и в <a href="https://help.suno.com/en/articles/9010177" rel="noopener noreferrer">музыкальном глоссарии Suno</a>. Использовать все обозначения необязательно. Короткой песне может хватить куплетов, припева и завершения.</p>
+
+      <h2>Как подготовить текст: пошаговая инструкция</h2>
+      <h3>1. Отделите слова от описания музыки</h3>
+      <p>В поле Lyrics оставьте секции и строки, которые должны прозвучать. Жанр, настроение, инструменты, темп и характеристику голоса перенесите в Styles.</p>
+      <div class="example good"><strong>Lyrics</strong><p>[Verse 1]<br>Город гасит фонари<br>Я опять считаю окна</p></div>
+      <div class="code-block">melancholic indie pop, mid-tempo, intimate female vocal, warm electric guitar, soft synths, Russian lyrics</div>
+
+      <h3>2. Добавьте понятную структуру</h3>
+      <p>Если куплетов несколько, пронумеруйте их. Один тег относится ко всей секции до следующего обозначения:</p>
+      <div class="code-block">[Verse 1]
+...
+
+[Chorus]
+...
+
+[Verse 2]
+...</div>
+
+      <h3>3. Разбейте текст на короткие строки</h3>
+      <p>Одна строка должна соответствовать одной вокальной фразе или её удобной части.</p>
+      <div class="example bad"><strong>Слабо</strong><p>Я возвращаюсь в этот город и опять пытаюсь вспомнить всё, что было между нами</p></div>
+      <div class="example good"><strong>Лучше</strong><p>Я возвращаюсь в этот город<br>И снова вижу свет в окне<br>Всё, что осталось между нами<br>Сегодня возвращается ко мне</p></div>
+
+      <h3>4. Запишите припев полностью</h3>
+      <p>Если припев должен повториться, продублируйте его строки в нужном месте. Не заменяйте их указанием «повторить припев».</p>
+      <div class="example bad"><strong>Слабо</strong><p>[Chorus]<br>Повторить припев</p></div>
+      <div class="example good"><strong>Лучше</strong><p>[Chorus]<br>Не выключай свет<br>Я ещё не ушёл</p></div>
+
+      <h3>5. Используйте постановочные пометки умеренно</h3>
+      <p>Короткие обозначения вроде <code>[Instrumental]</code> иногда полезны, но не стоит снабжать каждую строку командами <code>[whispered]</code>, <code>[emotional]</code> и <code>[big drums]</code>. Основное описание подачи и аранжировки лучше оставить в Styles.</p>
+
+      <h3>6. Проверьте текст перед генерацией</h3>
+      <ul>
+        <li>У каждой части есть понятный тег.</li>
+        <li>Строки не выглядят как длинные абзацы.</li>
+        <li>Повторяющийся припев записан полностью.</li>
+        <li>В Lyrics нет описания жанра и инструментов.</li>
+        <li>Заголовки секций оформлены единообразно.</li>
+      </ul>
+
+      <h2>Примеры «слабо → лучше»</h2>
+      <h3>Текст оформлен сплошным абзацем</h3>
+      <div class="example bad"><strong>Слабо</strong><p>Я снова иду по знакомой дороге город молчит и никто не ответит ты обещала вернуться до ночи но ночь наступила и выключен свет</p></div>
+      <div class="example good"><strong>Лучше</strong><p>[Verse 1]<br>Я снова иду по знакомой дороге<br>Город молчит и не даст мне ответ<br>Ты обещала вернуться до ночи<br>Но ночь наступила<br>И выключен свет</p></div>
+
+      <h3>Музыкальные указания смешаны со словами</h3>
+      <div class="example bad"><strong>Слабо</strong><p>[Chorus with big drums and emotional climax]<br>Не возвращайся за мной</p></div>
+      <div class="example good"><strong>Лучше</strong><p>[Chorus]<br>Не возвращайся за мной</p></div>
+      <p>Уточнение «powerful drums and emotional lift in the chorus» лучше перенести в Styles.</p>
+
+      <h3>Структура перегружена тегами</h3>
+      <div class="example bad"><strong>Слабо</strong><p>[Verse 1]<br>[Soft]<br>[Slow]<br>[Female Vocal]<br>Я слышу дождь<br>[Pause]<br>За стеной</p></div>
+      <div class="example good"><strong>Лучше</strong><p>[Verse 1]<br>Я слышу дождь<br>За стеной</p></div>
+
+      <h2>Чистый пример текста для Suno</h2>
+      <div class="code-block">[Verse 1]
+Город выключил окна
+Дождь остаётся со мной
+Я набираю твой номер
+Но слышу только прибой
+
+[Pre-Chorus]
+Ещё один шаг до рассвета
+Ещё один повод не спать
+
+[Chorus]
+Не выключай свет
+Я найду дорогу
+Не выключай свет
+Подожди немного
+
+[Verse 2]
+Ветер листает афиши
+Утро стирает следы
+Я становлюсь тебе ближе
+Там, где кончаются сны
+
+[Chorus]
+Не выключай свет
+Я найду дорогу
+Не выключай свет
+Подожди немного
+
+[Bridge]
+Если исчезнут слова
+Пусть за меня скажет тишина
+
+[Chorus]
+Не выключай свет
+Я найду дорогу
+Не выключай свет
+Подожди немного
+
+[Outro]
+Не выключай свет</div>
+
+      <h2>Частые ошибки</h2>
+      <ul>
+        <li><strong>Текст вставлен одним абзацем.</strong> Сложнее определить паузы и вокальные фразы.</li>
+        <li><strong>Жанр записан внутри Lyrics.</strong> Описание музыки может стать частью исполнения.</li>
+        <li><strong>Слишком много тегов.</strong> Команды начинают конкурировать друг с другом.</li>
+        <li><strong>Припев заменён словом «повтор».</strong> Надёжнее вставить его полностью.</li>
+        <li><strong>Очень длинные строки.</strong> Они могут исполняться слишком быстро или делиться в случайном месте.</li>
+        <li><strong>Авторские пояснения написаны как обычный текст.</strong> Модель может их спеть.</li>
+      </ul>
+
+      <h2>Частые вопросы</h2>
+      <div class="faq-item"><h3>Можно ли писать названия секций на русском?</h3><p>Лучше использовать распространённые английские обозначения: <code>[Verse]</code>, <code>[Chorus]</code> и <code>[Bridge]</code>. Они однозначнее и рекомендуются Suno.</p></div>
+      <div class="faq-item"><h3>Нужно ли добавлять [Intro] и [Outro]?</h3><p>Нет. Используйте их, только если вступление или завершение действительно нужны композиции.</p></div>
+      <div class="faq-item"><h3>Можно ли указать темп и тип вокала в тегах?</h3><p>Можно экспериментировать, но надёжнее вынести BPM, характер вокала, инструменты и настроение в Styles.</p></div>
+      <div class="faq-item"><h3>Нужно ли повторно вставлять припев?</h3><p>Да. Если припев должен прозвучать снова, вставьте его строки полностью в нужной позиции.</p></div>
+      <div class="faq-item"><h3>Почему Suno иногда игнорирует тег?</h3><p>Структурные обозначения направляют генерацию, но не являются жёсткими программными командами. Результат также зависит от текста, стиля и выбранной генерации.</p></div>
+
+      <div class="article-cta">
+        <h2>Подготовьте текст в Track Start</h2>
+        <p>Задайте тему, жанр и настроение, получите песню с готовыми секциями, а затем сформируйте Suno-промпт на основе текста. Останется проверить строки и скопировать чистую структуру для генерации трека.</p>
+        <a class="btn btn-primary" href="/generator.html">Создать текст песни</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer"><div class="container"><div class="footer-bottom"><span>© 2026 Track Start</span><span>От идеи до готового текста песни</span></div></div></footer>
+</body>
+</html>
