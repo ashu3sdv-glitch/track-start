@@ -4,6 +4,7 @@
 import crypto from 'node:crypto';
 import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin } from './_security.js';
 import { getAuthUser, supabaseConfigured } from './_supabase.js';
+import { rejectIfServicePaused } from './_service-state.js';
 
 const PLANS = {
   lite: { amount: '450.00', title: 'Track Start Lite — доступ на 1 месяц' },
@@ -46,6 +47,7 @@ async function createPayment(auth, plan, email, userId, withReceipt) {
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (rejectIfServicePaused(res)) return;
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

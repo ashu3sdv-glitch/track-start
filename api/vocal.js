@@ -1,4 +1,5 @@
 import { applySecurityHeaders, enforceRateLimit, hasOwnerAccess, hasUsedVocalTrial, markVocalTrialUsed, parseRequestBody, requireTrustedOrigin, verifyPlanToken } from './_security.js';
+import { rejectIfServicePaused } from './_service-state.js';
 
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 function jsonFrom(text) {
@@ -10,6 +11,7 @@ function jsonFrom(text) {
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (rejectIfServicePaused(res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!requireTrustedOrigin(req, res)) return;
   const body = parseRequestBody(req); const plan = verifyPlanToken(body.planToken); const isPro = plan?.plan === 'pro' || hasOwnerAccess(req);

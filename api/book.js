@@ -8,11 +8,13 @@ import {
   requireTrustedOrigin,
   verifyPlanToken,
 } from './_security.js';
+import { rejectIfServicePaused } from './_service-state.js';
 
 const encryptedVoiceBook = new URL('../private-books/voice-in-suno.pdf.enc', import.meta.url);
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (rejectIfServicePaused(res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!requireTrustedOrigin(req, res)) return;
 
