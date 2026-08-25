@@ -8,6 +8,7 @@ import {
   requireTrustedOrigin,
   verifyPlanToken,
 } from './_security.js';
+import { rejectIfServicePaused } from './_service-state.js';
 
 const OFFSETS = [-21, -14, -10, -7, -3, -1, 0, 1, 3, 5, 7, 10, 14, 21, 30];
 
@@ -62,6 +63,7 @@ async function parseOrRepairJson(key, text) {
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (rejectIfServicePaused(res)) return;
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

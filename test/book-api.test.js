@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import handler from '../api/book.js';
+import { SERVICE_PAUSED } from '../api/_service-state.js';
 
 function responseMock() {
   return {
@@ -23,7 +24,7 @@ test('does not return the book without a valid Pro token', async () => {
   };
   const res = responseMock();
   await handler(req, res);
-  assert.equal(res.statusCode, 402);
-  assert.equal(res.body.code, 'PRO_REQUIRED');
+  assert.equal(res.statusCode, SERVICE_PAUSED ? 503 : 402);
+  assert.equal(res.body.code, SERVICE_PAUSED ? 'SERVICE_PAUSED' : 'PRO_REQUIRED');
   assert.equal(Buffer.isBuffer(res.body), false);
 });

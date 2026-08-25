@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { applySecurityHeaders, enforceRateLimit } from './_security.js';
 import { getAuthUser, getSubscription, supabaseConfigured } from './_supabase.js';
+import { rejectIfServicePaused } from './_service-state.js';
 
 function planToken(subscription) {
   const secret = process.env.YOOKASSA_SECRET_KEY;
@@ -15,6 +16,7 @@ function planToken(subscription) {
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (rejectIfServicePaused(res)) return;
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   if (!enforceRateLimit(req, res, { scope: 'account' })) return;
   if (!supabaseConfigured()) return res.status(503).json({ error: 'Авторизация ещё не настроена' });

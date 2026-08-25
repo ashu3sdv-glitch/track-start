@@ -4,11 +4,13 @@
 import crypto from 'node:crypto';
 import { applySecurityHeaders, enforceRateLimit, parseRequestBody, requireTrustedOrigin } from './_security.js';
 import { activateSubscription, getAuthUser, supabaseConfigured } from './_supabase.js';
+import { rejectIfServicePaused } from './_service-state.js';
 
 const ACCESS_DAYS = 31;
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (rejectIfServicePaused(res)) return;
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

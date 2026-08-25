@@ -2,6 +2,21 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
+      "source": "/generator.html",
+      "destination": "/#paused",
+      "permanent": false
+    },
+    {
+      "source": "/vocal.html",
+      "destination": "/#paused",
+      "permanent": false
+    },
+    {
+      "source": "/promotion.html",
+      "destination": "/#paused",
+      "permanent": false
+    },
+    {
       "source": "/index.html",
       "destination": "/",
       "permanent": true
